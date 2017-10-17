@@ -44,7 +44,7 @@ model.add(Dense(1, activation='sigmoid'))
 # 2. compile the network
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 # 3. fit the network
-history = model.fit(X, Y, epochs=200, batch_size=10)
+history = model.fit(X, Y, epochs=200, batch_size=100)
 # 4. evaluate the network
 loss, accuracy = model.evaluate(X, Y)
 print("\nLoss: %.2f, Accuracy: %.2f%%" % (loss, accuracy*100))

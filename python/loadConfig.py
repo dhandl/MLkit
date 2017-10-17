@@ -5,11 +5,11 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 
 # save model in directory
 saveDir = "../TrainedModels/models/"
-fileSuffix = "16102017_cutOptimizedComparison_multiclassFALSE_"
+fileSuffix = "17102017_loosePreselection_multiclassFALSE_"
 # load data from path 
 loadDir = "/project/etp5/dhandl/samples/SUSY/Stop1L/"
 
-preselection = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (n_jet>=4) && (n_bjet>=1) && (jet_pt[0]>50e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>130e3) && (met>230e3)"
+preselection = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (n_jet>=4) && (n_bjet>=1) && (jet_pt[0]>25e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>60e3) && (met>120e3)"
 
 # define your input variables and the weights
 nvar = [
@@ -48,8 +48,14 @@ lumi = 36100.
 
 # define your input samples here
 Signal = [
-  {'name':'stop_bWN_350_200', 'tree':'stop_bWN_350_200_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi}
-  #{'name':'stop_bWN_350_230', 'tree':'stop_bWN_350_230_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi}
+  {'name':'stop_bWN_350_185', 'tree':'stop_bWN_350_185_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_350_200', 'tree':'stop_bWN_350_200_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_350_230', 'tree':'stop_bWN_350_230_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_350_260', 'tree':'stop_bWN_350_260_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_400_235', 'tree':'stop_bWN_400_235_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_400_250', 'tree':'stop_bWN_400_250_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_400_280', 'tree':'stop_bWN_400_280_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi},
+  {'name':'stop_bWN_400_310', 'tree':'stop_bWN_400_310_Nom', 'path':loadDir, 'cut':preselection, 'branches':nvar, 'weights':weights, 'lumi':lumi}
 ]
 
 Background = [
@@ -61,24 +67,24 @@ Background = [
 
 analysis = [
             Algorithm('BDT',
-                      fileSuffix+'GradientBoost_d2_mspl20_nEst200_lr0p02',
+                      fileSuffix+'GradientBoost_d3_mspl10_nEst100_lr0p01',
                       {
                        'classifier':'GradientBoost',
-                       'max_depth':4,
-                       'min_samples_leaf':20,
-                       'n_estimators':200,
-                       'learning_rate':0.02
+                       'max_depth':3,
+                       'min_samples_leaf':10,
+                       'n_estimators':100,
+                       'learning_rate':0.01
                       }
             ),
             Algorithm('NN',
-                      fileSuffix+'DNN_SGD_layer20-20_epochs100_batch1024_lr0p02',
+                      fileSuffix+'DNN_ADAM_layer32-32_epochs100_batch2048_lr0p01',
                       {
-                      'layers':[20,20,1],
+                      'layers':[32,32,1],
                       'ncycles':100,
-                      'batchSize':1024,
-                      'dropout':0.2,
+                      'batchSize':2048,
+                      'dropout':0.3,
                       'optimizer':'sgd',
-                      'learningRate':0.02,
+                      'learningRate':0.01,
                       'decay':0.0,
                       'momentum':0.0,
                       'nesterov':False,
