@@ -301,8 +301,6 @@ def plotSigVersusEff(classifier, X, y, w, wp, wp_label, label='ML classifier', f
     bkg_predicted = classifier.decision_function(X[y==0.]).ravel()
   fig = plt.figure(figsize=(6, 6))
   ax1=fig.add_subplot(111, label="significance")
-  #ax2=fig.add_subplot(111, label="sig", frame_on=False)
-  #ax3=fig.add_subplot(111, label="bkg", frame_on=False)
   bins = 100
   # create an array and initialize it with -1.
   Z = np.ones(int(bins))
@@ -331,16 +329,6 @@ def plotSigVersusEff(classifier, X, y, w, wp, wp_label, label='ML classifier', f
   ax1.axhline(y=5, c='lightcoral')
   ax1.set_xlabel('Signal efficiency')
   ax1.set_ylabel('Zn')
-  #ax2.plot(x, sumW_sig, 'r-')
-  #ax2.get_xaxis().set_visible(False)
-  #ax2.yaxis.tick_right()
-  #ax2.set_ylabel('cum. fraction', color="royalblue")       
-  #ax2.yaxis.set_label_position('right') 
-  #ax2.spines['right'].set_color('royalblue')
-  #ax2.tick_params(axis='y', color="royalblue")
-  #ax3.plot(x, sumW_bkg, 'b--')
-  #ax3.get_xaxis().set_visible(False)
-  #ax3.get_yaxis().set_visible(False)
   if type(wp) is list and not None:
     plt.plot([wp[0]], [wp[1]], marker='o', markersize=3, color="red", label=wp_label)
   plt.grid()
