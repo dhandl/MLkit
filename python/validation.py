@@ -140,8 +140,8 @@ def plotROC(classifier, X, y, weight, fileName, wp=None, wp_label=None, save=Fal
   plt.legend(loc="lower left")
   plt.grid()
   if save:
-    plt.savefig(fileSuffix+"_ROC.pdf")
-    plt.savefig(fileSuffix+"_ROC.png")
+    plt.savefig(fileName+".pdf")
+    plt.savefig(fileName+".png")
     plt.close()
 
 def compareTrainTest(classifier, X_train, y_train, w_train, X_test, y_test, w_test, fileName, wp=None, wp_label=None, save=False):
@@ -173,8 +173,8 @@ def compareTrainTest(classifier, X_train, y_train, w_train, X_test, y_test, w_te
   plt.legend(loc="lower left")
   plt.grid()
   if save:
-    plt.savefig(fileSuffix+"_ROC_TrainingAndTesting.pdf")
-    plt.savefig(fileSuffix+"_ROC_TrainingAndTesting.png")
+    plt.savefig(fileName+".pdf")
+    plt.savefig(fileName+".png")
     plt.close()
 
 def plotOutputScore(classifier, X, y, w, fileName, title, normed=False, save=False):
@@ -292,7 +292,7 @@ def plotSignificance(classifier, X, y, w, score=(-1., 1.), fileName="Significanc
     plt.savefig(fileName+'.png')
     plt.close()
 
-def plotSigVersusEff(classifier, X, y, w, wp, wp_label, fileName="Significance", save=False):
+def plotSigVersusEff(classifier, X, y, w, wp, wp_label, label='ML classifier', fileName="Significance", save=False):
   if 'keras.models.' in str(type(classifier)):
     sig_predicted = classifier.predict(X[y==1.]).ravel()
     bkg_predicted = classifier.predict(X[y==0.]).ravel()
@@ -326,7 +326,7 @@ def plotSigVersusEff(classifier, X, y, w, wp, wp_label, fileName="Significance",
     Z[i] = rs.NumberCountingUtils.BinomialExpZ(S, B, dB)
     sumW_sig[i] = S/nEventsSig
     sumW_bkg[i] = B/nEventsBkg
-  ax1.plot(sumW_sig, Z, 'k')
+  ax1.plot(sumW_sig, Z, 'k', label=label)
   ax1.axhline(y=3, c='lightcoral')
   ax1.axhline(y=5, c='lightcoral')
   ax1.set_xlabel('Signal efficiency')

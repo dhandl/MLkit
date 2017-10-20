@@ -5,7 +5,7 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 
 # save model in directory
 saveDir = "../TrainedModels/models/"
-fileSuffix = "17102017_loosePreselection_multiclassFALSE_"
+fileSuffix = "18102017_highMethighMtPreselection_multiclassFALSE_"
 # load data from path 
 loadDir = "/project/etp5/dhandl/samples/SUSY/Stop1L/"
 
@@ -19,13 +19,13 @@ nvar = [
         'amt2',
         'n_jet',
         'n_bjet',
-        #'ht_sig',
+        'ht_sig',
         'jet_pt[0]',
         'jet_pt[1]',
         'jet_pt[2]',
         'jet_pt[3]',
-        #'bjet_pt',
-        #'m_bl',
+        'bjet_pt[0]',
+        'm_bl',
         #'mT250',
         #'dphi_b_lep_max',
         #'dphi_b_ptmiss_max',
@@ -33,7 +33,7 @@ nvar = [
         #'mT_b1lMET',
         #'m_top_chi2',
         #'met_proj_lep',
-        #'met_sig',
+        'met_sig',
         #'mt2stop'
 ]
 
@@ -66,24 +66,24 @@ Background = [
 # define your ML algorithm here
 
 analysis = [
-            Algorithm('BDT',
-                      fileSuffix+'GradientBoost_d3_mspl10_nEst100_lr0p01',
-                      {
-                       'classifier':'GradientBoost',
-                       'max_depth':3,
-                       'min_samples_leaf':10,
-                       'n_estimators':100,
-                       'learning_rate':0.01
-                      }
-            ),
+            #Algorithm('BDT',
+            #          fileSuffix+'AdaBoost_d2_mspl10_nEst50_lr0p01',
+            #          {
+            #           'classifier':'AdaBoost',
+            #           'max_depth':2,
+            #           'min_samples_leaf':10,
+            #           'n_estimators':50,
+            #           'learning_rate':0.01
+            #          }
+            #),
             Algorithm('NN',
-                      fileSuffix+'DNN_ADAM_layer32-32_epochs100_batch2048_lr0p01',
+                      fileSuffix+'DNN_ADAM_layer40_epochs75_batch512_lr0p01',
                       {
-                      'layers':[32,32,1],
-                      'ncycles':100,
-                      'batchSize':2048,
+                      'layers':[40,1],
+                      'ncycles':75,
+                      'batchSize':512,
                       'dropout':0.3,
-                      'optimizer':'sgd',
+                      'optimizer':'adam',
                       'learningRate':0.01,
                       'decay':0.0,
                       'momentum':0.0,

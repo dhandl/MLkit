@@ -40,15 +40,15 @@ import tqdm
 
 Sample = namedtuple('Sample', 'name dataframe')
 
-def prepDataset(sigList, bkgList, saveDataset, multiclass=False):
+def prepDataset(sigList, bkgList, saveDataset, multiclass=False, fixedTrainSize=-1, fixedTestSize=-1):
   # for Debugging: load an existing training and test sample
   if os.path.isfile(saveDataset) and saveDataset.endswith('.h5'):
     print "Loading previous data set from", saveDataset
     h5f = h5py.File(saveDataset, 'r')
-    ix = h5f['ix'][:]
-    X = h5f['X'][:]
-    y = h5f['y'][:]
-    w = h5f['w'][:]
+    #ix = h5f['ix'][:]
+    #X = h5f['X'][:]
+    #y = h5f['y'][:]
+    #w = h5f['w'][:]
     X_train = h5f['X_train'][:]
     X_test = h5f['X_test'][:]
     y_train = h5f['y_train'][:]
@@ -61,51 +61,140 @@ def prepDataset(sigList, bkgList, saveDataset, multiclass=False):
   if not os.path.exists(saveDataset):
     Signal = []
     Background = []
-    print 'Loading signal...'
     for s in sigList:
+      print 'Loading signal %s...'%(s['name'])
       Signal.append(Sample(s['name'], loadFromRoot(s['path']+s['name'], s['tree'], s['cut'], s['branches'], s['weights'], s['lumi'])))
-    print 'Loading background...'
     for b in bkgList:
+      print 'Loading background %s...'%(b['name'])
       Background.append(Sample(b['name'], loadFromRoot(b['path']+b['name'], b['tree'], b['cut'], b['branches'], b['weights'], b['lumi'])))
 
-    sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
-    sig_w = np.empty(0)
-    sig_y = np.empty(0)
-    bkg = np.empty([0, Background[0].dataframe[0].shape[1]])
-    bkg_w = np.empty(0)
-    bkg_y = np.empty(0)
-  
+    if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+      print 'Set fixed number of training events! Will randomly pick %i training events for signal and background.'%(fixedTrainSize)
+      n_sig = len(Signal)
+      n_bkg = len(Background)
+      #sig_train_frac = fixedTrainSize/n_sig
+      bkg_train_frac = fixedTrainSize/n_bkg
+      if fixedTestSize < 0: 
+        fixedTestSize = fixedTrainSize
+      #sig_test_frac = fixedTestSize/n_sig
+      bkg_test_frac = fixedTestSize/n_bkg
+      sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
+      sig_w = np.empty(0)
+      sig_y = np.empty(0)
+      sig_train = np.empty([0, Signal[0].dataframe[0].shape[1]])
+      bkg_train = np.empty([0, Background[0].dataframe[0].shape[1]])
+      sig_train_w = np.empty(0)
+      sig_train_y = np.empty(0)
+      bkg_train_w = np.empty(0)
+      bkg_train_y = np.empty(0)
+      sig_test = np.empty([0, Signal[0].dataframe[0].shape[1]])
+      bkg_test = np.empty([0, Background[0].dataframe[0].shape[1]])
+      sig_test_w = np.empty(0)
+      sig_test_y = np.empty(0)
+      bkg_test_w = np.empty(0)
+      bkg_test_y = np.empty(0)
+    else:      
+      sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
+      sig_w = np.empty(0)
+      sig_y = np.empty(0)
+      bkg = np.empty([0, Background[0].dataframe[0].shape[1]])
+      bkg_w = np.empty(0)
+      bkg_y = np.empty(0)
+
     for s in Signal:
-      print 'Loading signal: %s'%s.name
       sig = np.concatenate((sig, s.dataframe[0]))
       sig_w = np.concatenate((sig_w, s.dataframe[1]))
       sig_y = np.concatenate((sig_y, np.zeros(s.dataframe[0].shape[0])))
+    if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+      ix = range(sig.shape[0])
+      ix_shuffle = random.sample(ix, len(ix))
+      ix_shuffle = np.split(ix_shuffle, [fixedTrainSize, fixedTrainSize+fixedTestSize])
+      sig_train = np.concatenate((sig_train, sig[ix_shuffle[0]]))
+      sig_train_w = np.concatenate((sig_train_w, sig_w[ix_shuffle[0]]))
+      sig_train_y = np.concatenate((sig_train_y, np.zeros(fixedTrainSize)))
+      sig_test = np.concatenate((sig_test, sig[ix_shuffle[1]]))
+      sig_test_w = np.concatenate((sig_test_w, sig_w[ix_shuffle[1]]))
+      sig_test_y = np.concatenate((sig_test_y, np.zeros(fixedTestSize)))
+     #if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+     #   # TODO: Picking the same frac in each signal can cause problems when high m_stop samples have less stats. Weight Factor!
+     #   # Currently merging signal together and pick
+     #   
+     #   ix = range(s.dataframe[0].shape[0])
+     #   ix_shuffle = random.sample(ix, len(ix))
+     #   ix_shuffle = np.split(ix_shuffle, [sig_train_frac,sig_train_frac+sig_test_frac])
+     #   sig_train = np.concatenate((sig_train, s.dataframe[0][ix_shuffle[0]]))
+     #   sig_train_w = np.concatenate((sig_train_w, s.dataframe[1][ix_shuffle[0]]))
+     #   sig_train_y = np.concatenate((sig_train_y, np.zeros(sig_train_frac)))
+     #   sig_test = np.concatenate((sig_test, s.dataframe[0][ix_shuffle[1]]))
+     #   sig_test_w = np.concatenate((sig_test_w, s.dataframe[1][ix_shuffle[1]]))
+     #   sig_test_y = np.concatenate((sig_test_y, np.zeros(sig_test_frac)))
+     #   print sig_test.shape, sig_train.shape
+     #else:      
+     #  sig = np.concatenate((sig, s.dataframe[0]))
+     #  sig_w = np.concatenate((sig_w, s.dataframe[1]))
+     #  sig_y = np.concatenate((sig_y, np.zeros(s.dataframe[0].shape[0])))
   
     for i, b in enumerate(Background):
-      print 'Loading background: %s'%b.name
       i = i + 1
-      bkg = np.concatenate((bkg, b.dataframe[0]))
-      bkg_w = np.concatenate((bkg_w, b.dataframe[1]))
-      bkg_y = np.concatenate((bkg_y, np.full(b.dataframe[0].shape[0], i)))
+      if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+        ix = range(b.dataframe[0].shape[0])
+        ix_shuffle = random.sample(ix, len(ix))
+        ix_shuffle = np.split(ix_shuffle, [bkg_train_frac,bkg_train_frac+bkg_test_frac])
+        bkg_train = np.concatenate((bkg_train, b.dataframe[0][ix_shuffle[0]]))
+        bkg_train_w = np.concatenate((bkg_train_w, b.dataframe[1][ix_shuffle[0]]))
+        bkg_train_y = np.concatenate((bkg_train_y, np.full(bkg_train_frac, i)))
+        bkg_test = np.concatenate((bkg_test, b.dataframe[0][ix_shuffle[1]]))
+        bkg_test_w = np.concatenate((bkg_test_w, b.dataframe[1][ix_shuffle[1]]))
+        bkg_test_y = np.concatenate((bkg_test_y, np.full(bkg_test_frac, i)))
+      else:
+        bkg = np.concatenate((bkg, b.dataframe[0]))
+        bkg_w = np.concatenate((bkg_w, b.dataframe[1]))
+        bkg_y = np.concatenate((bkg_y, np.full(b.dataframe[0].shape[0], i)))
   
-    X = np.concatenate((sig, bkg))
-    w = np.concatenate((sig_w, bkg_w))
-    if multiclass:
-      y = np.concatenate((sig_y, bkg_y))
+    if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+      ix = range(2*fixedTrainSize)
+      ix_train_shuffle = random.sample(ix, len(ix))
+      ix_test_shuffle = random.sample(ix, len(ix))
+      X_train = np.concatenate((sig_train, bkg_train))
+      X_test = np.concatenate((sig_test, bkg_test))
+      w_train = np.concatenate((sig_train_w, bkg_train_w))
+      w_test = np.concatenate((sig_test_w, bkg_test_w))
+      if multiclass:
+        y_train = np.concatenate((sig_train_y, bkg_train_y))
+        y_test = np.concatenate((sig_test_y, bkg_test_y))
+      else:
+        y_train = []; y_test = []
+        for _df, ID in [(sig_train, 1), (bkg_train, 0)]:
+            y_train.extend([ID] * _df.shape[0])
+        for _df, ID in [(sig_test, 1), (bkg_test, 0)]:
+            y_test.extend([ID] * _df.shape[0])
+        y_train = np.array(y_train); y_test = np.array(y_test)
+      X_train = X_train[ix_train_shuffle]
+      y_train = y_train[ix_train_shuffle]
+      w_train = w_train[ix_train_shuffle]
+      X_test = X_test[ix_test_shuffle]
+      y_test = y_test[ix_test_shuffle]
+      w_test = w_test[ix_test_shuffle]
+  
     else:
-      y = []
-      for _df, ID in [(sig, 1), (bkg, 0)]:
-        y.extend([ID] * _df.shape[0])
-      y = np.array(y)
+      X = np.concatenate((sig, bkg))
+      w = np.concatenate((sig_w, bkg_w))
+      if multiclass:
+        y = np.concatenate((sig_y, bkg_y))
+      else:
+        y = []
+        for _df, ID in [(sig, 1), (bkg, 0)]:
+          y.extend([ID] * _df.shape[0])
+        y = np.array(y)
   
-    ix = range(X.shape[0])
-    X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=0.5)
+      ix = range(X.shape[0])
+      X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=0.5)
     
     h5f = h5py.File(saveDataset, 'w')
-    h5f.create_dataset('ix', data=ix)
-    h5f.create_dataset('X', data=X)
-    h5f.create_dataset('y', data=y)
-    h5f.create_dataset('w', data=w)
+    #h5f.create_dataset('ix', data=ix)
+    #h5f.create_dataset('X', data=X)
+    #h5f.create_dataset('y', data=y)
+    #h5f.create_dataset('w', data=w)
     h5f.create_dataset('X_train', data=X_train)
     h5f.create_dataset('X_test', data=X_test)
     h5f.create_dataset('y_train', data=y_train)
