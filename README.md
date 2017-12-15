@@ -1,4 +1,6 @@
-# This is framework for ongoing ML R&D studies for the ttbar+MET 1L analysis.
+# README
+
+This is the framework for ongoing ML R&D studies for the ttbar+MET 1L analysis.
 
 ### Getting started
 
