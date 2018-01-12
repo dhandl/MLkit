@@ -14,9 +14,9 @@ from numpy.lib.recfunctions import stack_arrays
 import h5py
 
 # matplot lib for plotting
-import matplotlib
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 
 # keras 
 from keras.models import Sequential
@@ -188,7 +188,7 @@ def prepDataset(sigList, bkgList, saveDataset, multiclass=False, fixedTrainSize=
         y = np.array(y)
   
       ix = range(X.shape[0])
-      X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=0.5)
+      X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=0.33, test_size=0.33)
     
     h5f = h5py.File(saveDataset, 'w')
     #h5f.create_dataset('ix', data=ix)
@@ -207,10 +207,11 @@ def prepDataset(sigList, bkgList, saveDataset, multiclass=False, fixedTrainSize=
 
 def loadFromRoot(filepath, treename, cut, branches, weights, lumi=1000.):
   files = os.listdir(filepath)
+  print 'Loading file(s):'
 
   if len(files) == 1:
     f = files[0]
-
+    print f
     if os.path.isfile('/'.join([filepath, f])) and f.endswith(".root"):
 
       infile = ROOT.TFile('/'.join([filepath, f]))
@@ -226,6 +227,7 @@ def loadFromRoot(filepath, treename, cut, branches, weights, lumi=1000.):
     weight = np.empty([0,len(weights)])
 
     for f in files:
+      print f
       if os.path.isfile('/'.join([filepath, f])) and f.endswith(".root"):    
         
         infile = ROOT.TFile('/'.join([filepath, f]))

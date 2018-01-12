@@ -17,3 +17,13 @@ source setup.sh #(this command will eventually not work for you!)
 
 More info will follow. 
 
+### Miscellanea
+
+Necessary python modules are loaded via an Anaconda based environment. Find a list of installed packages here:
+root, python, mkl, jupyter, numpy, scipy, matplotlib, scikit-learn, h5py, rootpy, root-numpy, pandas, scikit-image, seaborn, mkl-service, tqdm
+
+Might be that root is not working properly. In this case try:
+
+```
+source <PATH_TO_YOUR_CONDA_ENVIRONMENT>/bin/thisroot.sh #to check your available environments try conda info --envs
+``` 

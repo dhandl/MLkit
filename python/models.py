@@ -38,26 +38,26 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   print "BDT finished!"
   return model, y_predicted
 
-def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
+def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer,learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):              
   print "Performing a Deep Neural Net!"
   model = Sequential()
   first = True
   if first:
-    model.add(Dense(netDim[0], input_dim=X_train.shape[1], activation='relu'))#, kernel_initializer=initializer))
+    model.add(Dense(netDim[0], input_dim=X_train.shape[1], activation=activation, kernel_initializer=initializer))
     #model.add(Dropout(0.4))
     model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)-1]:
-    model.add(Dense(layer, activation='relu'))
+    model.add(Dense(layer, activation=activation, kernel_initializer=initializer))
     model.add(BatchNormalization())
     model.add(Dropout(dropout))
   if multiclass:
     model.add(Dense(len(np.bincount(y_train)), activation='softmax'))
-    loss = 'categorical_crossentropy'
+    loss = 'sparse_categorical_crossentropy'
   else:
     model.add(Dense(1, activation='sigmoid'))
     loss = 'binary_crossentropy'
-  
+
   # Set loss and optimizer
   if optimizer.lower() == 'sgd':
     print 'Going to use stochastic gradient descent method for learning!'
@@ -67,12 +67,13 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     print 'Going to use %s as optimizer. Learning rate, decay and momentum will not be used during training!'%(optimizer)
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
 
-  print model.summary()  
+  print model.summary()
   print "Training..."
   # if using an unbalanced set of samples sci-kit learns compute_class_weight fct. equally penalizes under/over represented classes in the training set
   # n_samples / (n_classes * np.bincount(y))
   class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
-  model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=False, sample_weight=w_train, class_weight=class_weight, validation_data=(X_test,y_test))
+  #y_train_binarize= label_binarize(y_train, classes=[0,1,2,3])
+  model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={0:class_weight[0], 1:class_weight[1]}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=10)])
   # TODO: add callbacks EarlyStopping and ModelCheckpoint
   # Store model to file
   print 'Testing...'
@@ -80,8 +81,9 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   print("\n%s: %.2f%%" % (model.metrics_names[0], score[0]*100))
   print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
   y_predicted = model.predict(X_test)
-  
+
   print "DNN finished!"
   return model, y_predicted
+
 
 #def trainRNN():

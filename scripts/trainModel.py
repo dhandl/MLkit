@@ -87,7 +87,7 @@ def parse_options():
   parser = argparse.ArgumentParser()
   #parser.add_argument('-C', '--config', help="Config file", default="python/loadConfig.py")
   #parser.add_argument('-a', '--analysis', help="name of the analysis to run" , default="NN")
-  parser.add_argument('-m', '--multiclass', help="Multi-Classification (True/False)" , default=False)
+  parser.add_argument('-m', '--multiclass', help="Multi-Classification (True/False)" , default=True, type=bool)
   parser.add_argument('-s', '--saveDataset', help="Save the training data, if it exists, it will load existing file!" , default='./TrainedModels/models/defaultDataset.h5')
 
   opts = parser.parse_args()
@@ -101,7 +101,7 @@ def main():
   data = opts.saveDataset
 
   print "Loading config file!"
-  from loadConfig import Signal, Background, preselection, nvar, lumi, weights, loadDir, saveDir, fileSuffix, analysis
+  from loadConfig import Signal, Background, preselection, nvar, lumi, weights, saveDir, fileSuffix, analysis
 
   #if not os.path.exists(data):
   #  sig = []; bkg = []
