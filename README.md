@@ -4,9 +4,15 @@ This is the framework for ongoing ML R&D studies for the ttbar+MET 1L analysis.
 
 ### Getting started
 
-Maybe check your global config before with 
+Check your global config before with 
 ```
 git config --list
+```
+
+Set up your config properly:
+```
+git config --global user.name "Firstname Lastname"
+git config --global user.email example@example.com
 ```
 
 ```
