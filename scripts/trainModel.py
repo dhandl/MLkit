@@ -1,23 +1,15 @@
 #!/usr/bin/env python
 
 # main script for training
-# define samples, variables and algorithms in python/loadConfig.py
+# define samples, variables and algorithms in config/ directory
 import os, sys, copy
+import timer
 
 import numpy as np
-import h5py
-
-# scikit-learn
-from sklearn.model_selection import train_test_split
-from sklearn.externals import joblib
-# keras
-from keras.models import Sequential
 
 from collections import namedtuple
 from LoadData import prepDataset, loadFromRoot
 from models import trainBDT, trainNN
-
-import timer
 
 Sample = namedtuple('Sample', 'name dataframe')
 
