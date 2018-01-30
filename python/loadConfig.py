@@ -49,16 +49,16 @@ Background = [
 # define your ML algorithm here
 
 analysis = [
-            Algorithm('BDT',
-                      fileSuffix+'AdaBoost_d2_mspl10_nEst50_lr0p01',
-                      {
-                       'classifier':'AdaBoost',
-                       'max_depth':2,
-                       'min_samples_leaf':10,
-                       'n_estimators':50,
-                       'learning_rate':0.01
-                      }
-            ),
+            #Algorithm('BDT',
+            #          fileSuffix+'AdaBoost_d2_mspl10_nEst50_lr0p01',
+            #          {
+            #           'classifier':'AdaBoost',
+            #           'max_depth':2,
+            #           'min_samples_leaf':10,
+            #           'n_estimators':50,
+            #           'learning_rate':0.01
+            #          }
+            #),
             Algorithm('NN',
                       fileSuffix+'DNN_ADAM_layer16-16_epochs50_batch512',
                       {
@@ -75,7 +75,7 @@ analysis = [
                       'nesterov':False,
                       'multiclassification':False
                       }
-            ),
+            )
             #Algorithm('RNN',
             #          {}
             #)
