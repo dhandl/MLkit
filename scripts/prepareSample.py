@@ -4,7 +4,7 @@ import ROOT
 import os
 import sys
 import pandas as pd
-
+import h5py
 from root2pandas import root2pandas
 
 #CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && (n_jet>=4) && (n_bjet>0) && (jet_pt[0]>50e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>30e3) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (met >120e3)"
@@ -15,13 +15,13 @@ variables = [
 #              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
               "lep_pt", "lep_eta", "lep_phi", "lep_e",
               "met",
-#              "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
+              "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
 #              "dphi_min_ptmiss",
               "dphi_met_lep",
-#              "dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
-#              "dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
-#              "deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
-#              "m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
+              "dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
+              "dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
+              "deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
+              "m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
               "event_number", "run_number", "lumi_block", "mc_channel_number", "bcid",
               "weight",
               "xs_weight"
@@ -96,21 +96,24 @@ def main():
 
       tCopy = t.CopyTree(CUT)
       tCopy.AutoSave()
-
+      fCopy.Close()
+      
       # Create data frame from .root file
       outFile = infile.replace(".root", ".h5")
       df = root2pandas(fDest, name)
 
       # save a pandas df to hdf5 (better to first convert it back to ndarray, to be fair)
-      import deepdish.io as io
-      io.save(os.path.join(dest, outFile), df)
+      store = pd.HDFStore(os.path.join(dest, outFile), "w")
+      store.put(name, df, data_columns=df.columns)
+      store.close()
 
       # let's load it back in to make sure it actually worked!
-      new_df = io.load(os.path.join(dest, outFile))
+      new_df = pd.read_hdf(os.path.join(dest, outFile), name)
       # -- check the shape again -- nice check to run every time you create a df
       print "File check!"
       print "(Number of events, Number of branches): ",new_df.shape
-
+    
+    f.Close()
     print "OK Saved {}".format(filesize(os.stat(fSrc).st_size - os.stat(fDest).st_size))
 
   writeInfo = os.path.join(dest, "info.txt")
@@ -124,7 +127,7 @@ def main():
 
   with open(writeInfo, "w") as f:
     f.write(CUT)
-    f.write(var for var in variables)
+    for var in variables: f.write(var)
 
 if __name__ == "__main__":
   main()
