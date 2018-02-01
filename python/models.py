@@ -74,7 +74,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
   #y_train_binarize= label_binarize(y_train, classes=[0,1,2,3])
   model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=10)])
-  # TODO: add callbacks EarlyStopping and ModelCheckpoint
+  # TODO: add callbacks and ModelCheckpoint
   # Store model to file
   print 'Testing...'
   score = model.evaluate(X_test, y_test)
@@ -86,4 +86,6 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   return model, y_predicted
 
 
-#def trainRNN():
+def trainRNN():
+  # first test of a recurrent neural network
+  return model, y_predicted
