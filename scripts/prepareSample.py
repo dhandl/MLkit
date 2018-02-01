@@ -89,18 +89,57 @@ def main():
       for var in variables:
         t.SetBranchStatus(var, 1)
 
+      t.Draw(">>eList",CUT) #Get the event list 'eList' which has all the events satisfying the cut
+      elist = ROOT.gDirectory.Get("eList")
+      nevents = elist.GetN()
+      print "\nDEBUG: Will loop over {} events in file {} ".format(nevents, fSrc)
+      first = True
+      last = nevents-1
+      for i in range(nevents):
+        if i%10000==0:
+          print i
+        if first:
+          fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
+          fCopy = ROOT.TFile(fDest2, "RECREATE")
+          fCopy.cd()
+          tCopy = t.CloneTree(0)
+          first = False
+        if i%1000000==0 and i!=0:
+          #fCopy.Write()
+          fCopy.Close()
+          fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
+          fCopy = ROOT.TFile(fDest2, "RECREATE")
+          fCopy.cd()
+          tCopy = t.CloneTree(0)
+        t.GetEntry(i)
+        tCopy.Fill()
+        if i == last:
+          print "File {} processed!".format(fSrc)
+          fCopy.Write()
+          #fCopy.Close()
       # Open destination file for this tree. This is important as otherwise the tree would get written to
       # memory by default when doing CopyTree
-      fCopy = ROOT.TFile(fDest, "RECREATE")
-      fCopy.cd()
+      #fCopy = ROOT.TFile(fDest, "RECREATE")
+      #fCopy.cd()
 
-      tCopy = t.CopyTree(CUT)
-      tCopy.AutoSave()
-      fCopy.Close()
+      #tCopy = t.CopyTree(CUT)
+      #tCopy.AutoSave()
+      #fCopy.Close()
       
-      # Create data frame from .root file
-      outFile = infile.replace(".root", ".h5")
-      df = root2pandas(fDest, name)
+    f.Close()
+  # Create data frame from preprocessed .root file
+  output = os.listdir(dest)
+  for ofile in output:
+    fRoot = os.path.join(dest, ofile) 
+
+    f = ROOT.TFile(fRoot)
+
+    # Get all trees in this file
+    for name in set([k.GetName() for k in f.GetListOfKeys() if k.GetClassName() == "TTree"]):
+      print "\nDEBUG: Processing " + name
+      t = f.Get(name)
+      outFile = fRoot.replace(".root", ".h5")
+      df = root2pandas(fRoot, name)
 
       # save a pandas df to hdf5 (better to first convert it back to ndarray, to be fair)
       store = pd.HDFStore(os.path.join(dest, outFile), "w")
@@ -110,11 +149,9 @@ def main():
       # let's load it back in to make sure it actually worked!
       new_df = pd.read_hdf(os.path.join(dest, outFile), name)
       # -- check the shape again -- nice check to run every time you create a df
-      print "File check!"
+      print "File check! {}".format(os.path.join(dest, outFile))
       print "(Number of events, Number of branches): ",new_df.shape
-    
-    f.Close()
-    print "OK Saved {}".format(filesize(os.stat(fSrc).st_size - os.stat(fDest).st_size))
+    #print "OK Saved {}".format(filesize(os.stat(fSrc).st_size - os.stat(fDest).st_size))
 
   writeInfo = os.path.join(dest, "info.txt")
   if os.path.exists(writeInfo):
@@ -126,8 +163,10 @@ def main():
         return
 
   with open(writeInfo, "w") as f:
-    f.write(CUT)
-    for var in variables: f.write(var)
+    f.write("Preprocess Info!\nCut: {}".format(CUT))
+    f.write("\nVariables:")
+    for var in variables:
+      f.write("\n"+var)
 
 if __name__ == "__main__":
   main()
