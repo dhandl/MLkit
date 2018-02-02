@@ -99,7 +99,7 @@ def main():
   data = opts.saveDataset
 
   print "Loading config file!"
-  from loadConfig import Signal, Background, preselection, nvar, lumi, weights, saveDir, fileSuffix, analysis
+  #from loadConfig import Signal, Background, preselection, nvar, lumi, weights, saveDir, fileSuffix, analysis
 
   #if not os.path.exists(data):
   #  sig = []; bkg = []
