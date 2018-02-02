@@ -7,7 +7,7 @@ analysis = [
            Algorithm('NN',
                       'DNN_ADAM_layer16-16_epochs50_batch512',
                       {
-                      'layers':[16,16,1],
+                      'layers':[16,16],
                       'ncycles':50,
                       'batchSize':512,
                       'dropout':0.3,
