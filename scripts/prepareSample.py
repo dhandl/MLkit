@@ -11,12 +11,12 @@ from root2pandas import root2pandas
 CUT ="(1)"
 
 variables = [
-              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e",
+              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_deltaRj"
 #              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
               "lep_pt", "lep_eta", "lep_phi", "lep_e",
               "met",
               "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
-#              "dphi_min_ptmiss",
+              "dphi_min_ptmiss",
               "dphi_met_lep",
               "dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
               "dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
