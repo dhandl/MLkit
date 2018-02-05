@@ -223,13 +223,148 @@ def loadFromRoot(filepath, treename, cut, branches, weights, lumi=1000.):
 
   return (source, weight)
 
-def loadDataFrame(path, nvar=None, cut=None):
+def prepareTraining(sigList, bkgList, preselection, nvar, weight, lumi=100e3, splitFrac=0.33, multiclass=False, fixedTrainSize=-1, fixedTestSize=-1):
+  Signal = []
+  Background = []
+  for s in sigList:
+    print 'Loading signal {} from {}...'.format(s['name'], s['path'])
+    Signal.append(Sample(s['name'], loadDataFrame(s['path'], preselection, nvar, weight, lumi)))
+    
+  for b in bkgList:
+    print 'Loading background {} from {}...'.format(b['name'], b['path'])
+    Background.append(Sample(b['name'], loadDataFrame(b['path'], preselection, nvar, weight, lumi)))
+
+  if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+    print 'Set fixed number of training events! Will randomly pick %i training events for signal and background.'%(fixedTrainSize)
+    n_sig = len(Signal)
+    n_bkg = len(Background)
+    #sig_train_frac = fixedTrainSize/n_sig
+    bkg_train_frac = fixedTrainSize/n_bkg
+    if fixedTestSize < 0: 
+      fixedTestSize = fixedTrainSize
+    #sig_test_frac = fixedTestSize/n_sig
+    bkg_test_frac = fixedTestSize/n_bkg
+    sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
+    sig_w = np.empty(0)
+    sig_y = np.empty(0)
+    sig_train = np.empty([0, Signal[0].dataframe[0].shape[1]])
+    bkg_train = np.empty([0, Background[0].dataframe[0].shape[1]])
+    sig_train_w = np.empty(0)
+    sig_train_y = np.empty(0)
+    bkg_train_w = np.empty(0)
+    bkg_train_y = np.empty(0)
+    sig_test = np.empty([0, Signal[0].dataframe[0].shape[1]])
+    bkg_test = np.empty([0, Background[0].dataframe[0].shape[1]])
+    sig_test_w = np.empty(0)
+    sig_test_y = np.empty(0)
+    bkg_test_w = np.empty(0)
+    bkg_test_y = np.empty(0)
+  else:      
+    sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
+    sig_w = np.empty(0)
+    sig_y = np.empty(0)
+    bkg = np.empty([0, Background[0].dataframe[0].shape[1]])
+    bkg_w = np.empty(0)
+    bkg_y = np.empty(0)
+
+  for s in Signal:
+    sig = np.concatenate((sig, s.dataframe[0]))
+    sig_w = np.concatenate((sig_w, s.dataframe[1]))
+    sig_y = np.concatenate((sig_y, np.zeros(s.dataframe[0].shape[0])))
+  if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+    ix = range(sig.shape[0])
+    ix_shuffle = random.sample(ix, len(ix))
+    ix_shuffle = np.split(ix_shuffle, [fixedTrainSize, fixedTrainSize+fixedTestSize])
+    sig_train = np.concatenate((sig_train, sig[ix_shuffle[0]]))
+    sig_train_w = np.concatenate((sig_train_w, sig_w[ix_shuffle[0]]))
+    sig_train_y = np.concatenate((sig_train_y, np.zeros(fixedTrainSize)))
+    sig_test = np.concatenate((sig_test, sig[ix_shuffle[1]]))
+    sig_test_w = np.concatenate((sig_test_w, sig_w[ix_shuffle[1]]))
+    sig_test_y = np.concatenate((sig_test_y, np.zeros(fixedTestSize)))
+   #if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+   #   # TODO: Picking the same frac in each signal can cause problems when high m_stop samples have less stats. Weight Factor!
+   #   # Currently merging signal together and pick
+   #   
+   #   ix = range(s.dataframe[0].shape[0])
+   #   ix_shuffle = random.sample(ix, len(ix))
+   #   ix_shuffle = np.split(ix_shuffle, [sig_train_frac,sig_train_frac+sig_test_frac])
+   #   sig_train = np.concatenate((sig_train, s.dataframe[0][ix_shuffle[0]]))
+   #   sig_train_w = np.concatenate((sig_train_w, s.dataframe[1][ix_shuffle[0]]))
+   #   sig_train_y = np.concatenate((sig_train_y, np.zeros(sig_train_frac)))
+   #   sig_test = np.concatenate((sig_test, s.dataframe[0][ix_shuffle[1]]))
+   #   sig_test_w = np.concatenate((sig_test_w, s.dataframe[1][ix_shuffle[1]]))
+   #   sig_test_y = np.concatenate((sig_test_y, np.zeros(sig_test_frac)))
+   #   print sig_test.shape, sig_train.shape
+   #else:      
+   #  sig = np.concatenate((sig, s.dataframe[0]))
+   #  sig_w = np.concatenate((sig_w, s.dataframe[1]))
+   #  sig_y = np.concatenate((sig_y, np.zeros(s.dataframe[0].shape[0])))
+  
+  for i, b in enumerate(Background):
+    i = i + 1
+    if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+      ix = range(b.dataframe[0].shape[0])
+      ix_shuffle = random.sample(ix, len(ix))
+      ix_shuffle = np.split(ix_shuffle, [bkg_train_frac,bkg_train_frac+bkg_test_frac])
+      bkg_train = np.concatenate((bkg_train, b.dataframe[0][ix_shuffle[0]]))
+      bkg_train_w = np.concatenate((bkg_train_w, b.dataframe[1][ix_shuffle[0]]))
+      bkg_train_y = np.concatenate((bkg_train_y, np.full(bkg_train_frac, i)))
+      bkg_test = np.concatenate((bkg_test, b.dataframe[0][ix_shuffle[1]]))
+      bkg_test_w = np.concatenate((bkg_test_w, b.dataframe[1][ix_shuffle[1]]))
+      bkg_test_y = np.concatenate((bkg_test_y, np.full(bkg_test_frac, i)))
+    else:
+      bkg = np.concatenate((bkg, b.dataframe[0]))
+      bkg_w = np.concatenate((bkg_w, b.dataframe[1]))
+      bkg_y = np.concatenate((bkg_y, np.full(b.dataframe[0].shape[0], i)))
+  
+  if (type(fixedTrainSize) is int) and (fixedTrainSize > 0):
+    ix = range(2*fixedTrainSize)
+    ix_train_shuffle = random.sample(ix, len(ix))
+    ix_test_shuffle = random.sample(ix, len(ix))
+    X_train = np.concatenate((sig_train, bkg_train))
+    X_test = np.concatenate((sig_test, bkg_test))
+    w_train = np.concatenate((sig_train_w, bkg_train_w))
+    w_test = np.concatenate((sig_test_w, bkg_test_w))
+    if multiclass:
+      y_train = np.concatenate((sig_train_y, bkg_train_y))
+      y_test = np.concatenate((sig_test_y, bkg_test_y))
+    else:
+      y_train = []; y_test = []
+      for _df, ID in [(sig_train, 1), (bkg_train, 0)]:
+          y_train.extend([ID] * _df.shape[0])
+      for _df, ID in [(sig_test, 1), (bkg_test, 0)]:
+          y_test.extend([ID] * _df.shape[0])
+      y_train = np.array(y_train); y_test = np.array(y_test)
+    X_train = X_train[ix_train_shuffle]
+    y_train = y_train[ix_train_shuffle]
+    w_train = w_train[ix_train_shuffle]
+    X_test = X_test[ix_test_shuffle]
+    y_test = y_test[ix_test_shuffle]
+    w_test = w_test[ix_test_shuffle]
+  
+  else:
+    X = np.concatenate((sig, bkg))
+    w = np.concatenate((sig_w, bkg_w))
+    if multiclass:
+      y = np.concatenate((sig_y, bkg_y))
+    else:
+      y = []
+      for _df, ID in [(sig, 1), (bkg, 0)]:
+        y.extend([ID] * _df.shape[0])
+      y = np.array(y)
+  
+    ix = range(X.shape[0])
+    X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=splitFrac, test_size=splitFrac)
+  
+  return (X_train, X_test, y_train, y_test, w_train, w_test)
+
+def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
   files = os.listdir(path)
   if len(files) == 1:
     f = files[0]
     if os.path.isfile(path+f) and f.endswith(".h5"):
       _df = pd.read_hdf(path+f)
-      df = selectVarList(_df, nvar)
+      df = selectVarList(_df, nvar+weights)
       df = applyCut(df, cut)
       del _df
   elif len(files)>1:
@@ -238,18 +373,20 @@ def loadDataFrame(path, nvar=None, cut=None):
       if os.path.isfile(path+f) and f.endswith(".h5"):
         if first:
           _df = pd.read_hdf(path+f)
-          df = selectVarList(_df, nvar)
+          df = selectVarList(_df, nvar+weights)
           df = applyCut(df, cut)
           del _df
           first = False
         else:
           _df = pd.read_hdf(path+f)
-          df_slice = selectVarList(_df, nvar)
+          df_slice = selectVarList(_df, nvar+weights)
           df_slice = applyCut(df_slice, cut)
           df = pd.concat((df, df_slice), ignore_index=True)
           del _df, df_slice
 
-  return df
+  df, weight_df = np.split(df, [len(nvar)], axis=1)
+  weight_df = weightFrame(weight_df, weights, lumi)
+  return df, weight_df
 
 def createFullDataset(fileList, varList):
   df = pd.concat((f[varList] for f in fileList), ignore_index=True)
