@@ -10,30 +10,11 @@ from collections import namedtuple
 import pandas as pd
 import numpy as np
 from root_numpy import rec2array, tree2array
-from numpy.lib.recfunctions import stack_arrays
 import h5py
-
-# matplot lib for plotting
-#import matplotlib
-#import matplotlib.pyplot as plt
-#import seaborn as sns
-
-# keras 
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout, Highway, MaxoutDense
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.optimizers import SGD
-from keras.regularizers import l2
-from keras import initializers
 
 # scikit-learn
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
-from sklearn.metrics import classification_report, roc_auc_score, roc_curve, auc
-from sklearn.externals import joblib
 
 import json
 import tqdm
@@ -242,22 +223,31 @@ def loadFromRoot(filepath, treename, cut, branches, weights, lumi=1000.):
 
   return (source, weight)
 
-def loadDataFrame(path):
+def loadDataFrame(path, nvar=None, cut=None):
   files = os.listdir(path)
   if len(files) == 1:
     f = files[0]
     if os.path.isfile(path+f) and f.endswith(".h5"):
-      df = pd.read_hdf(path+f)
+      _df = pd.read_hdf(path+f)
+      df = selectVarList(_df, nvar)
+      df = applyCut(df, cut)
+      del _df
   elif len(files)>1:
     first = True
     for f in files:
       if os.path.isfile(path+f) and f.endswith(".h5"):
         if first:
-          df = pd.read_hdf(path+f)
+          _df = pd.read_hdf(path+f)
+          df = selectVarList(_df, nvar)
+          df = applyCut(df, cut)
+          del _df
           first = False
         else:
           _df = pd.read_hdf(path+f)
-          df = pd.concat((df, _df), ignore_index=True)
+          df_slice = selectVarList(_df, nvar)
+          df_slice = applyCut(df_slice, cut)
+          df = pd.concat((df, df_slice), ignore_index=True)
+          del _df, df_slice
 
   return df
 
@@ -276,6 +266,55 @@ def weightFrame(df, weights, lumi=36100.):
   weight = weight * lumi
   return weight
 
+def selectVarList(df, nvar=None):
+  if type(nvar)==list:
+    first = True
+    for v in nvar:
+      if varHasIndex(v): 
+        index, name = pickIndex(v)
+        _df = df[name].str[int(index)]
+      else:  
+        _df = df[v]
+      if first:
+        first = False
+        new_df = _df
+      else:
+        new_df = pd.concat((new_df, _df), axis=1)
+    new_df.columns = nvar
+  del _df
+  return new_df
+
+def applyCut(df, cut=None):
+  if type(cut) == list:
+    for i, c in enumerate(cut):
+      if c['type'] == 'exact':
+        df = df[ df[c['name']] == c['threshold'] ]
+      elif c['type'] == 'less':
+        df = df[ df[c['name']] < c['threshold'] ]
+      elif c['type'] == 'leq':
+        df = df[ df[c['name']] <= c['threshold'] ]
+      elif c['type'] == 'greater':
+        df = df[ df[c['name']] > c['threshold'] ]
+      elif c['type'] == 'geq':
+        df = df[ df[c['name']] >= c['threshold'] ]
+  return df
+
+def varHasIndex(var):
+  if ('[' in var) and (']' in var):
+    return True 
+  else:
+    return False
+
+def pickIndex(var):
+  if ('[' in var) and (']' in var):
+    name = var.split('[')
+    start = var.index('[')
+    stop = var.index(']')
+    index = ''
+    for i in range(start+1, stop):
+      index = index + var[i]
+  return index, name[0]
+ 
 def create_stream(df, ix_train, ix_test, num_obj, sort_col):
   n_variables = df.shape[1]
   var_names = df.keys()

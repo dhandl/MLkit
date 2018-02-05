@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-input = '/gpfs/scratch/pr62re/di36jop/samples/ttbar_rew/TRUTH3/hdf5'
+input = '/gpfs/scratch/pr62re/di36jop/samples/ttbar_rew/TRUTH3/hdf5/'
 
 # define your samples here
 Signal = [
@@ -9,5 +9,5 @@ Signal = [
 
 Background = [
 #  {'name':'ttbar_radHi_TRUTH3',  'path':input},
-  {'name':'ttbar_radLo_TRUTH3', 'path':input+'ttbar_radLo_TRUTH3/}
+  {'name':'ttbar_radLo_TRUTH3', 'path':input+'ttbar_radLo_TRUTH3/'}
 ]

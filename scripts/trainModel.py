@@ -5,10 +5,11 @@
 import os, sys, copy
 import timer
 
+import pandas as pd
 import numpy as np
 
 from collections import namedtuple
-from LoadData import prepDataset, loadFromRoot
+from LoadData import prepDataset, loadFromRoot, loadDataFrame, createFullDataset
 from models import trainBDT, trainNN
 
 Sample = namedtuple('Sample', 'name dataframe')
@@ -78,13 +79,22 @@ def saveModel(model, modelDir, modelName, alg):
 def parse_options():
   import argparse
 
+  workdir = os.getenv('WorkDir')
+  output = os.path.join(workdir, 'TrainedModels')
+
   parser = argparse.ArgumentParser()
   #parser.add_argument('-C', '--config', help="Config file", default="python/loadConfig.py")
   #parser.add_argument('-a', '--analysis', help="name of the analysis to run" , default="NN")
   parser.add_argument('-m', '--multiclass', help="Multi-Classification (True/False)" , default=True, type=bool)
-  parser.add_argument('-s', '--saveDataset', help="Save the training data, if it exists, it will load existing file!" , default='./TrainedModels/models/defaultDataset.h5')
+  parser.add_argument('-o', '--output', help="Directory for output files" , default=output)
 
   opts = parser.parse_args()
+
+  if not os.path.exists(opts.output):
+    os.makedirs(opts.output)
+  
+  opts.weightDir = os.path.join(opts.output, 'weights')
+  opts.modelDir = os.path.join(opts.output, 'models')
 
   return opts
 
@@ -95,23 +105,11 @@ def main():
 
   opts = parse_options()
 
-  #ConfigFile = opts.config
-  data = opts.saveDataset
-
-  print "Loading config file!"
-  #from loadConfig import Signal, Background, preselection, nvar, lumi, weights, saveDir, fileSuffix, analysis
-
-  #if not os.path.exists(data):
-  #  sig = []; bkg = []
-  #  print 'Loading signal...'
-  #  for s in Signal:
-  #    sig.append(Sample(s[0], loadFromRoot(loadDir+s[0]+'/', s[1], preselection, nvar, weights, lumi)))
-  #  print 'Loading background...'
-  #  for b in Background:
-  #    bkg.append(Sample(b[0], loadFromRoot(loadDir+b[0]+'/', b[1], preselection, nvar, weights, lumi)))
-  #else:
-  #  sig = Signal
-  #  bkg = Background
+  print "Loading configuration..."
+  from variables import preselection, lumi, nvar, weight
+  from samples import Signal, Background
+  from algorithm import analysis
+  
 
   print "Creating training and test set!"
   X_train, X_test, y_train, y_test, w_train, w_test = prepDataset(Signal, Background, data, multiclass=opts.multiclass)
