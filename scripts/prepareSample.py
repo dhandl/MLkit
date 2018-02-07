@@ -11,7 +11,7 @@ from root2pandas import root2pandas
 CUT ="(1)"
 
 variables = [
-              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_deltaRj"
+              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_deltaRj",
 #              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
               "lep_pt", "lep_eta", "lep_phi", "lep_e",
               "met",

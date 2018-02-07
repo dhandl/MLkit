@@ -1,6 +1,7 @@
 from collections import namedtuple
 
-input = '/gpfs/scratch/pr62re/di36jop/samples/ttbar_rew/TRUTH3/hdf5/'
+#input = '/gpfs/scratch/pr62re/di36jop/samples/ttbar_rew/TRUTH3/hdf5/'
+input = '/project/etp5/dhandl/samples/ttbar_rew/TRUTH3/hdf5/'
 
 # define your samples here
 Signal = [

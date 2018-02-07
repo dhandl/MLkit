@@ -5,10 +5,10 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer16-16_epochs50_batch512',
+          'DNN_ADAM_layer256-256-256-256_epochs100_batch512',
           {
-          'layers':[16,16],
-          'ncycles':50,
+          'layers':[256,256,256,256],
+          'ncycles':100,
           'batchSize':512,
           'dropout':0.3,
           'optimizer':'adam',
@@ -20,5 +20,15 @@ Algorithm('NN',
           'nesterov':False,
           'multiclassification':False
           }
-)
+),
+Algorithm('BDT',
+          'AdaBoost_d3_mspl0p025_nEst850_lr0p5',
+          {
+           'classifier':'AdaBoost',
+           'max_depth':3,
+           'min_samples_leaf':0.025,
+           'n_estimators':850,
+           'learning_rate':0.5
+          }
+          ),
 ]

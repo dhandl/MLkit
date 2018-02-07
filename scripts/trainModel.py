@@ -9,12 +9,12 @@ import timer
 import pandas as pd
 import numpy as np
 
-from collections import namedtuple
-from LoadData import prepareTraining
+from prepareTraining import prepareTraining
 from models import trainBDT, trainNN
 
 from sklearn.externals import joblib
 
+from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 def getModel(models, modeltype):
@@ -107,24 +107,42 @@ def parse_options():
 
   parser = argparse.ArgumentParser()
   #parser.add_argument('-C', '--config', help="Config file", default="python/loadConfig.py")
-  parser.add_argument('-a', '--analysis', help="name of the analysis to run" , default="NN")
+  parser.add_argument('-a', '--analysis', help="Name of the algorithm to run" , default="NN")
+  parser.add_argument('-d', '--dataset', help="Name of the dataset file")
   parser.add_argument('-m', '--multiclass', help="Multi-Classification (True/False)" , default=False, type=bool)
   parser.add_argument('-n', '--name', help="Name of the output files")
   parser.add_argument('-o', '--output', help="Directory for output files" , default=output)
+  parser.add_argument('-r', '--reproduce', help='Constant seed for reproducabilty', default=False, type=bool)
+  parser.add_argument('-t', '--trainsize', help='Size of training data. Both (float/int) possible', default=None)
+  parser.add_argument('-u', '--testsize', help='Size of test data. Both (float/int) possible', default=None)
 
   opts = parser.parse_args()
 
   opts.weightDir = os.path.join(opts.output, 'weights')
   opts.modelDir = os.path.join(opts.output, 'models')
+  opts.dataDir = os.path.join(opts.output, 'datasets')
 
   if not os.path.exists(opts.weightDir):
     os.makedirs(opts.weightDir)
   if not os.path.exists(opts.modelDir):
     os.makedirs(opts.modelDir)
+  if not os.path.exists(opts.dataDir):
+    os.makedirs(opts.dataDir)
 
   if not opts.name:
     opts.name =  datetime.now().strftime("%Y-%m-%d_%H-%M_")
 
+  if type(opts.trainsize) is str: 
+    if '.' in opts.trainsize:
+      opts.trainsize = float(opts.trainsize)
+    else:
+      opts.trainsize = int(opts.trainsize)
+  if type(opts.testsize) is str: 
+      if '.' in opts.testsize:
+        opts.testsize = float(opts.testsize)
+      else:
+        opts.testsize = int(opts.testsize)
+        
   return opts
 
 def main():
@@ -140,15 +158,17 @@ def main():
   from algorithm import analysis
   
   alg = getModel(analysis, opts.analysis)
-  opts.name = opts.name + model.modelname
+  opts.name = opts.name + alg.modelname
+  
+  dataset = os.path.join(opts.dataDir,opts.dataset+'.h5')
   
   print "Creating training and test set!"
-  X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, lumi, multiclass=opts.multiclass)
+  X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
 
   checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
-      model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'])
+      model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], opts.reproduce)
   elif (opts.analysis.lower() == 'nn'):
       model, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], alg.options['nesterov'], alg.options['multiclassification'])
     #elif (opts.analysis.lower() == 'rnn'):

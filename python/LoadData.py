@@ -354,7 +354,7 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, lumi=100e3, sp
       y = np.array(y)
   
     ix = range(X.shape[0])
-    X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=splitFrac, test_size=splitFrac)
+    X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=splitFrac, test_size=splitFrac, random_state=14)
   
   return (X_train, X_test, y_train, y_test, w_train, w_test)
 

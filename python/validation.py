@@ -1,6 +1,7 @@
 import os, copy, sys
 import glob
 import random 
+import itertools
 
 # ROOT
 import ROOT
@@ -9,7 +10,6 @@ import ROOT.RooStats as rs
 # for arrays
 import pandas as pd
 import numpy as np
-from numpy.lib.recfunctions import stack_arrays
 from array import array
 
 # scipy 
@@ -20,18 +20,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-# keras 
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout, Highway, MaxoutDense
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-
 # scikit-learn
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
-from sklearn.metrics import classification_report, roc_auc_score, roc_curve, auc
+from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score, roc_curve, auc
 
 import seaborn as sns
 
@@ -339,4 +329,42 @@ def plotSigVersusEff(classifier, X, y, w, wp, wp_label, label='ML classifier', f
     plt.savefig(fileName+'.png')
     plt.close()
 
+def getConfusioMatrix(y_test, y_predict, w_test, precision=2):
+  yhat_cls = y_predict.round()
+  cnf_matrix = confusion_matrix(y_test, yhat_cls, sample_weight=w_test)
+  np.set_printoptions(precision=2)
+  return cnf_matrix
+
+def plot_confusion_matrix(classifier, X, y, w, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+  if 'keras.models.' in str(type(classifier)):
+    y_predict = classifier.predict(X)
+  elif 'sklearn.ensemble.' in str(type(classifier)):
+    y_predict = classifier.decision_function(X)
+  cm = getConfusionMatrix(y, y_predict, w)
+
+  if normalize:
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    print("Normalized confusion matrix")
+  else:
+    print('Confusion matrix, without normalization')
+  
+  print(cm)
+  
+  plt.imshow(cm, interpolation='nearest', cmap=cmap)
+  plt.title(title)
+  plt.colorbar()
+  tick_marks = np.arange(len(classes))
+  plt.xticks(tick_marks, classes, rotation=45)
+  plt.yticks(tick_marks, classes)
+  
+  fmt = '.2f' if normalize else 'd'
+  thresh = cm.max() / 2.
+  for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+      plt.text(j, i, format(cm[i, j], fmt),
+               horizontalalignment="center",
+               color="white" if cm[i, j] > thresh else "black")
+  
+  plt.tight_layout()
+  plt.ylabel('True label')
+  plt.xlabel('Predicted label')
 
