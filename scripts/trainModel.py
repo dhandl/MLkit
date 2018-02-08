@@ -171,13 +171,13 @@ def main():
   checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
-      model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], opts.reproduce)
+    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], opts.reproduce)
   elif (opts.analysis.lower() == 'nn'):
-      model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], alg.options['nesterov'], alg.options['multiclassification'])
+    model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], alg.options['nesterov'], alg.options['multiclassification'])
     from plotting.plot_learning_curve import learning_curve_for_keras
     learning_curve_for_keras(history, opts.plotDir, opts.name)
-    #elif (opts.analysis.lower() == 'rnn'):
-    #  trainRNN()
+  #elif (opts.analysis.lower() == 'rnn'):
+  #  trainRNN()
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
 
