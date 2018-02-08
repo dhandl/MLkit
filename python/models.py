@@ -78,9 +78,8 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   print model.summary()
   print "Training..."
   class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
-  model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=10)])
+  history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
   # TODO: add callbacks and ModelCheckpoint
-  # Store model to file
   print 'Testing...'
   score = model.evaluate(X_test, y_test)
   print("\n%s: %.2f%%" % (model.metrics_names[0], score[0]*100))
@@ -88,7 +87,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   y_predicted = model.predict(X_test)
 
   print "DNN finished!"
-  return model, y_predicted
+  return model, history, y_predicted
 
 
 #def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, nvar, collection, multiclass=False):
