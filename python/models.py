@@ -78,7 +78,8 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   print model.summary()
   print "Training..."
   class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
-  history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
+  #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
+  history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight=None, sample_weight=w_train, validation_data=(X_test,y_test,w_test), callbacks = [EarlyStopping(verbose=True, patience=10)])
   # TODO: add callbacks and ModelCheckpoint
   print 'Testing...'
   score = model.evaluate(X_test, y_test)

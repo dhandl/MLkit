@@ -5,6 +5,7 @@
 import os, sys, copy
 from datetime import datetime
 import timer
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -121,7 +122,6 @@ def parse_options():
   opts.weightDir = os.path.join(opts.output, 'weights')
   opts.modelDir = os.path.join(opts.output, 'models')
   opts.dataDir = os.path.join(opts.output, 'datasets')
-  opts.plotDir = os.path.join(opts.output, 'plots')
 
   if not os.path.exists(opts.weightDir):
     os.makedirs(opts.weightDir)
@@ -129,8 +129,6 @@ def parse_options():
     os.makedirs(opts.modelDir)
   if not os.path.exists(opts.dataDir):
     os.makedirs(opts.dataDir)
-  if not os.path.exists(opts.plotDir):
-    os.makedirs(opts.plotDir)
 
   if not opts.name:
     opts.name =  datetime.now().strftime("%Y-%m-%d_%H-%M_")
@@ -174,8 +172,8 @@ def main():
     model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], opts.reproduce)
   elif (opts.analysis.lower() == 'nn'):
     model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], alg.options['nesterov'], alg.options['multiclassification'])
-    from plotting.plot_learning_curve import learning_curve_for_keras
-    learning_curve_for_keras(history, opts.plotDir, opts.name)
+    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
+      pickle.dump(history.history, hist_pi)
   #elif (opts.analysis.lower() == 'rnn'):
   #  trainRNN()
 

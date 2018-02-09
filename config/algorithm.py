@@ -5,9 +5,9 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer256_epochs100_batch512',
+          'DNN_ADAM_layer2048_batch512',
           {
-          'layers':[256],
+          'layers':[2048],
           'ncycles':100,
           'batchSize':512,
           'dropout':0.3,

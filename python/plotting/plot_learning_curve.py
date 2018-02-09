@@ -1,3 +1,5 @@
+import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
@@ -96,26 +98,28 @@ def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
 
 #plt.show()
 
-def learning_curve_for_keras(history, savedir='./', filename='learning_curve'):
+def learning_curve_for_keras(hist_pi, savedir='./', filename='learning_curve'):
+  with open(hist_pi, 'rb') as infile:
+    history = pickle.load(infile)
   # list all data in history
-  print(history.history.keys())
+  print(history.keys())
   # summarize history for accuracy
-  plt.plot(history.history['acc'])
-  plt.plot(history.history['val_acc'])
+  plt.plot(history['acc'])
+  plt.plot(history['val_acc'])
   plt.title('model accuracy')
   plt.ylabel('accuracy')
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
-  plt.savefig(savedir+filename+'_acc.pdf')
-  plt.savefig(savedir+filename+'_acc.png')
+  plt.savefig(os.path.join(savedir,filename+'_acc.pdf'))
+  plt.savefig(os.path.join(savedir,filename+'_acc.png'))
   plt.close()
   # summarize history for loss
-  plt.plot(history.history['loss'])
-  plt.plot(history.history['val_loss'])
+  plt.plot(history['loss'])
+  plt.plot(history['val_loss'])
   plt.title('model loss')
   plt.ylabel('loss')
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
-  plt.savefig(savedir+filename+'_loss.pdf')
-  plt.savefig(savedir+filename+'_loss.png')
+  plt.savefig(os.path.join(savedir,filename+'_loss.pdf'))
+  plt.savefig(os.path.join(savedir,filename+'_loss.png'))
   plt.close()

@@ -28,15 +28,12 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     y_test = h5f['y_test'][:]
     w_train = h5f['w_train'][:]
     w_test = h5f['w_test'][:]
-    #ix_train = h5f['ix_train'][:]
-    #ix_test = h5f['ix_test'][:]
     h5f.close() 
 
   if not os.path.exists(output):
     if reproduce:
       print 'Warning! Constant seed is activated.'
       random_state = 14
-      np.random.seed(random_state)
     if trainSize is None:
       print 'Warning! Size of training set not specified. Set training data to 0.5 of complete dataset.'
       trainSize = 0.5
@@ -45,6 +42,8 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     else:
       print 'Fraction of training set: {}'.format(trainSize) if type(trainSize) is float else 'Number training events: {}'.format(trainSize)
       print 'Fraction of test set: {}'.format(testSize) if type(testSize) is float else 'Number test events: {}'.format(testSize)
+    
+    split = np.array([trainSize, testSize])  
     
     Signal = []
     Background = []
@@ -88,9 +87,8 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     ix = range(X.shape[0])
     X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=trainSize, test_size=testSize, random_state=random_state)  
 
-    split = np.array([X_train.shape[0]/X.shape[0], X_test.shape[0]/X.shape[0]])  
     h5f = h5py.File(output, 'w')
-    h5f.create_dataset('train_test_frac', data=split)
+    h5f.creat_dataset('train_test_frac', data=split)
     h5f.create_dataset('ix', data=ix)
     h5f.create_dataset('X', data=X)
     h5f.create_dataset('y', data=y)
@@ -101,8 +99,6 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     h5f.create_dataset('y_test', data=y_test)
     h5f.create_dataset('w_train', data=w_train)
     h5f.create_dataset('w_test', data=w_test)
-    h5f.create_dataset('ix_train', data=ix_train)
-    h5f.create_dataset('ix_test', data=ix_test)
     h5f.close()  
 
   return (X_train, X_test, y_train, y_test, w_train, w_test)
