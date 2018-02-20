@@ -13,16 +13,18 @@ CUT ="(1)"
 variables = [
               "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_deltaRj",
 #              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
-              "lep_pt", "lep_eta", "lep_phi", "lep_e",
-              "met",
+              "n_lep", "lep_pt", "lep_eta", "lep_phi", "lep_e",
+              "met", "mt", "ht", "met_sig", "ht_sig",
               "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
               "dphi_min_ptmiss",
               "dphi_met_lep",
               "dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
               "dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
               "deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
+              "ttbar_m", "ttbar_pt", "ttbar_dphi",
               "m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
               "event_number", "run_number", "lumi_block", "mc_channel_number", "bcid",
+              "tt_cat_TRUTH3",
               "weight",
               "xs_weight"
 ]
@@ -96,7 +98,7 @@ def main():
       first = True
       last = nevents-1
       for i in range(nevents):
-        if i%10000==0:
+        if i%100000==0:
           print i
         if first:
           fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
@@ -105,7 +107,7 @@ def main():
           tCopy = t.CloneTree(0)
           first = False
         if i%1000000==0 and i!=0:
-          #fCopy.Write()
+          fCopy.Write()
           fCopy.Close()
           fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
           fCopy = ROOT.TFile(fDest2, "RECREATE")

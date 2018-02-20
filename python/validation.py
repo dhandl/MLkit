@@ -5,7 +5,6 @@ import itertools
 
 # ROOT
 import ROOT
-import ROOT.RooStats as rs
 
 # for arrays
 import pandas as pd
@@ -216,16 +215,20 @@ def KolmogorovTest(classifier, X_train, y_train, w_train, X_test, y_test, w_test
     plt.ylabel("a. u.")
   else:
     plt.ylabel("Events")
-  plt.legend(loc='best')
+  leg = plt.legend(loc='best', frameon=False)
+  p = leg.get_window_extent()
   ax = fig.add_subplot(111)
-  ax.text(0.55, 0.75, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax.transAxes)
-  ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
+  ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
+  sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
+  #ax.text(0.55, 0.75, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax.transAxes)
+  #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
   if save:
     plt.savefig(fileName+".pdf")
     plt.savefig(fileName+".png")
     plt.close()
 
 def plotSignificance(classifier, X, y, w, score=(-1., 1.), fileName="Significance", save=False):
+  import ROOT.RooStats as rs
   if 'keras.models.' in str(type(classifier)):
     sig_predicted = classifier.predict(X[y==1.]).ravel()
     bkg_predicted = classifier.predict(X[y==0.]).ravel()
@@ -368,3 +371,35 @@ def plot_confusion_matrix(classifier, X, y, w, classes, normalize=False, title='
   plt.ylabel('True label')
   plt.xlabel('Predicted label')
 
+
+def getSeparation(s_hist, s_bins, b_hist, b_bins):
+  sep = 0.
+
+  # Normalize objects
+  S = s_hist*1./(s_hist.sum())
+  B = b_hist*1./(b_hist.sum())
+
+  # Sanity checks
+  if len(s_bins) != len(b_bins) or len(b_bins) <=0:
+    print "Signal and Bkg samples with different number of bins: S(" + str(len(s_bins))+ ") B(" + str(len(b_bins)) + ")"
+    return 0
+
+  if s_bins.max() != b_bins.max() or s_bins.min() != b_bins.min() or s_bins.max() <= s_bins.min():
+    print "Edges of histos are not right: Smin(" + str(s_bins.min()) + ")  Bmin(" + str(b_bins.min()) + ")"
+    print "Smax(" + str(s_bins.max()) + ")  Bmax(" + str(b_bins.max()) + ")"
+    return 0
+
+  nstep = int(s_bins.max())
+  intBin = (s_bins.max() - s_bins.min())/nstep
+  nS = S.sum()*intBin
+  nB = B.sum()*intBin
+  
+  if nS > 0 and nB > 0 :
+    for bins in range(0,nstep):
+      s = S[bins]/nS
+      b = B[bins]/nB
+      if s+b>0 : sep +=  0.5*(s - b)*(s - b)/(s + b)
+      pass
+    sep *= intBin
+    else : print "histos with 0 entries: Snb(" + str(nS) + ") Bnb("+ str(nB) + ")"; sep = 0
+    return sep

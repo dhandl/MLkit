@@ -112,25 +112,27 @@ def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
   files = os.listdir(path)
   if len(files) == 1:
     f = files[0]
+    print f
     if os.path.isfile(path+f) and f.endswith(".h5"):
       _df = pd.read_hdf(path+f)
-      df = selectVarList(_df, nvar+weights)
-      df = applyCut(df, cut)
+      df = applyCut(_df, cut)
+      df = selectVarList(df, nvar+weights)
       del _df
   elif len(files)>1:
     first = True
     for f in files:
+      print f
       if os.path.isfile(path+f) and f.endswith(".h5"):
         if first:
           _df = pd.read_hdf(path+f)
-          df = selectVarList(_df, nvar+weights)
-          df = applyCut(df, cut)
+          df = applyCut(_df, cut)
+          df = selectVarList(df, nvar+weights)
           del _df
           first = False
         else:
           _df = pd.read_hdf(path+f)
-          df_slice = selectVarList(_df, nvar+weights)
-          df_slice = applyCut(df_slice, cut)
+          df_slice = applyCut(_df, cut)
+          df_slice = selectVarList(df_slice, nvar+weights)
           df = pd.concat((df, df_slice), ignore_index=True)
           del _df, df_slice
 
