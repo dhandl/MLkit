@@ -210,6 +210,7 @@ def KolmogorovTest(classifier, X_train, y_train, w_train, X_test, y_test, w_test
   plt.errorbar(center, b_histTest, fmt='o', c='b', label='Background (Testing)') # TODO define yerr = sqrt( sum w^2 ) per bin!
   ks_sig, ks_sig_p = ks_2samp(s_histTrain, s_histTest)
   ks_bkg, ks_bkg_p = ks_2samp(b_histTrain, b_histTest)
+  sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
   plt.xlabel("Output score")
   if normed:
     plt.ylabel("a. u.")
@@ -219,7 +220,7 @@ def KolmogorovTest(classifier, X_train, y_train, w_train, X_test, y_test, w_test
   p = leg.get_window_extent()
   ax = fig.add_subplot(111)
   ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
-  sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
+  ax.annotate('<S^2> = %.3f'%(sep), (p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
   #ax.text(0.55, 0.75, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
   if save:
@@ -401,5 +402,5 @@ def getSeparation(s_hist, s_bins, b_hist, b_bins):
       if s+b>0 : sep +=  0.5*(s - b)*(s - b)/(s + b)
       pass
     sep *= intBin
-    else : print "histos with 0 entries: Snb(" + str(nS) + ") Bnb("+ str(nB) + ")"; sep = 0
-    return sep
+  else : print "histos with 0 entries: Snb(" + str(nS) + ") Bnb("+ str(nB) + ")"; sep = 0
+  return sep
