@@ -211,17 +211,18 @@ def KolmogorovTest(classifier, X_train, y_train, w_train, X_test, y_test, w_test
   ks_sig, ks_sig_p = ks_2samp(s_histTrain, s_histTest)
   ks_bkg, ks_bkg_p = ks_2samp(b_histTrain, b_histTest)
   sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
+  print sep
   plt.xlabel("Output score")
   if normed:
     plt.ylabel("a. u.")
   else:
     plt.ylabel("Events")
-  leg = plt.legend(loc='best', frameon=False)
+  leg = plt.legend(loc="best", frameon=False)
   p = leg.get_window_extent()
   ax = fig.add_subplot(111)
-  ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
-  ax.annotate('<S^2> = %.3f'%(sep), (p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
-  #ax.text(0.55, 0.75, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax.transAxes)
+  #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
+  ax.text(0.55, 0.75, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax.transAxes)
+  ax.text(0.55, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
   if save:
     plt.savefig(fileName+".pdf")

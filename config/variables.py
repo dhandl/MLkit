@@ -2,7 +2,7 @@
 preselection = [ 
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'met',    'threshold':120e3,  'type':'geq'},
-                {'name':'mt',    'threshold':90e3,  'type':'geq'},
+                #{'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
 ]
 
@@ -16,7 +16,8 @@ nvar = [
         'ttbar_dphi',
         'm_jet1_jet2',
         'm_jet_jet_min',
-        'm_jet_jet_max'
+        'm_jet_jet_max',
+        'tt_cat_TRUTH3'
 ]
 
 weight = [

@@ -28,8 +28,8 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     y_test = h5f['y_test'][:]
     w_train = h5f['w_train'][:]
     w_test = h5f['w_test'][:]
-    #ix_train = h5f['ix_train'][:]
-    #ix_test = h5f['ix_test'][:]
+    ix_train = h5f['ix_train'][:]
+    ix_test = h5f['ix_test'][:]
     h5f.close() 
 
   if not os.path.exists(output):
@@ -37,6 +37,7 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
       print 'Warning! Constant seed is activated.'
       random_state = 14
       np.random.seed(random_state)
+    else: random_state = None;
     if trainSize is None:
       print 'Warning! Size of training set not specified. Set training data to 0.5 of complete dataset.'
       trainSize = 0.5
@@ -84,7 +85,6 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
         y.extend([ID] * _df.shape[0])
       y = np.array(y)
    
-    print ''
     ix = range(X.shape[0])
     X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=trainSize, test_size=testSize, random_state=random_state)  
 

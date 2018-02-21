@@ -5,15 +5,15 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer128-64_batch16',
+          'DNN_rmsprop_layer128_batch512_GlorotNormalInitializer',
           {
-          'layers':[128,64],
+          'layers':[128],
           'ncycles':100,
-          'batchSize':16,
+          'batchSize':512,
           'dropout':0.3,
-          'optimizer':'adam',
+          'optimizer':'rmsprop',
           'activation':'relu',
-          'initializer':'glorot_uniform',
+          'initializer':'glorot_normal',
           'learningRate':0.01,
           'decay':0.0,
           'momentum':0.0,
