@@ -30,6 +30,9 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, nvar, weight,
     w_test = h5f['w_test'][:]
     ix_train = h5f['ix_train'][:]
     ix_test = h5f['ix_test'][:]
+    sequence = []
+    for idx, c in enumerate(col):
+      sequence.append({'name':c, 'X_train':h5f['X_train_'+c][:], 'X_test':h5f['X_test_'+c][:]})
     h5f.close() 
 
   if not os.path.exists(output):
@@ -224,6 +227,8 @@ def applyCut(df, cut=None):
         df = df[ df[c['name']] > c['threshold'] ]
       elif c['type'] == 'geq':
         df = df[ df[c['name']] >= c['threshold'] ]
+      elif c['type'] == 'not':
+        df = df[ df[c['name']] != c['threshold'] ]
   return df
 
 
@@ -239,8 +244,8 @@ def create_stream(df, ix_train, ix_test, num_obj, sort_col, VAR_FILE_NAME):
   Xobj_test = data[ix_test]
   
   # print 'Scaling features ...' 
-  scale(Xobj_train, var_names, savevars=True, VAR_FILE_NAME=VAR_FILE_NAME.replace('.h5','_scaling.json') # scale training sample and save scaling
-  scale(Xobj_test, var_names, savevars=False, VAR_FILE_NAME=VAR_FILE_NAME.replace('.h5','_scaling.json') # apply scaling to test set
+  scale(Xobj_train, var_names, savevars=True, VAR_FILE_NAME=VAR_FILE_NAME.replace('.h5','_scaling.json')) # scale training sample and save scaling
+  scale(Xobj_test, var_names, savevars=False, VAR_FILE_NAME=VAR_FILE_NAME.replace('.h5','_scaling.json')) # apply scaling to test set
   return Xobj_train, Xobj_test
 
 def sort_objects(df, data, SORT_COL, max_nobj):

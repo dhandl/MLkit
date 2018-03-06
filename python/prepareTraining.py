@@ -185,6 +185,8 @@ def applyCut(df, cut=None):
         df = df[ df[c['name']] > c['threshold'] ]
       elif c['type'] == 'geq':
         df = df[ df[c['name']] >= c['threshold'] ]
+      elif c['type'] == 'not':
+        df = df[ df[c['name']] != c['threshold'] ]
   return df
 
 

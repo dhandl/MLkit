@@ -7,26 +7,34 @@ import pandas as pd
 import h5py
 from root2pandas import root2pandas
 
-#CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && (n_jet>=4) && (n_bjet>0) && (jet_pt[0]>50e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>30e3) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (met >120e3)"
-CUT ="(1)"
+CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && (n_jet>=4) && (n_bjet>0) && (jet_pt[0]>25e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>30e3) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (met >60e3)"
+#CUT ="(1)"
 
 variables = [
-              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_deltaRj",
-#              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
-              "n_lep", "lep_pt", "lep_eta", "lep_phi", "lep_e",
-              "met", "mt", "ht", "met_sig", "ht_sig",
+              "n_jet", "jet_pt", "jet_eta", "jet_phi", "jet_e", "jet_mv2c10",
+              "n_bjet", "bjet_pt", "bjet_eta", "bjet_phi", "bjet_e",
+              "n_lep", "lep_pt", "lep_eta", "lep_phi", "lep_e", "lep_charge",
+              "n_hadtop_cand", "hadtop_cand_pt", "hadtop_cand_eta", "hadtop_cand_phi", "hadtop_cand_m",
+              "n_hadw_cand", "hadw_cand_pt", "hadw_cand_eta", "hadw_cand_phi", "hadw_cand_m",
+              "met", "mt", "ht", "met_sig", "ht_sig", "amt2", "mt2stop", "mT2tauLooseTau_GeV",
               "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
               "dphi_min_ptmiss",
               "dphi_met_lep",
-              "dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
-              "dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
-              "deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
-              "ttbar_m", "ttbar_pt", "ttbar_dphi",
-              "m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
+              "dphi_b_lep_max", "dphi_b_ptmiss_max", "met_proj_lep", "dr_bjet_lep", "m_bl", "mT_blMET",
+              "m_top_chi2",
+              #"dr_jet_jet_min", "dr_jet_jet_max", "dr_lep_jet_min", "dr_lep_jet_max",
+              #"dphi_jet_jet_min", "dphi_jet_jet_max", "dphi_lep_jet_min", "dphi_lep_jet_max",
+              #"deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
+              "ttbar_m", "ttbar_pt", "dphi_ttbar", "dphi_leptop_met", "dphi_hadtop_met",
+              #"m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
+              "RJR_RISR", "RJR_MS", "RJR_PTISR", "RJR_nBJet",
+              "stxe_trigger", "el_trigger", "mu_trigger", "lep_trig_req",
               "event_number", "run_number", "lumi_block", "mc_channel_number", "bcid",
-              "tt_cat_TRUTH3",
+              "tt_cat",
               "weight",
-              "xs_weight"
+              "xs_weight",
+              "sf_total",
+              "weight_sherpa22_njets"
 ]
 
 def filesize(num):
@@ -101,15 +109,15 @@ def main():
         if i%100000==0:
           print i
         if first:
-          fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
+          fDest2 =fDest.replace(".root","_"+str(i/500000)+".root")
           fCopy = ROOT.TFile(fDest2, "RECREATE")
           fCopy.cd()
           tCopy = t.CloneTree(0)
           first = False
-        if i%1000000==0 and i!=0:
+        if i%500000==0 and i!=0:
           fCopy.Write()
           fCopy.Close()
-          fDest2 =fDest.replace(".root","_"+str(i/1000000)+".root")
+          fDest2 =fDest.replace(".root","_"+str(i/500000)+".root")
           fCopy = ROOT.TFile(fDest2, "RECREATE")
           fCopy.cd()
           tCopy = t.CloneTree(0)

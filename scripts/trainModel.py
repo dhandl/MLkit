@@ -11,7 +11,8 @@ import pandas as pd
 import numpy as np
 
 from prepareTraining import prepareTraining
-from models import trainBDT, trainNN
+from prepareSequentialTraining import prepareSequentialTraining
+from models import trainBDT, trainNN, trainRNN
 
 from sklearn.externals import joblib
 
@@ -164,18 +165,39 @@ def main():
   dataset = os.path.join(opts.dataDir,opts.dataset+'.h5')
   
   print "Creating training and test set!"
-  X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+  if (opts.analysis.lower() == 'rnn'):
+    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    
+  else:
+    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
 
   checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
-    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], opts.reproduce)
+    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'],                              alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], 
+                             opts.reproduce)
+
   elif (opts.analysis.lower() == 'nn'):
-    model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], alg.options['nesterov'], alg.options['multiclassification'])
+    model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
+                                     alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
+                                     alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], 
+                                     alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
+                                     alg.options['nesterov'], alg.options['multiclassification'])
+
     with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
       pickle.dump(history.history, hist_pi)
-  #elif (opts.analysis.lower() == 'rnn'):
-  #  trainRNN()
+
+  elif (opts.analysis.lower() == 'rnn'):
+    model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
+                                      alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
+                                      alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
+                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], 
+                                      alg.options['learningRate'], alg.options['decay'], 
+                                      alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
+                                      alg.options['multiclassification'])
+
+    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
+      pickle.dump(history.history, hist_pi)
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
 

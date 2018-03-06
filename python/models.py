@@ -2,10 +2,10 @@ import os, sys
 import numpy as np
 
 # keras
-from keras.models import Sequential, load_model
+from keras.models import Sequential, Model, load_model
 from keras.layers.core import Dense, Activation, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge
+from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge, Dense, Dropout, Input, concatenate
 from keras.regularizers import l2
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras import initializers
@@ -34,7 +34,10 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
     print "Using GradientBoost technique!"
     model = GradientBoostingClassifier(max_depth=max_depth, criterion='friedman_mse', min_samples_leaf=min_samples_leaf, loss='deviance', n_estimators=n_estimators, learning_rate=learning_rate, warm_start=True)
 
-  model.fit(X_train, y_train)
+  try:
+    model.fit(X_train, y_train)
+  except KeyboardInterrupt:
+    print '--- Training ended early. ---'
   y_predicted = model.predict(X_test)
   print classification_report(y_test, y_predicted, target_names=["background", "signal"])
 
@@ -60,7 +63,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(BatchNormalization())
     model.add(Dropout(dropout))
   if multiclass:
-    model.add(Dense(len(np.bincount(y_train)), activation='softmax'))
+    model.add(Dense(len(np.bincount(y_train.astype(int))), activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
   else:
     model.add(Dense(1, activation='sigmoid'))
@@ -78,11 +81,16 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   print model.summary()
   print "Training..."
   class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
+  try:
   #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
-  history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight=None, sample_weight=w_train, validation_data=(X_test,y_test,w_test), callbacks = [EarlyStopping(verbose=True, patience=10)])
-  # TODO: add callbacks and ModelCheckpoint
+    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
+              class_weight={i:class_weight[i] for i in range(len(class_weight))},
+              sample_weight=w_train, validation_data=(X_test,y_test,w_test),
+              callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
+  except KeyboardInterrupt:
+    print '--- Training ended early ---'
   print 'Testing...'
-  score = model.evaluate(X_test, y_test)
+  score = model.evaluate(X_test, y_test, sample_weight=w_test)
   print("\n%s: %.2f%%" % (model.metrics_names[0], score[0]*100))
   print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
   y_predicted = model.predict(X_test)
@@ -91,12 +99,89 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   return model, history, y_predicted
 
 
-#def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, nvar, collection, multiclass=False):
-#
-#  if type(collection) == list:
-#    sequences = []
-#    for seq in collection:
-#      print 'Prepare sequence for {} collection...'.format(seq)
-#      sequences.append([key for key in .keys() if key.startswit(seq)])
-# netDim, epochs, batchSize, dropout, optimizer, activation, initializer,learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False):
-#  return model, y_predicted
+def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False):
+  print "Performing a Deep Recurrent Neural Net!"
+
+  if type(sequence) == list:
+    for seq in sequence:
+      print 'Prepare channel for {} collection...'.format(seq['name'])
+      SHAPE = seq['X_train'].shape[1:]
+      seq['input'] = Input(SHAPE)
+      seq['channel'] = Masking(mask_value=-999, name=seq['name']+'_masking')(seq['input'])
+      if unit_type.lower() == 'lstm':
+        seq['channel'] = LSTM(n_units, name=seq['name']+'_lstm')(seq['channel'])
+      if unit_type.lower() == 'gru':
+        seq['channel'] = GRU(n_units, name=seq['name']+'_gru')(seq['channel'])
+      seq['channel'] = Dropout(dropout, name=seq['name']+'_dropout')(seq['channel'])
+
+  if mergeModels:
+    print 'Going to merge sequence model with common NN!'
+    print 'Standardize training set...'
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    model_inputs = Input(shape=(X_train.shape[1], ))
+    layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
+    layer = BatchNormalization()(layer)
+    layer = Dropout(dropout)(layer)
+    
+  if mergeModels:
+    combined = concatenate([c['channel'] for c in sequence]+[layer])
+  else:
+    if len(sequence)>1:
+      combined = concatenate([c['channel'] for c in sequence])
+    else:
+      combined = sequence[0]['channel']
+    #for layer in combinedDim:
+    #  combined = Dense(layer, activation = activation)(combined)
+    #  combined = Dropout(dropout)(combined)
+  if multiclass:
+    combined_output = Dense(len(np.bincount(y_train)), activation='softmax')(combined)
+    loss = 'categorical_crossentropy'
+  else:
+    combined_outputs = Dense(1, activation='sigmoid')(combined)
+    loss = 'binary_crossentropy'
+  
+  if mergeModels:
+    combined_rnn = Model(inputs=[seq['input'] for seq in sequence]+[model_inputs], outputs=combined_outputs)
+  else:
+    if len(sequence)>1:
+      combined_rnn = Model(inputs=[seq['input'] for seq in sequence], outputs=combined_outputs)
+    else:
+      combined_rnn = Model(inputs=sequence[0]['input'], outputs=combined_outputs)
+
+  combined_rnn.summary()
+  combined_rnn.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
+  print 'Training...'
+  class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
+  try:
+    if mergeModels:
+      history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
+                class_weight=class_weight, sample_weight=w_train, epochs=epochs, batch_size=batchSize,
+                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+                #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
+    else:
+      history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,
+                class_weight=class_weight, sample_weight=w_train, epochs=epochs, batch_size=batchSize,
+                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='acc')])
+  except KeyboardInterrupt:
+      print 'Training ended early.'
+
+  print 'Testing...'
+  if mergeModels:
+    score = combined_rnn.evaluate([seq['X_test'] for seq in sequence]+[X_test], y_test, batch_size=batchSize)
+    y_predicted = combined_rnn.predict([seq['X_test'] for seq in sequence]+[X_test], batch_size=batchSize)
+  else:
+    if len(seq)>1:
+      score = combined_rnn.evaluate([seq['X_test'] for seq in sequence], y_test)
+      y_predicted = combined_rnn.predict([seq['X_test'] for seq in sequence], batch_size=batchSize)
+    else:
+      score = combined_rnn.evaluate(sequence[0]['X_test'], y_test)
+      y_predicted = combined_rnn.predict(sequence[0]['X_test'], batch_size=batchSize)
+  #print("\n%s: %.2f%%" % (combined_rnn.metrics_names[0], score[0]*100))
+  #print("\n%s: %.2f%%" % (combined_rnn.metrics_names[1], score[1]*100))
+  
+
+  print "RNN finished!"
+  return combined_rnn, history, y_predicted
