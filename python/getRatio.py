@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def getRatio(s_hist, s_bins, b_hist, b_bins):
+def getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w):
   S = s_hist.copy()
   B = b_hist.copy()
 
@@ -16,20 +16,9 @@ def getRatio(s_hist, s_bins, b_hist, b_bins):
     return 0
   
   ratio = S/B
+  err = ratio * np.sqrt((s_w/S)**2 + (b_w/B)**2)
   width = (s_bins[1] - s_bins[0])
   center = (s_bins[:-1] + s_bins[1:]) / 2
-  plt.errorbar(center, ratio, fmt='o', c='r') # TODO define yerr = sqrt( sum w^2 ) per bin!
+  plt.errorbar(center, ratio, yerr=err, fmt='o', color="r")
 
-  #nstep = s_bins.max()
-  #intBin = (s_bins.max() - s_bins.min())/nstep
-  #nS = S.sum()*intBin
-  #nB = B.sum()*intBin
-  #
-  #if nS > 0 and nB > 0 :
-  #  for bins in range(0,int(nstep)):
-  #    s = S[bins]/nS
-  #    b = B[bins]/nB
-  #    if s+b>0 : sep +=  0.5*(s - b)*(s - b)/(s + b)
-  #    pass
-  #  sep *= intBin
-  #else : print "histos with 0 entries: Snb(" + str(nS) + ") Bnb("+ str(nB) + ")"; sep = 0
+  return ratio
