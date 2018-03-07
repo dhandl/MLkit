@@ -18,10 +18,24 @@ git config --global user.email example@example.com
 ```
 git clone ssh://git@gitlab.cern.ch:7999/dhandl/stop1l-MLkit.git
 cd stop1l-MLkit
-source setup.sh #(this command will eventually not work for you!)
+source setup.sh
 ```
 
-More info will follow. 
+### Transform .root files
+To use python libraries for Machine Learning applications you first have transform your .root files into arrays of python dataformat.
+Open scripts/prepareSample.py and define a 'CUT' and the 'variables' you need for your analyis. Afterwards execute:
+
+```
+prepareSample.py <PATH_OF_ROOTFILES> <DESTINATION_PATH>
+```
+
+.root files are usually very large, hence the files are chunked in multiple files and afterwards transformed. You can delete the chunked .root files in your destination path if necessary.
+
+### Run Training 
+
+```
+trainModel.py -a -d 
+```
 
 ### Miscellanea
 
