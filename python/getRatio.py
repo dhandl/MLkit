@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w):
+def getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w, color):
   S = s_hist.copy()
   B = b_hist.copy()
 
@@ -19,6 +19,6 @@ def getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w):
   err = ratio * np.sqrt((s_w/S)**2 + (b_w/B)**2)
   width = (s_bins[1] - s_bins[0])
   center = (s_bins[:-1] + s_bins[1:]) / 2
-  plt.errorbar(center, ratio, yerr=err, fmt='o', color="r")
+  plt.errorbar(center, ratio, yerr=err, fmt='o', color=color)
 
   return ratio
