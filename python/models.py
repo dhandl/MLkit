@@ -44,7 +44,7 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   print "BDT finished!"
   return model, y_predicted
 
-def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer,learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
+def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
   print "Performing a Deep Neural Net!"
 
   print 'Standardize training set...'
@@ -59,9 +59,9 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)]:
-    model.add(Dense(layer, activation=activation, kernel_initializer=initializer))
-    model.add(BatchNormalization())
+    model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer)))
     model.add(Dropout(dropout))
+    model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(len(np.bincount(y_train.astype(int))), activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
