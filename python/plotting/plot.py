@@ -10,7 +10,7 @@ from getSumW2 import getSumW2
 import matplotlib
 import matplotlib.pyplot as plt
 
-import AtlasLabel_mpl
+import AtlasStyle_mpl
 
 def plotShape(var, samples, weights, color, binning, xTitle, yTitle="Events", lumi=100, unit=None, legend=None, log=False, ratio=False, ratioTitle='1/nominal', ratioLimit=(0,2) ,normed=False, savePlot=False, fileName=None):
 
@@ -69,9 +69,9 @@ def plotShape(var, samples, weights, color, binning, xTitle, yTitle="Events", lu
     _max = np.max([h[0].max() for h in hists])
 
   if normed:
-    ax1.set_ylabel("a. u.", va='top')
+    ax1.set_ylabel("a. u.", ha='left')
   else:
-    ax1.set_ylabel("Events", va='top') 
+    ax1.set_ylabel("Events", ha='left') 
 
   if log:
     ax1.set_yscale('log')
@@ -84,8 +84,8 @@ def plotShape(var, samples, weights, color, binning, xTitle, yTitle="Events", lu
 
   leg = plt.legend(loc='best', frameon=False)
 
-  AtlasLabel_mpl.ATLASLabel(ax1, 0.02, 0.9, 'Work in progress')
-  AtlasLabel_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=str(lumi))
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.9, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=str(lumi))
 
   if ratio:
     ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)
@@ -93,8 +93,8 @@ def plotShape(var, samples, weights, color, binning, xTitle, yTitle="Events", lu
     for i in range(1, len(hists)):
       r = getRatio(hists[i][0], hists[i][1], sumW2[i], hists[0][0], hists[0][1], sumW2[0], color[i])
 
-    ax2.set_xlabel(xTitle, ha='right')
-    ax2.set_ylabel(ratioTitle, va='top')
+    ax2.set_xlabel(xTitle)
+    ax2.set_ylabel(ratioTitle)
     ax2.set_xlim((binning[1],binning[2]))
     ax2.set_ylim(ratioLimit)
     ax2.grid()
@@ -108,38 +108,3 @@ def plotShape(var, samples, weights, color, binning, xTitle, yTitle="Events", lu
     plt.savefig(fileName+".pdf")
     plt.savefig(fileName+".png")
     plt.close()
-
-#  elif type(samples) == tuple:
-#    if (unit == None) or (unit.lower() == 'gev'):
-#      hist, bins, patches = plt.hist(samples[0][var], bins=binning[0], range=(binning[1],binning[2]),\
-#                                     normed=normed, weights=samples[1], cumulative=False, bottom=None, histtype='step',\
-#                                     align='mid', orientation='vertical', rwidth=None, log=log, color=colors[0],\
-#                                     label=legend, stacked=False, hold=None, data=None)
-#    elif unit.lower() == "mev":
-#      hist, bins, patches = plt.hist(samples[0][var]*0.001, bins=binning[0], range=(binning[1],binning[2]),\
-#                                     normed=normed, weights=samples[1], cumulative=False, bottom=None, histtype='step',\
-#                                     align='mid', orientation='vertical', rwidth=None, log=log, color=colors[0],\
-#                                     label=legend, stacked=False, hold=None, data=None)
-#  elif type(samples) == list:
-#    if (unit == None) or (unit.lower() == 'gev'):
-#      hist, bins, patches = plt.hist([s[0][var] for s in samples], bins=binning[0], range=(binning[1],binning[2]),\
-#                                     normed=normed, weights=[s[1] for s in samples], cumulative=False, bottom=None, histtype='step',\
-#                                     align='mid', orientation='vertical', rwidth=None, log=log, color=[colors[i] for i in range(len(samples))],\
-#                                     label=legend, stacked=False, hold=None, data=None)
-#    elif unit.lower() == "mev":
-#      hist, bins, patches = plt.hist([s[0][var]*0.001 for s in samples], bins=binning[0], range=(binning[1],binning[2]),\
-#                                     normed=normed, weights=[s[1] for s in samples], cumulative=False, bottom=None, histtype='step',\
-#                                     align='mid', orientation='vertical', rwidth=None, log=log, color=[colors[i] for i in range(len(samples))],\
-#                                     label=legend, stacked=False, hold=None, data=None)
-#  plt.subplots_adjust(left=0.15)
-#  plt.xlabel(xTitle)
-#  if normed:
-#    plt.ylabel("a. u.")
-#  else:
-#    plt.ylabel(yTitle)
-#  plt.legend(legend, loc='best')
-#  if save:
-#    plt.savefig(fileName+".pdf")
-#    plt.savefig(fileName+".png")
-#    plt.close()
-#

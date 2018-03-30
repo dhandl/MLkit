@@ -5,7 +5,7 @@ import numpy as np
 from keras.models import Sequential, Model, load_model
 from keras.layers.core import Dense, Activation, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge, Dense, Dropout, Input, concatenate
+from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge, Dense, Dropout, Input, concatenate, Flatten, LeakyReLU
 from keras.regularizers import l2
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras import initializers
@@ -185,3 +185,42 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
 
   print "RNN finished!"
   return combined_rnn, history, y_predicted
+
+def trainCNN():
+  x = Input(shape=(images_train.shape[1:]))
+  h = Conv2D(32, kernel_size=7, strides=1)(x)
+  h = LeakyReLU()(h)
+  h = Dropout(0.2)(h)
+  
+  h = Conv2D(64, kernel_size=7, strides=1)(h)
+  h = LeakyReLU()(h)
+  h = Dropout(0.2)(h)
+  
+  h = Conv2D(128, kernel_size=5, strides=1)(h)
+  h = LeakyReLU()(h)
+  h = Dropout(0.2)(h)
+  
+  h = Conv2D(256, kernel_size=5, strides=1)(h)
+  h = LeakyReLU()(h)
+  h = Flatten()(h)
+  h = Dropout(0.2)(h)
+  y = Dense(1, activation='sigmoid')(h)
+  
+  cnn_model = Model(x, y)
+  cnn_model.compile('adam', 'binary_crossentropy', metrics=['acc'])
+  
+  cnn_model.summary()
+  
+  # cnn_model.fit(
+  #     images_train, labels_train,
+  #     epochs=100,
+  #     batch_size=512,
+  #     validation_data=(images_val, labels_val),
+  #     callbacks=[
+  #         EarlyStopping(verbose=True, patience=30, monitor='val_loss'),
+  #         ModelCheckpoint('./models/cnn-model.h5', monitor='val_loss',
+  #                         verbose=True, save_best_only=True)
+  #     ]
+  # )
+
+  return cnn, history, y_predicted

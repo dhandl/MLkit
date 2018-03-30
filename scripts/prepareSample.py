@@ -16,7 +16,7 @@ variables = [
               "n_lep", "lep_pt", "lep_eta", "lep_phi", "lep_e", "lep_charge",
               "n_hadtop_cand", "hadtop_cand_pt", "hadtop_cand_eta", "hadtop_cand_phi", "hadtop_cand_m",
               "n_hadw_cand", "hadw_cand_pt", "hadw_cand_eta", "hadw_cand_phi", "hadw_cand_m",
-              "met", "mt", "ht", "met_sig", "ht_sig", "amt2", "mt2stop", "mT2tauLooseTau_GeV",
+              "met", "met_phi", "mt", "ht", "met_sig", "ht_sig", "amt2", "mt2stop", "mT2tauLooseTau_GeV",
               "dphi_jet0_ptmiss", "dphi_jet1_ptmiss", "dphi_jet2_ptmiss", "dphi_jet3_ptmiss",
               "dphi_min_ptmiss",
               "dphi_met_lep",
@@ -27,7 +27,7 @@ variables = [
               #"deta_jet_jet_min", "deta_jet_jet_max", "deta_lep_jet_min", "deta_lep_jet_max",
               "ttbar_m", "ttbar_pt", "dphi_ttbar", "dphi_leptop_met", "dphi_hadtop_met",
               #"m_jet1_jet2", "m_jet_jet_min", "m_jet_jet_max",
-              "RJR_RISR", "RJR_MS", "RJR_PTISR", "RJR_nBJet",
+              #"RJR_RISR", "RJR_MS", "RJR_PTISR", "RJR_nBJet",
               "stxe_trigger", "el_trigger", "mu_trigger", "lep_trig_req",
               "event_number", "run_number", "lumi_block", "mc_channel_number", "bcid",
               "tt_cat",
@@ -109,15 +109,15 @@ def main():
         if i%100000==0:
           print i
         if first:
-          fDest2 =fDest.replace(".root","_"+str(i/500000)+".root")
+          fDest2 =fDest.replace(".root","_"+str(i/100000)+".root")
           fCopy = ROOT.TFile(fDest2, "RECREATE")
           fCopy.cd()
           tCopy = t.CloneTree(0)
           first = False
-        if i%500000==0 and i!=0:
+        if i%100000==0 and i!=0:
           fCopy.Write()
           fCopy.Close()
-          fDest2 =fDest.replace(".root","_"+str(i/500000)+".root")
+          fDest2 =fDest.replace(".root","_"+str(i/100000)+".root")
           fCopy = ROOT.TFile(fDest2, "RECREATE")
           fCopy.cd()
           tCopy = t.CloneTree(0)
