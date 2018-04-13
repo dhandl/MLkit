@@ -9,7 +9,7 @@ import h5py
 from root2pandas import root2pandas
 
 variables = [
-              'n_jet', 'jet_pt', 'jet_eta', 'jet_phi',
+              'n_jet', 'jet_pt', 'jet_eta', 'jet_phi', 'ht',
               'n_lep', 'lep_pt', 'lep_eta', 'lep_phi',
               'met', 'met_phi'
 ]
@@ -90,19 +90,25 @@ def main():
     for index, evt in df.iterrows():
       grid = np.zeros((nyPix, nxPix)) #Attention array is organized in (rows, cols) = (y,x)
 
+      # normalize the events according to total transverse activity 
+      meff = evt.met + evt.lep_pt[0] 
+      for i in range(evt.n_jet):
+        meff += evt.jet_pt[i]
+
       # met
       met_xbin = np.digitize(evt.met_phi, xBins)-1
       met_ybin = np.digitize(0., yBins)-1
       met_z = evt.met
-      if grid.shape[1] > met_xbin and grid.shape[0] > met_ybin:
-        grid[met_ybin][met_xbin] = met_z    
+      if grid.shape[1] > met_xbin:
+        # no eta information for met
+        grid[:,met_xbin] = met_z/meff    
 
       # lepton
       lep_xbin = np.digitize(evt.lep_phi[0], xBins)-1
       lep_ybin = np.digitize(evt.lep_eta[0], yBins)-1
       lep_z = evt.lep_pt[0]
       if grid.shape[1] > lep_xbin and grid.shape[0] > lep_ybin:
-        grid[lep_ybin][lep_xbin] = lep_z    
+        grid[lep_ybin][lep_xbin] += lep_z/meff    
   
       # jets
       for i in range(evt.n_jet):
@@ -110,7 +116,7 @@ def main():
         jet_ybin = np.digitize(evt.jet_eta[i], yBins)-1 #eta
         jet_z = evt.jet_pt[i]
         if grid.shape[1] > lep_xbin and grid.shape[0] > lep_ybin:
-          grid[jet_ybin][jet_xbin] = jet_z
+          grid[jet_ybin][jet_xbin] += jet_z/meff
   
       grids.append(grid)
     grids = np.array(grids)

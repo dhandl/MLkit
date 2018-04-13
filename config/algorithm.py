@@ -5,21 +5,21 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer5x64_batch16_GlorotNormalInitializer_dropout0p2',
+          'DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass',
           {
-          'layers':[64,64,64,64,64],
-          'ncycles':100,
-          'batchSize':16,
-          'dropout':0.2,
-          'optimizer':'ADAM',
+          'layers':[128,128,128],
+          'ncycles':50,
+          'batchSize':128,
+          'dropout':0.5,
+          'optimizer':'adam',
           'activation':'relu',
-          'initializer':'glorot_normal',
+          'initializer':'normal',
           'regularizer':0.01,
           'learningRate':0.01,
           'decay':0.0,
           'momentum':0.0,
           'nesterov':False,
-          'multiclassification':False
+          'multiclassification':True
           }
 ),
 Algorithm('BDT',

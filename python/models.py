@@ -10,6 +10,7 @@ from keras.regularizers import l2
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras import initializers
 from keras.optimizers import SGD
+from keras.utils import np_utils
 
 # scikit-learn
 from sklearn.preprocessing import StandardScaler, label_binarize
@@ -51,6 +52,13 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   scaler = StandardScaler()
   X_train = scaler.fit_transform(X_train)
   X_test = scaler.transform(X_test)
+  
+  class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
+  classes = len(np.bincount(y_train.astype(int)))
+
+  #create 'one-hot' vector for y
+  y_train = np_utils.to_categorical(y_train, classes)
+  y_test = np_utils.to_categorical(y_test, classes)
 
   model = Sequential()
   first = True
@@ -63,8 +71,8 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(Dropout(dropout))
     model.add(BatchNormalization())
   if multiclass:
-    model.add(Dense(len(np.bincount(y_train.astype(int))), activation='softmax'))
-    loss = 'sparse_categorical_crossentropy'
+    model.add(Dense(classes, activation='softmax'))
+    loss = 'categorical_crossentropy'
   else:
     model.add(Dense(1, activation='sigmoid'))
     loss = 'binary_crossentropy'
@@ -80,7 +88,6 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
 
   print model.summary()
   print "Training..."
-  class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
   try:
   #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
