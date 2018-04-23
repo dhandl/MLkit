@@ -5,6 +5,7 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 import timer
 from sklearn.externals import joblib
+import pickle
 
 sys.path.append("./python/plotting/")
 
@@ -22,22 +23,27 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     
     - modelDir Directory of model
     
-    - binning = [bins, start, stop]
+    - binning = [bins, start, stop] default: [50,0,1.]
     
     - save Save Files in ./plots/
     """
     t = timer.Timer()
     t.start()
     
+    #Load models
+    
     dataset = h5py.File(datasetDir)
     try:
+        pickleDir = modelDir.replace(".h5", "_history.pkl")
         model = load_model(modelDir)
         model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
         print("Neuronal Network detected")
     except IOError:
         model = joblib.load(modelDir)
         print("Boosted Decision Tree detected")
-        #return 0
+        return 0
+    
+    #Get the data and scale it, if necessary
     
     X_train = dataset["X_train"][:]
     X_test = dataset["X_test"][:]
@@ -61,17 +67,21 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     bkg_w_train = dataset["w_train"][y_train!=0]
     bkg_w_test = dataset["w_test"][y_test!=0]
     
-    plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save)
     
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, save=save)
+    #Do various plots
     
-    plt.figure()
+    #plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save)
+    
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, save=save)
+    
+    #plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, save=save)
     
-    #learning_curve_for_keras(?)
+    #plt.figure()   
+    #plot_learning_curve.learning_curve_for_keras(pickleDir, save=save)
     
-    plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save)
+    #plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save)
     
     # end timer and print time
     t.stop()
