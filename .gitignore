@@ -1,0 +1,16 @@
+*.pyc
+*~
+.*
+*.h5
+*.json
+*.yaml
+*.pdf
+*.png
+*.eps
+*.root
+TrainedModels
+TrainedModels/*
+config
+config/*
+
+
