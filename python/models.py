@@ -57,8 +57,8 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   classes = len(np.bincount(y_train.astype(int)))
 
   #create 'one-hot' vector for y
-  y_train = np_utils.to_categorical(y_train, classes)
-  y_test = np_utils.to_categorical(y_test, classes)
+  #y_train = np_utils.to_categorical(y_train, classes)
+  #y_test = np_utils.to_categorical(y_test, classes)
 
   model = Sequential()
   first = True
@@ -72,7 +72,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(classes, activation='softmax'))
-    loss = 'categorical_crossentropy'
+    loss = 'sparse_categorical_crossentropy'
   else:
     model.add(Dense(1, activation='sigmoid'))
     loss = 'binary_crossentropy'
