@@ -53,8 +53,12 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   X_train = scaler.fit_transform(X_train)
   X_test = scaler.transform(X_test)
   
-  class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
   classes = len(np.bincount(y_train.astype(int)))
+  if classWeight = 'balanced':
+    class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
+  if classWeight = 'SumOfWeights':
+    sumofweights = w_train.sum()
+    class_weight = sumofweights / (classes * np.bincount(y_train))
 
   #create 'one-hot' vector for y
   #y_train = np_utils.to_categorical(y_train, classes)
