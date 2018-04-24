@@ -10,6 +10,7 @@ from sklearn.model_selection import ShuffleSplit
 
 def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
                         n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+    
     """
     Generate a simple plot of the test and training learning curve.
 
@@ -58,6 +59,7 @@ def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
     plt.ylabel("Score")
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, scoring=scoring, n_jobs=n_jobs, train_sizes=train_sizes)
+    print(train_scores)
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -98,7 +100,7 @@ def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
 
 #plt.show()
 
-def learning_curve_for_keras(hist_pi, savedir='./', filename='learning_curve'):
+def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=False):
   with open(hist_pi, 'rb') as infile:
     history = pickle.load(infile)
   # list all data in history
@@ -110,16 +112,24 @@ def learning_curve_for_keras(hist_pi, savedir='./', filename='learning_curve'):
   plt.ylabel('accuracy')
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
-  plt.savefig(os.path.join(savedir,filename+'_acc.pdf'))
-  plt.savefig(os.path.join(savedir,filename+'_acc.png'))
-  plt.close()
+  if save:
+    if not os.path.exists("plots/"):
+        os.makedirs("plots/")
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.pdf'))
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.png'))
+    plt.close()
   # summarize history for loss
+  plt.figure()
   plt.plot(history['loss'])
   plt.plot(history['val_loss'])
   plt.title('model loss')
   plt.ylabel('loss')
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
-  plt.savefig(os.path.join(savedir,filename+'_loss.pdf'))
-  plt.savefig(os.path.join(savedir,filename+'_loss.png'))
-  plt.close()
+  if save:
+    if not os.path.exists("./plots/"):
+        os.makedirs("./plots/")
+        print("Creating folder plots")
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.pdf'))
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.png'))
+    plt.close()

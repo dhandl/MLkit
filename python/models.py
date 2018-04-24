@@ -94,9 +94,13 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   print "Training..."
   try:
   #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True, class_weight={i:class_weight[i] for i in range(len(class_weight))}, validation_data=(X_test,y_test), callbacks = [EarlyStopping(verbose=True, patience=20)])
+    #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
+              #class_weight={i:class_weight[i] for i in range(len(class_weight))},
+              #sample_weight=w_train, validation_data=(X_test,y_test,w_test),
+              #callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
               class_weight={i:class_weight[i] for i in range(len(class_weight))},
-              sample_weight=w_train, validation_data=(X_test,y_test,w_test),
+              sample_weight=None, validation_data=(X_test,y_test,None),
               callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
   except KeyboardInterrupt:
     print '--- Training ended early ---'

@@ -2,6 +2,7 @@ import os
 
 from separation import getSeparation
 from getRatio import getRatio
+from getSumW2 import getSumW2
 # arrays
 import numpy as np
 import pandas as pd
@@ -13,7 +14,7 @@ from scipy.stats import ks_2samp
 import matplotlib
 import matplotlib.pyplot as plt
 
-def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="KS_test", normed=False, save=False, ratio=True):
+def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="Test", normed=False, save=False, ratio=True):
   fig = plt.figure(figsize=(8,6))
   if ratio:
     ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)
@@ -25,11 +26,11 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ax1.xaxis.set_ticks_position('both')
   ax1.yaxis.set_ticks_position('both')
 
-  s_histTrain, s_binsTrain, s_patchesTrain = plt.hist(sig_predicted_train.ravel(), weights=sig_w_train, histtype='stepfilled', color='r', label='Signal (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), normed=normed)
-  b_histTrain, b_binsTrain, b_patchesTrain = plt.hist(bkg_predicted_train.ravel(), weights=bkg_w_train, histtype='stepfilled', color='b', label='Background (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), normed=normed)
+  s_histTrain, s_binsTrain, s_patchesTrain = plt.hist(sig_predicted_train.ravel(), weights=sig_w_train, histtype='stepfilled', color='r', label='Signal (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  b_histTrain, b_binsTrain, b_patchesTrain = plt.hist(bkg_predicted_train.ravel(), weights=bkg_w_train, histtype='stepfilled', color='b', label='Background (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
 
-  s_histTest, s_binsTest = np.histogram(sig_predicted_test.ravel(), weights=sig_w_test, bins=binning[0], range=(binning[1], binning[2]), normed=normed)
-  b_histTest, b_binsTest = np.histogram(bkg_predicted_test.ravel(), weights=bkg_w_test, bins=binning[0], range=(binning[1], binning[2]), normed=normed)
+  s_histTest, s_binsTest = np.histogram(sig_predicted_test.ravel(), weights=sig_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  b_histTest, b_binsTest = np.histogram(bkg_predicted_test.ravel(), weights=bkg_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
 
   width = (s_binsTrain[1] - s_binsTrain[0])
   center = (s_binsTrain[:-1] + s_binsTrain[1:]) / 2
@@ -39,6 +40,9 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ks_sig, ks_sig_p = ks_2samp(s_histTrain, s_histTest)
   ks_bkg, ks_bkg_p = ks_2samp(b_histTrain, b_histTest)
   #sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
+
+  s_w_test = getSumW2(sig_predicted_test.ravel(), sig_w_test, binning)
+  b_w_test = getSumW2(bkg_predicted_test.ravel(), bkg_w_test, binning)
 
   #print sep
   if normed:
@@ -54,7 +58,7 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
 
   if ratio:
     ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)
-    getRatio(s_histTest, s_binsTest, b_histTest, b_binsTest)
+    getRatio(s_histTest, s_binsTest, s_w_test, b_histTest, b_binsTest, b_w_test, 'r')
     ax2.set(xlabel='Output score', ylabel='S/B')
     ax2.set_xlim((binning[1],binning[2]))
     ax2.set_ylim((0,2))
@@ -66,7 +70,10 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ax1.set(xlabel='Output score')
 
   if save:
-    plt.savefig(fileName+".pdf")
-    plt.savefig(fileName+".png")
+    if not os.path.exists("./plots/"):
+        os.makedirs("./plots/")
+        print("Creating folder plots")
+    plt.savefig("plots/"+fileName+"_TrainTestScore.pdf")
+    plt.savefig("plots/"+fileName+"_TrainTestScore.png")
     plt.close()
 
