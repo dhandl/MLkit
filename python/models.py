@@ -45,7 +45,7 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   print "BDT finished!"
   return model, y_predicted
 
-def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='SumOfWeights', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
+def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='balanced', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
   print "Performing a Deep Neural Net!"
 
   print 'Standardize training set...'
