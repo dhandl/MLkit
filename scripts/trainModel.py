@@ -180,7 +180,7 @@ def main():
   elif (opts.analysis.lower() == 'nn'):
     model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
                                      alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
-                                     alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'],  
+                                     alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
                                      alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
                                      alg.options['nesterov'], alg.options['multiclassification'])
 

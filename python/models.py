@@ -45,7 +45,7 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   print "BDT finished!"
   return model, y_predicted
 
-def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
+def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='SumOfWeights', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
   print "Performing a Deep Neural Net!"
 
   print 'Standardize training set...'
@@ -54,11 +54,15 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   X_test = scaler.transform(X_test)
   
   classes = len(np.bincount(y_train.astype(int)))
-  if classWeight = 'balanced':
-    class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
-  if classWeight = 'SumOfWeights':
+  if classWeight.lower() == 'balanced':
+    w = compute_class_weight('balanced', np.unique(y_train), y_train)
+    class_weight={i:w[i] for i in range(len(w))}
+  elif classWeight.lower() == 'sumsfweights':
     sumofweights = w_train.sum()
-    class_weight = sumofweights / (classes * np.bincount(y_train))
+    w = sumofweights / (classes * np.bincount(y_train))
+    class_weight={i:w[i] for i in range(len(w))}
+  else:
+    class_weight = None
 
   #create 'one-hot' vector for y
   #y_train = np_utils.to_categorical(y_train, classes)
@@ -99,7 +103,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
               #sample_weight=w_train, validation_data=(X_test,y_test,w_test),
               #callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
-              class_weight={i:class_weight[i] for i in range(len(class_weight))},
+              class_weight=class_weight,
               sample_weight=None, validation_data=(X_test,y_test,None),
               callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
   except KeyboardInterrupt:
