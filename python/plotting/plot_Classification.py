@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 #def plot_classification(y_true, y_predict, save=False, fileName="Class_test"):
     #y_predict_class = np.argmax(y_predict, axis=1)
@@ -38,7 +39,7 @@ import numpy as np
         #plt.savefig("plots/"+fileName+".png")
         #plt.close()
     
-def plot_classification(y_true, y_predict, save=False, fileName="Class_test"):
+def plot_classification(y_true, y_predict, fileName="Test", save=False):
     y_predict_class = np.argmax(y_predict, axis=1)
     classes = [0,1,2,3] #Different classes
     assignal = []
@@ -90,6 +91,9 @@ def plot_classification(y_true, y_predict, save=False, fileName="Class_test"):
     #plt.gca().set_ylim([0,1.2])
     
     if save:
-        plt.savefig("plots/"+fileName+".pdf")
-        plt.savefig("plots/"+fileName+".png")
+        if not os.path.exists("./plots/"):
+            os.makedirs("./plots/")
+            print("Creating folder plots")
+        plt.savefig("plots/"+fileName+"_Classification.pdf")
+        plt.savefig("plots/"+fileName+"_Classification.png")
         plt.close()

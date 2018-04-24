@@ -2,6 +2,7 @@ import itertools
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def draw_confusion_matrix(cm, classes,
                           normalize=False,
@@ -42,12 +43,15 @@ def draw_confusion_matrix(cm, classes,
     fig.set_size_inches(9., 7.)
     
     if save:
-        plt.savefig("plots/"+fileName+".pdf")
-        plt.savefig("plots/"+fileName+".png")
+        if not os.path.exists("./plots/"):
+            os.makedirs("./plots/")
+            print("Creating folder plots")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix.pdf")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix.png")
         plt.close()
     
     
-def plot_confusion_matrix(y_true, y_predict,save=False):
+def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False):
     """
     Plotting (and printing) the confusion matrix
     """
@@ -57,4 +61,4 @@ def plot_confusion_matrix(y_true, y_predict,save=False):
     
     draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'],
                       normalize=True,
-                      title='Normalized Confusion matrix',save=save)
+                      title='Normalized Confusion matrix',save=save,fileName=filename)

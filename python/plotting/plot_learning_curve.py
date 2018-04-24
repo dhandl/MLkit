@@ -100,7 +100,7 @@ def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
 
 #plt.show()
 
-def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='learning_curve',save=False):
+def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=False):
   with open(hist_pi, 'rb') as infile:
     history = pickle.load(infile)
   # list all data in history
@@ -113,8 +113,10 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='learning_cur
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
   if save:
-    plt.savefig(os.path.join(savedir,filename+'_acc.pdf'))
-    plt.savefig(os.path.join(savedir,filename+'_acc.png'))
+    if not os.path.exists("plots/"):
+        os.makedirs("plots/")
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.pdf'))
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.png'))
     plt.close()
   # summarize history for loss
   plt.figure()
@@ -125,6 +127,9 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='learning_cur
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
   if save:
-    plt.savefig(os.path.join(savedir,filename+'_loss.pdf'))
-    plt.savefig(os.path.join(savedir,filename+'_loss.png'))
+    if not os.path.exists("./plots/"):
+        os.makedirs("./plots/")
+        print("Creating folder plots")
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.pdf'))
+    plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.png'))
     plt.close()

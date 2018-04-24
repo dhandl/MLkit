@@ -19,9 +19,9 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     """
     Plot all important things
     
-    - datasetDir Directory of dataset
+    - datasetDir: Directory of dataset
     
-    - modelDir Directory of model
+    - modelDir: Directory of model
     
     - binning = [bins, start, stop] default: [50,0,1.]
     
@@ -33,6 +33,7 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     #Load models
     
     dataset = h5py.File(datasetDir)
+    filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","")
     try:
         pickleDir = modelDir.replace(".h5", "_history.pkl")
         model = load_model(modelDir)
@@ -70,18 +71,18 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     
     #Do various plots
     
-    plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save)
+    plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
     
     plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, save=save)
+    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, filename=filenames, save=save)
     
     plt.figure()
-    plot_Classification.plot_classification(y_test, y_predict_test, save=save)
+    plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
     
     plt.figure()   
-    plot_learning_curve.learning_curve_for_keras(pickleDir, save=save)
+    plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
     
-    plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save)
+    plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
     # end timer and print time
     t.stop()

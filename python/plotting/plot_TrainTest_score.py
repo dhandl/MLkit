@@ -14,7 +14,7 @@ from scipy.stats import ks_2samp
 import matplotlib
 import matplotlib.pyplot as plt
 
-def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="KS_test", normed=False, save=False, ratio=True):
+def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="Test", normed=False, save=False, ratio=True):
   fig = plt.figure(figsize=(8,6))
   if ratio:
     ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)
@@ -70,7 +70,10 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ax1.set(xlabel='Output score')
 
   if save:
-    plt.savefig("plots/"+fileName+".pdf")
-    plt.savefig("plots/"+fileName+".png")
+    if not os.path.exists("./plots/"):
+        os.makedirs("./plots/")
+        print("Creating folder plots")
+    plt.savefig("plots/"+fileName+"_TrainTestScore.pdf")
+    plt.savefig("plots/"+fileName+"_TrainTestScore.png")
     plt.close()
 

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 import AtlasStyle_mpl
 
-def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileName="Output_Test", normed=False, save=False, ratio=True):
+def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileName="Test", normed=False, save=False, ratio=True):
   fig = plt.figure(figsize=(8,6))
   if ratio:
     ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)
@@ -66,7 +66,10 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   ax1.set(xlabel='Output score')
 
   if save:
-    plt.savefig("plots/"+fileName+".pdf")
-    plt.savefig("plots/"+fileName+".png")
+    if not os.path.exists("./plots/"):
+        os.makedirs("./plots/")
+        print("Creating folder plots")
+    plt.savefig("plots/"+fileName+"_output_score.pdf")
+    plt.savefig("plots/"+fileName+"_output_score.png")
     plt.close()
   return r, s_bins
