@@ -26,7 +26,7 @@ def getModel(models, modeltype):
   try:
     return model
   except NameError:
-    sys.exit("Type {} not found in config/algorithm.py!".format(modeltype))
+    sys.exit('Type {} not found in config/algorithm.py!'.format(modeltype))
 
 def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
   # Print number of weighted and unweighted events
@@ -41,8 +41,8 @@ def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
         ns_w += w_train[i]
     ns_train = ns; nsw_tain = ns_w
     nb_train = nb; nbw_train = nb_w
-    print "Number of unweighted training events (sig/bkg): %0.2f / %0.2f"%(ns, nb)
-    print "Number of weighted training events (sig/bkg): %0.2f / %0.2f"%(ns_w, nb_w)
+    print 'Number of unweighted training events (sig/bkg): %0.2f / %0.2f'%(ns, nb)
+    print 'Number of weighted training events (sig/bkg): %0.2f / %0.2f'%(ns_w, nb_w)
     for i in range(0, len(y_test)):
       if (y_test[i]<0.5):
         nb += 1.
@@ -61,8 +61,8 @@ def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
         ns_w += w_train[i]
     ns_train = ns; nsw_tain = ns_w
     nb_train = nb; nbw_train = nb_w
-    print "Number of unweighted training events (sig/bkg): %0.2f / %0.2f"%(ns, nb)
-    print "Number of weighted training events (sig/bkg): %0.2f / %0.2f"%(ns_w, nb_w)
+    print 'Number of unweighted training events (sig/bkg): %0.2f / %0.2f'%(ns, nb)
+    print 'Number of weighted training events (sig/bkg): %0.2f / %0.2f'%(ns_w, nb_w)
     for i in range(0, len(y_test)):
       if (y_test[i]>0.5):
         nb += 1.
@@ -71,9 +71,9 @@ def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
         ns += 1.
         ns_w += w_test[i]
 
-  print "Total unweighted events (sig/bkg): %0.2f / %0.2f"%(ns, nb)
-  print "Total weighted events (sig/bkg): %0.2f / %0.2f"%(ns_w, nb_w)
-  print "Ratio of training-to-testing samples (sig/bkg): %0.2f / %0.2f"%(ns_train/ns, nb_train/nb)
+  print 'Total unweighted events (sig/bkg): %0.2f / %0.2f'%(ns, nb)
+  print 'Total weighted events (sig/bkg): %0.2f / %0.2f'%(ns_w, nb_w)
+  print 'Ratio of training-to-testing samples (sig/bkg): %0.2f / %0.2f'%(ns_train/ns, nb_train/nb)
 
 def saveModel(model, modelDir, weightDir, modelName, alg):
   print 'Saving model {} and weights...'.format(alg)
@@ -84,11 +84,52 @@ def saveModel(model, modelDir, weightDir, modelName, alg):
     model.save(os.path.join(modelDir,modelName+'.h5'), overwrite=True)
     model.save_weights(os.path.join(weightDir,modelName+'_weights.h5'), overwrite=True)
     # save as JSON
-    json_string = model.to_json()
-    open(os.path.join(modelDir,modelName+'.json'), 'w').write(json_string)
+    #json_string = model.to_json()
+    #open(os.path.join(modelDir,modelName+'.json'), 'w').write(json_string)
     # save as YAML
-    yaml_string = model.to_yaml()
-    open(os.path.join(modelDir,modelName+'.yaml'), 'w').write(json_string)
+    #yaml_string = model.to_yaml()
+    #open(os.path.join(modelDir,modelName+'.yaml'), 'w').write(json_string)
+    
+def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isignal, Ibackground, Ialgorithmparams, Itrainsize, Itestsize, Ireproduce, Imulticlass):
+    '''
+    Imodel: Name of the model.h5 file
+    Ianalysis: Used Method, e.g. BDT, DNN
+    Ialgorithmparams: Parametes of used analysis method
+    Imulticlass: Multiclassification (boolean)
+    Idataset: Name of the dataset.h5 file
+    Ivariables: Variables used for training
+    Ipreselection: Used cuts in preselection
+    Ilumi: Luminosity
+    Isignal: Used signal files for dataset
+    Ibackground: Used background files for datset
+    Itrainsize: Size of trainset (float)
+    Itestsize: Size of testset (float)
+    Ireproduce: Repdroduce (boolean)
+    '''
+    print('Saving model informations in infofile...')
+    filepath = './TrainedModels/models/' + Imodel + '_infofile.txt'
+    infofile = open(filepath, 'w')
+    infofile.write('Used analysis method: ' + Ianalysis + '\n')
+    infofile.write('Used parameters for this analysis algorithm: ' + Ialgorithmparams + '\n')
+    infofile.write('Used multiclass: ' + str(Imulticlass) + '\n')
+    infofile.write('Used dataset: ' + Idataset + '\n')
+    infofile.write('Used variables for training: ' + Ivariables + '\n')
+    presels = ''
+    for pre in Ipreselection:
+        presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + '; '
+    infofile.write('Used preselection: ' + presels + '\n')
+    infofile.write('Used Lumi: ' + str(Ilumi) + '\n')
+    sigs = ''
+    for sig in Isignal:
+        sigs += sig['name'] + '; '
+    infofile.write('Used signal files: ' + sigs + '\n')
+    bkgs = ''
+    for bkg in Ibackground:
+        bkgs += bkg['name'] + '; '
+    infofile.write('Used background files:' + bkgs + '\n')
+    infofile.write('Used trainsize/testsize: ' + str(Itrainsize) + '/' + str(Itestsize) + '\n')
+    infofile.write('Used reproduce: ' + str(Ireproduce) + '\n')
+    infofile.close()
 
 def runtimeSummary(t0):
   hour = t0 // 3600
@@ -108,12 +149,12 @@ def parse_options():
   output = os.path.join(workdir, 'TrainedModels')
 
   parser = argparse.ArgumentParser()
-  #parser.add_argument('-C', '--config', help="Config file", default="python/loadConfig.py")
-  parser.add_argument('-a', '--analysis', help="Name of the algorithm to run" , default="NN")
-  parser.add_argument('-d', '--dataset', help="Name of the dataset file")
-  parser.add_argument('-m', '--multiclass', help="Multi-Classification (True/False)" , default=False, type=bool)
-  parser.add_argument('-n', '--name', help="Name of the output files")
-  parser.add_argument('-o', '--output', help="Directory for output files" , default=output)
+  #parser.add_argument('-C', '--config', help='Config file', default='python/loadConfig.py')
+  parser.add_argument('-a', '--analysis', help='Name of the algorithm to run' , default='NN')
+  parser.add_argument('-d', '--dataset', help='Name of the dataset file')
+  parser.add_argument('-m', '--multiclass', help='Multi-Classification (True/False)' , default=False, type=bool)
+  parser.add_argument('-n', '--name', help='Name of the output files')
+  parser.add_argument('-o', '--output', help='Directory for output files' , default=output)
   parser.add_argument('-r', '--reproduce', help='Constant seed for reproducabilty', default=False, type=bool)
   parser.add_argument('-t', '--trainsize', help='Size of training data. Both (float/int) possible', default=None)
   parser.add_argument('-u', '--testsize', help='Size of test data. Both (float/int) possible', default=None)
@@ -132,7 +173,7 @@ def parse_options():
     os.makedirs(opts.dataDir)
 
   if not opts.name:
-    opts.name =  datetime.now().strftime("%Y-%m-%d_%H-%M_")
+    opts.name =  datetime.now().strftime('%Y-%m-%d_%H-%M_')
 
   if type(opts.trainsize) is str: 
     if '.' in opts.trainsize:
@@ -147,6 +188,8 @@ def parse_options():
         
   return opts
 
+
+
 def main():
   # define timer to check how long the job runs
   t = timer.Timer()
@@ -154,7 +197,7 @@ def main():
 
   opts = parse_options()
 
-  print "Loading configuration..."
+  print 'Loading configuration...'
   from variables import preselection, lumi, nvar, weight
   from samples import Signal, Background
   from algorithm import analysis
@@ -164,7 +207,7 @@ def main():
   
   dataset = os.path.join(opts.dataDir,opts.dataset+'.h5')
   
-  print "Creating training and test set!"
+  print 'Creating training and test set!'
   if (opts.analysis.lower() == 'rnn'):
     X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
     
@@ -200,6 +243,8 @@ def main():
       pickle.dump(history.history, hist_pi)
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
+  
+  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ''.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass)
 
   # end timer and print time
   t.stop()
