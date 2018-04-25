@@ -47,11 +47,6 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
 
 def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='SumOfWeights', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
   print "Performing a Deep Neural Net!"
-
-  print 'Standardize training set...'
-  scaler = StandardScaler()
-  X_train = scaler.fit_transform(X_train)
-  X_test = scaler.transform(X_test)
   
   classes = len(np.bincount(y_train.astype(int)))
   if classWeight.lower() == 'balanced':
@@ -104,7 +99,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
               #callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
               class_weight=class_weight,
-              sample_weight=None, validation_data=(X_test,y_test,None),
+              sample_weight=w_train, validation_data=(X_test,y_test,w_test),
               callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
   except KeyboardInterrupt:
     print '--- Training ended early ---'
@@ -135,10 +130,10 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
 
   if mergeModels:
     print 'Going to merge sequence model with common NN!'
-    print 'Standardize training set...'
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    #print 'Standardize training set...'
+    #scaler = StandardScaler()
+    #X_train = scaler.fit_transform(X_train)
+    #X_test = scaler.transform(X_test)
 
     model_inputs = Input(shape=(X_train.shape[1], ))
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)

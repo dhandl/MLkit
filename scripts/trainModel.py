@@ -15,6 +15,7 @@ from prepareSequentialTraining import prepareSequentialTraining
 from models import trainBDT, trainNN, trainRNN
 
 from sklearn.externals import joblib
+from sklearn.preprocessing import StandardScaler
 
 from startPlot import startPlot
 
@@ -197,6 +198,7 @@ def main():
   # define timer to check how long the job runs
   t = timer.Timer()
   t.start()
+  
 
   opts = parse_options()
 
@@ -224,6 +226,12 @@ def main():
                              opts.reproduce)
 
   elif (opts.analysis.lower() == 'nn'):
+      
+    print 'Standardize training and test set...'
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)  
+      
     model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
                                      alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
@@ -234,6 +242,13 @@ def main():
       pickle.dump(history.history, hist_pi)
 
   elif (opts.analysis.lower() == 'rnn'):
+      
+    if mergeModels:
+        print 'Standardize training set...'
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+    
     model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
                                       alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
                                       alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
@@ -248,6 +263,12 @@ def main():
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
   
   saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ''.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass)
+  
+  try:
+    print('Saving Scaler to file...')
+    joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
+  except NameError:
+      print('No Scaler found')
 
   # end timer and print time
   t.stop()
