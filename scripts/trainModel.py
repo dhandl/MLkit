@@ -262,7 +262,7 @@ def main():
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
   
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ''.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass)
+  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass)
   
   try:
     print('Saving Scaler to file...')
