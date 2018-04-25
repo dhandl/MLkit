@@ -45,7 +45,7 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   print "BDT finished!"
   return model, y_predicted
 
-def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='balanced', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
+def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='SumOfWeights', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False):
   print "Performing a Deep Neural Net!"
 
   print 'Standardize training set...'
@@ -57,7 +57,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   if classWeight.lower() == 'balanced':
     w = compute_class_weight('balanced', np.unique(y_train), y_train)
     class_weight={i:w[i] for i in range(len(w))}
-  elif classWeight.lower() == 'sumsfweights':
+  elif classWeight.lower() == 'SumOfWeights':
     sumofweights = w_train.sum()
     w = sumofweights / (classes * np.bincount(y_train))
     class_weight={i:w[i] for i in range(len(w))}

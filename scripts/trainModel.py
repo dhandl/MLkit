@@ -16,6 +16,8 @@ from models import trainBDT, trainNN, trainRNN
 
 from sklearn.externals import joblib
 
+from startPlot import startPlot
+
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
@@ -158,6 +160,7 @@ def parse_options():
   parser.add_argument('-r', '--reproduce', help='Constant seed for reproducabilty', default=False, type=bool)
   parser.add_argument('-t', '--trainsize', help='Size of training data. Both (float/int) possible', default=None)
   parser.add_argument('-u', '--testsize', help='Size of test data. Both (float/int) possible', default=None)
+  parser.add_argument('-p', '--plot', help='Plotting the output (True/False)', default=False,type=bool)
 
   opts = parser.parse_args()
 
@@ -251,6 +254,10 @@ def main():
   t0 = t.elapsed
   t.reset()
   runtimeSummary(t0)
+  
+  if opts.plot:
+    print('Start Plotting...')
+    startPlot(os.path.join('TrainedModels/datasets',opts.dataset+'.h5'),os.path.join('TrainedModels/models',opts.name+'.h5'),save=True)
   
 if __name__ == '__main__':
   main()
