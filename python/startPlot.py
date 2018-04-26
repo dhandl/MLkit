@@ -16,12 +16,10 @@ import plot_Classification2
 import plot_learning_curve
 import plot_output_score
 
-def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
+def startPlot(modelDir, binning=[50,0,1.], save=False):
     """
     Plot all important things
-    
-    - datasetDir: Directory of dataset
-    
+        
     - modelDir: Directory of model
     
     - binning = [bins, start, stop] default: [50,0,1.]
@@ -33,8 +31,19 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
     
     #Load models
     
+    print("Loading dataset...")
+    
+    infofile = open(modelDir.replace(".h5","_infofile.txt"))
+    datasetDir = "TrainedModels/datasets/" + infofile.readlines()[3].replace("Used dataset: ", "").replace("\n","") + ".h5"
+    
     dataset = h5py.File(datasetDir)
+    
     filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","")
+    
+    print("Using dataset from:", datasetDir)
+    
+    print("Loading model...")
+    
     try:
         pickleDir = modelDir.replace(".h5", "_history.pkl")
         model = load_model(modelDir)
