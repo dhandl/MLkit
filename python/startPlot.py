@@ -40,6 +40,7 @@ def startPlot(datasetDir, modelDir, binning=[50,0,1.], save=False):
         model = load_model(modelDir)
         model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
         print("Neuronal Network detected")
+        print("Scaling and reading values...")
     except IOError:
         model = joblib.load(modelDir)
         print("Boosted Decision Tree detected")

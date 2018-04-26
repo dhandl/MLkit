@@ -15,6 +15,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="Test", normed=False, save=False, ratio=True):
+  print('Plotting the train/test score...')
   fig = plt.figure(figsize=(8,6))
   if ratio:
     ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)
@@ -52,7 +53,7 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   leg = plt.legend(loc="best", frameon=False)
   p = leg.get_window_extent()
   #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
-  ax1.text(0.65, 0.7, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax1.transAxes)
+  ax1.text(0.65, 0.66, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax1.transAxes) #Former y=0.7
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
 

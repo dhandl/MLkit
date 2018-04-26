@@ -40,6 +40,7 @@ import os
         #plt.close()
     
 def plot_classification(y_true, y_predict, fileName="Test", save=False):
+    print('Plotting the classification for true labels...')
     y_predict_class = np.argmax(y_predict, axis=1)
     classes = [0,1,2,3] #Different classes
     assignal = []

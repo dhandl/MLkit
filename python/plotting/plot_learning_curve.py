@@ -101,10 +101,11 @@ def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
 #plt.show()
 
 def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=False):
+  print('Plotting the learning curve...')
   with open(hist_pi, 'rb') as infile:
     history = pickle.load(infile)
   # list all data in history
-  print(history.keys())
+  print('Keys of history file:', history.keys())
   # summarize history for accuracy
   plt.plot(history['acc'])
   plt.plot(history['val_acc'])

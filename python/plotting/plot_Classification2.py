@@ -3,6 +3,7 @@ import numpy as np
 import os
 
 def plot_classification_2(y_true, y_predict, fileName="Test", save=False):
+    print('Plotting the classification for predicted labels...')
     y_predict_class = np.argmax(y_predict, axis=1)
     classes = [0,1,2,3] #Different classes
     issignal = []
@@ -45,7 +46,7 @@ def plot_classification_2(y_true, y_predict, fileName="Test", save=False):
     plt.xlabel('Predicted Class')
     plt.legend(loc='best')
     plt.xticks(np.arange(4),(r'Signal',r'$t\overline{t}$',r'Single Top','$W$ + jets'))
-    plt.title('Classification 2')
+    plt.title('Classification')
     
     box = plt.gca().get_position()
     plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])

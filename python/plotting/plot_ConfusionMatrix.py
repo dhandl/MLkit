@@ -33,7 +33,7 @@ def draw_confusion_matrix(cm, classes,
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, format(cm[i, j], fmt),
                  horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+                 color="white" if cm[i, j] > thresh else "black", fontsize=14)
 
     plt.tight_layout()
     plt.ylabel('True label')
@@ -55,6 +55,7 @@ def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False):
     """
     Plotting (and printing) the confusion matrix
     """
+    print('Plotting the confusion matrix...')
     yhat_cls = np.argmax(y_predict, axis=1)
     cnf_matrix = confusion_matrix(y_true, yhat_cls)
     np.set_printoptions(precision=2)
