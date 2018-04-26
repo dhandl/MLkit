@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import matplotlib.patches as mpatches
 
 #def plot_classification(y_true, y_predict, save=False, fileName="Class_test"):
     #y_predict_class = np.argmax(y_predict, axis=1)
@@ -48,6 +49,8 @@ def plot_classification(y_true, y_predict, fileName="Test", save=False):
     assinglet = []
     asWjets = []
     
+    explain_patch = mpatches.Patch(color='None', label="predicted label")
+    
     for i in range(0,4):
         n = float(y_predict_class[y_true==i].shape[0])
 
@@ -75,19 +78,19 @@ def plot_classification(y_true, y_predict, fileName="Test", save=False):
             
     width=1.
     
-    plt.bar(classes, assignal, width, label=r'Signal')
-    plt.bar(classes, astt, width, bottom=assignal, label=r'$t\overline{t}$')
-    plt.bar(classes, assinglet, width, bottom=np.array(astt)+np.array(assignal), label=r'Single Top')
-    plt.bar(classes, asWjets, width, bottom=np.array(assinglet)+np.array(astt)+np.array(assignal), label='$W$ + jets')
+    bar0 = plt.bar(classes, assignal, width, label=r'Signal')
+    bar1 = plt.bar(classes, astt, width, bottom=assignal, label=r'$t\overline{t}$')
+    bar2 = plt.bar(classes, assinglet, width, bottom=np.array(astt)+np.array(assignal), label=r'Single Top')
+    bar3 = plt.bar(classes, asWjets, width, bottom=np.array(assinglet)+np.array(astt)+np.array(assignal), label='$W$ + jets')
     
-    plt.xlabel('True Class')
-    plt.legend(loc='best')
+    plt.xlabel('true label')
+    #plt.legend(loc='best',handles=[explain_patch, bar0, bar1, bar2, bar3])
     plt.xticks(np.arange(4),(r'Signal',r'$t\overline{t}$',r'Single Top','$W$ + jets'))
     plt.title('Classification')
     
     box = plt.gca().get_position()
     plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    plt.gca().legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.gca().legend(loc='center left', bbox_to_anchor=(1, 0.5),handles=[explain_patch, bar0, bar1, bar2, bar3])
     
     #plt.gca().set_ylim([0,1.2])
     

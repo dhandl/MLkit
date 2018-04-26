@@ -36,8 +36,8 @@ def draw_confusion_matrix(cm, classes,
                  color="white" if cm[i, j] > thresh else "black", fontsize=14)
 
     plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+    plt.ylabel('true label')
+    plt.xlabel('predicted label')
     
     fig = plt.gcf()
     fig.set_size_inches(9., 7.)
@@ -62,4 +62,4 @@ def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False):
     
     draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'],
                       normalize=True,
-                      title='Normalized Confusion matrix',save=save,fileName=filename)
+                      title='Normalized Confusion Matrix',save=save,fileName=filename)
