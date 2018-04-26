@@ -278,7 +278,7 @@ def main():
   
   if opts.plot:
     print('Start Plotting...')
-    startPlot(os.path.join('TrainedModels/datasets',opts.dataset+'.h5'),os.path.join('TrainedModels/models',opts.name+'.h5'),save=True)
+    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True)
   
 if __name__ == '__main__':
   main()

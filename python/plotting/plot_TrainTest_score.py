@@ -14,6 +14,9 @@ from scipy.stats import ks_2samp
 import matplotlib
 import matplotlib.pyplot as plt
 
+#dummy object for KS Test in legend
+import matplotlib.patches as mpatches
+
 def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName="Test", normed=False, save=False, ratio=True):
   print('Plotting the train/test score...')
   fig = plt.figure(figsize=(8,6))
@@ -35,8 +38,8 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
 
   width = (s_binsTrain[1] - s_binsTrain[0])
   center = (s_binsTrain[:-1] + s_binsTrain[1:]) / 2
-  plt.errorbar(center, s_histTest, fmt='o', c='r', label='Signal (Testing)') # TODO define yerr = sqrt( sum w^2 ) per bin!
-  plt.errorbar(center, b_histTest, fmt='o', c='b', label='Background (Testing)') # TODO define yerr = sqrt( sum w^2 ) per bin!
+  s_error = plt.errorbar(center, s_histTest, fmt='o', c='r', label='Signal (Testing)') # TODO define yerr = sqrt( sum w^2 ) per bin!
+  b_error = plt.errorbar(center, b_histTest, fmt='o', c='b', label='Background (Testing)') # TODO define yerr = sqrt( sum w^2 ) per bin!
 
   ks_sig, ks_sig_p = ks_2samp(s_histTrain, s_histTest)
   ks_bkg, ks_bkg_p = ks_2samp(b_histTrain, b_histTest)
@@ -44,16 +47,20 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
 
   s_w_test = getSumW2(sig_predicted_test.ravel(), sig_w_test, binning)
   b_w_test = getSumW2(bkg_predicted_test.ravel(), bkg_w_test, binning)
+  
+  #Proxy artist for KS Test
+  
+  ks_patch = mpatches.Patch(color='None', label="KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg))
 
   #print sep
   if normed:
     ax1.set(ylabel="a. u.")
   else:
     ax1.set(ylabel="Events")
-  leg = plt.legend(loc="best", frameon=False)
+  leg = plt.legend(loc="best", frameon=False, handles=[s_patchesTrain[0], b_patchesTrain[0], s_error, b_error, ks_patch])
   p = leg.get_window_extent()
   #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
-  ax1.text(0.65, 0.66, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax1.transAxes) #Former y=0.7
+  #ax1.text(0.65, 0.66, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax1.transAxes) #Former y=0.7
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
 
