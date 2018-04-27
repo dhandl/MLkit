@@ -220,8 +220,7 @@ def main():
 
   print x, y, z
   # Set up a regular grid of interpolation points
-  fig = plt.figure(figsize=(8,6))
-  ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=4)
+  fig, ax1 = plt.subplots(figsize=(8,6))
   xi, yi = np.linspace(x.min(), x.max(), 100), np.linspace(y.min(), y.max(), 100)
   xi, yi = np.meshgrid(xi, yi)
 
@@ -229,17 +228,19 @@ def main():
   rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
   zi = rbf(xi, yi)
 
-  plt.imshow(zi, vmin=0., vmax=5., origin='lower',
+  im = ax1.imshow(zi, vmin=0., vmax=5., origin='lower',
              extent=[x.min(), x.max(), y.min(), y.max()])
-  cbar = plt.colorbar()
+  cbar = plt.colorbar(im)
   cbar.set_label('Significance')
+  ax1.set_xlabel(r'$m_{\tilde{t}}$')
+  ax1.set_xlim([x.min(), x.max()])
+  ax1.set_ylabel(r'$m_{\chi}$')
+  ax1.set_ylim([y.min(), y.max()])
   plt.scatter(x, y, c='black')
   plt.plot(x, x-84., color='black')
   plt.plot(x, x-175., color='black')
-  ax1.set_ylabel(r'$m_{\chi}$')
-  ax1.set_ylabel(r'$m_{\tilde{t}}$')
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.9, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=LUMI*0.001)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.92, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.88, lumi=LUMI*0.001)
   plt.show()
 
 if __name__ == "__main__":
