@@ -245,4 +245,19 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+def evaluate_signalGrid(modelDir):
+    infofile = open(modelDir.replace(".h5","_infofile.txt"))
+    infos = infofile.readlines()
+    
+    #TODO Parse Strings for correct datatypes
+    variables=infos[4]
+    preselection=infos[5]
+    lumi=infos[6]
+    signal=infos[7]
+    background=infos[8]
+    weights=infos[?]
+    #TODO Get Scaler from modelDir
+    
+    #TODO Put weights in infofile
 

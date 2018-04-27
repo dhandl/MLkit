@@ -15,6 +15,7 @@ import plot_Classification
 import plot_Classification2
 import plot_learning_curve
 import plot_output_score
+#import evaluate_signalGrid
 
 def startPlot(modelDir, binning=[50,0,1.], save=False):
     """
@@ -90,13 +91,17 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
     
-    plt.figure()   
+    plt.figure()
     plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
     
     plt.figure()
     plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
     
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
+    
+    #plt.figure(modelDir)
+    #evaluate_signalGrid.evaluate_signalGrid():
+    #TODO Finish this method
     
     # end timer and print time
     t.stop()
