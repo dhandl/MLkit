@@ -15,6 +15,7 @@ import plot_Classification
 import plot_Classification2
 import plot_learning_curve
 import plot_output_score
+import plot_piechart
 #import evaluate_signalGrid
 
 def startPlot(modelDir, binning=[50,0,1.], save=False):
@@ -25,7 +26,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     - binning = [bins, start, stop] default: [50,0,1.]
     
-    - save Save Files in ./plots/
+    - save: Save Files in ./plots/ (True/False)
     """
     t = timer.Timer()
     t.start()
@@ -49,11 +50,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
         pickleDir = modelDir.replace(".h5", "_history.pkl")
         model = load_model(modelDir)
         model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
-        print("Neuronal Network detected")
+        print("Neuronal Network detected!")
         print("Scaling and reading values...")
     except IOError:
         model = joblib.load(modelDir)
-        print("Boosted Decision Tree detected")
+        print("Boosted Decision Tree detected!")
         return 0
     
     #Get the data and scale it, if necessary
@@ -97,9 +98,12 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
     
+    plt.figure()
+    plot_piechart.plot_pie_chart(y_test, y_predict_test, fileName=filenames, save=save)
+    
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
-    #plt.figure(modelDir)
+    #plt.figure()
     #evaluate_signalGrid.evaluate_signalGrid():
     #TODO Finish this method
     

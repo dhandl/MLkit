@@ -116,6 +116,7 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
   if save:
     if not os.path.exists("plots/"):
         os.makedirs("plots/")
+        print("Creating folder plots")
     plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.pdf'))
     plt.savefig(os.path.join(savedir,filename+'_learning_curve_acc.png'))
     plt.close()
