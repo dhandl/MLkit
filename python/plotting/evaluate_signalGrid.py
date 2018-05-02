@@ -250,14 +250,34 @@ def evaluate_signalGrid(modelDir):
     infofile = open(modelDir.replace(".h5","_infofile.txt"))
     infos = infofile.readlines()
     
-    #TODO Parse Strings for correct datatypes
-    variables=infos[4]
-    preselection=infos[5]
-    lumi=infos[6]
-    signal=infos[7]
-    background=infos[8]
-    weights=infos[?]
-    #TODO Get Scaler from modelDir
+    #Parse Strings for correct datatypes
     
-    #TODO Put weights in infofile
-
+    variables=infos[4].replace('Used variables for training: ','').replace('\n','').split()
+    weights=infos[5].replace('Used weights: ', '').replace('\n','').split()
+    preselection_raw=infos[6].replace('Used preselection: ', '').replace('; \n', '').split(';')
+    preselection=[]
+    for x in preselection_raw:
+        xdict = {}
+        xdict['name']= x.split()[0].split('-')[0]
+        xdict['threshold']= float(x.split()[1])
+        xdict['type'] = x.split()[3]
+        preselection.append(xdict)
+    lumi=float(infos[7].replace('Used Lumi: ','').replace('\n',''))
+    signal=infos[8].replace('Used signal files: ','').replace('; \n','').replace(' ','').split(';')
+    background=infos[9].replace('Used background files: ','').replace('; \n','').replace(' ','').split(';')
+    
+    ##For Debugging
+    #print variables, type(variables)
+    #print weights, type(variables)
+    #print preselection, type(preselection[1])
+    #print lumi, type(lumi)
+    #print signal, type(signal)
+    #print background, type(background)
+    
+    #Get Scaler from modelDir
+    
+    scalerDir=modelDir.replace('.h5','_scaler.pkl')
+    scaler=joblib.load(scalerDir)
+    
+    #Evaluate
+    

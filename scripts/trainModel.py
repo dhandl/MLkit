@@ -93,7 +93,7 @@ def saveModel(model, modelDir, weightDir, modelName, alg):
     #yaml_string = model.to_yaml()
     #open(os.path.join(modelDir,modelName+'.yaml'), 'w').write(json_string)
     
-def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isignal, Ibackground, Ialgorithmparams, Itrainsize, Itestsize, Ireproduce, Imulticlass):
+def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isignal, Ibackground, Ialgorithmparams, Itrainsize, Itestsize, Ireproduce, Imulticlass, Iweights):
     '''
     Imodel: Name of the model.h5 file
     Ianalysis: Used Method, e.g. BDT, DNN
@@ -108,6 +108,7 @@ def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isi
     Itrainsize: Size of trainset (float)
     Itestsize: Size of testset (float)
     Ireproduce: Repdroduce (boolean)
+    Iweights: Used weights for the model
     '''
     print('Saving model informations in infofile...')
     filepath = './TrainedModels/models/' + Imodel + '_infofile.txt'
@@ -117,6 +118,7 @@ def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isi
     infofile.write('Used multiclass: ' + str(Imulticlass) + '\n')
     infofile.write('Used dataset: ' + Idataset + '\n')
     infofile.write('Used variables for training: ' + Ivariables + '\n')
+    infofile.write('Used weights: ' + Iweights + '\n')
     presels = ''
     for pre in Ipreselection:
         presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + '; '
@@ -129,7 +131,7 @@ def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isi
     bkgs = ''
     for bkg in Ibackground:
         bkgs += bkg['name'] + '; '
-    infofile.write('Used background files:' + bkgs + '\n')
+    infofile.write('Used background files: ' + bkgs + '\n')
     infofile.write('Used trainsize/testsize: ' + str(Itrainsize) + '/' + str(Itestsize) + '\n')
     infofile.write('Used reproduce: ' + str(Ireproduce) + '\n')
     infofile.close()
@@ -262,7 +264,7 @@ def main():
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
   
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass)
+  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
   
   try:
     print('Saving Scaler to file...')

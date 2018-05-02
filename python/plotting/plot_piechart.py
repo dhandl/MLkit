@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def plot_pie_chart(y_true, y_predict, fileName="Test", save=False):
     print('Plotting pie charts...')    
@@ -12,11 +13,11 @@ def plot_pie_chart(y_true, y_predict, fileName="Test", save=False):
     plt.title('Vorhergesagte Verteilung')
     plt.axis('equal')
     if save:
-        if not os.path.exists("plots/"):
-            os.makedirs("plots/")
+        if not os.path.exists("./plots/"):
+            os.makedirs("./plots/")
             print("Creating folder plots")
-        plt.savefig(os.path.join(savedir,filename+'_predicted_pie.pdf'))
-        plt.savefig(os.path.join(savedir,filename+'_predicted_pie.png'))
+        plt.savefig("plots/"+fileName+"_predicted_pie.pdf")
+        plt.savefig("plots/"+fileName+"_predicted_pie.png")
         plt.close()
         
     plt.figure()
@@ -24,10 +25,10 @@ def plot_pie_chart(y_true, y_predict, fileName="Test", save=False):
     plt.title('Wahre Verteilung')
     plt.axis('equal')
     if save:
-        if not os.path.exists("plots/"):
-            os.makedirs("plots/")
+        if not os.path.exists("./plots/"):
+            os.makedirs("./plots/")
             print("Creating folder plots")
-        plt.savefig(os.path.join(savedir,filename+'_true_pie.pdf'))
-        plt.savefig(os.path.join(savedir,filename+'_true_pie.png'))
+        plt.savefig("plots/"+fileName+"_true_pie.pdf")
+        plt.savefig("plots/"+fileName+"_true_pie.png")
         plt.close()
     
