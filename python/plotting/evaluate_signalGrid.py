@@ -437,8 +437,8 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   plt.plot(x, x-84., color='black')
   plt.plot(x, x-175., color='black')
   AtlasStyle_mpl.ATLASLabel(ax1, 0.022, 0.925, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.022, 0.875, lumi=LUMI*0.001)
-  plt.show()
+  AtlasStyle_mpl.LumiLabel(ax1, 0.022, 0.875, lumi=lumi*0.001)
+  #plt.show()
   
   if save:
         if not os.path.exists("./plots/"):

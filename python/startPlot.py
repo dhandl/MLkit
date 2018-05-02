@@ -16,7 +16,7 @@ import plot_Classification2
 import plot_learning_curve
 import plot_output_score
 import plot_piechart
-#import evaluate_signalGrid
+import evaluate_signalGrid
 
 def startPlot(modelDir, binning=[50,0,1.], save=False):
     """
@@ -84,27 +84,27 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     #Do various plots
     
-    plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
-    
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, filename=filenames, save=save)
-    
-    plt.figure()
-    plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
-    
-    plt.figure()
-    plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
-    
-    plt.figure()
-    plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
-    
-    plt.figure()
-    plot_piechart.plot_pie_chart(y_test, y_predict_test, fileName=filenames, save=save)
-    
-    plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
+    #plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
     
     #plt.figure()
-    #evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames):
+    #plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, filename=filenames, save=save)
+    
+    #plt.figure()
+    #plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
+    
+    #plt.figure()
+    #plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
+    
+    #plt.figure()
+    #plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
+    
+    #plt.figure()
+    #plot_piechart.plot_pie_chart(y_test, y_predict_test, fileName=filenames, save=save)
+    
+    #plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
+    
+    #plt.figure()
+    evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
     
     # end timer and print time
     t.stop()
