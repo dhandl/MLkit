@@ -104,8 +104,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
     #plt.figure()
-    #evaluate_signalGrid.evaluate_signalGrid():
-    #TODO Finish this method
+    #evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames):
     
     # end timer and print time
     t.stop()

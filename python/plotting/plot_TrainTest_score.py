@@ -44,9 +44,13 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ks_sig, ks_sig_p = ks_2samp(s_histTrain, s_histTest)
   ks_bkg, ks_bkg_p = ks_2samp(b_histTrain, b_histTest)
   #sep = getSeparation(s_histTest, s_binsTest, b_histTest, b_binsTest)
-
-  s_w_test = getSumW2(sig_predicted_test.ravel(), sig_w_test, binning)
-  b_w_test = getSumW2(bkg_predicted_test.ravel(), bkg_w_test, binning)
+  
+  if normed:
+    s_w_test = getSumW2(sig_predicted_test.ravel(), sig_w_test, binning)/np.sum(sig_w_test)
+    b_w_test = getSumW2(bkg_predicted_test.ravel(), bkg_w_test, binning)/np.sum(bkg_w_test)
+  else:
+    s_w_test = getSumW2(sig_predicted_test.ravel(), sig_w_test, binning)
+    b_w_test = getSumW2(bkg_predicted_test.ravel(), bkg_w_test, binning)
   
   #Proxy artist for KS Test
   
