@@ -25,7 +25,7 @@ Sample = namedtuple('Sample', 'name' 'path')
 inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
 modelDir = 'TrainedModels/models/2018-04-12_10-21_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
 
-SIGNAL = ['stop_bWN_250_100', 'stop_bWN_300_150', 'stop_bWN_350_200', 'stop_bWN_400_250', 'stop_bWN_450_300', 'stop_bWN_500_350', 'stop_bWN_550_400', 'stop_bWN_600_450', 'stop_bWN_650_500']
+SIGNAL = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
 
 BACKGROUND = ['powheg_ttbar', 'powheg_singletop', 'sherpa22_Wjets']
 
@@ -225,7 +225,7 @@ def main():
   xi, yi = np.meshgrid(xi, yi)
 
   # Interpolate
-  rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+  rbf = scipy.interpolate.LinearNDInterpolator(points=np.array((x, y)).T, values=z)
   zi = rbf(xi, yi)
 
   im = ax1.imshow(zi, vmin=0., vmax=5., origin='lower',
@@ -239,8 +239,8 @@ def main():
   plt.scatter(x, y, c='black')
   plt.plot(x, x-84., color='black')
   plt.plot(x, x-175., color='black')
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.92, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.88, lumi=LUMI*0.001)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.022, 0.925, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.022, 0.875, lumi=LUMI*0.001)
   plt.show()
 
 if __name__ == "__main__":
