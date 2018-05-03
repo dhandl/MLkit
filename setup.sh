@@ -6,6 +6,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 if [[ "$HOSTNAME" == *"lxplus"* ]]; then
   echo "Setting up environment on lxplus..."
   export PATH=/afs/cern.ch/work/d/dhandl/public/miniconda3/bin:$PATH
+  CondaDir="/afs/cern.ch/work/d/dhandl/public/miniconda3"
 elif [[ "$HOSTNAME" == *"etp"* ]]; then
   echo "Setting up environment on etp..."
   export PATH=/project/etp5/dhandl/miniconda3/bin:$PATH
@@ -23,4 +24,7 @@ export PATH=$PATH:$WorkDir/scripts
 
 source activate testenv
 source "$CondaDir/envs/testenv/bin/thisroot.sh"
-#export MKL_THREADING_LAYER=GNU
+
+if [[ "$HOSTNAME" == *"lxplus"* ]]; then
+  export MKL_THREADING_LAYER=GNU
+fi

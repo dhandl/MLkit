@@ -81,7 +81,7 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
       y = np.concatenate((sig_y, bkg_y))
     else:
       y = []
-      for _df, ID in [(sig, 1), (bkg, 0)]:
+      for _df, ID in [(sig, 0), (bkg, 1)]:
         y.extend([ID] * _df.shape[0])
       y = np.array(y)
    

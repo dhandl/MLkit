@@ -254,7 +254,7 @@ def main():
     model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
                                       alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
                                       alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
-                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], 
+                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], 
                                       alg.options['learningRate'], alg.options['decay'], 
                                       alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
                                       alg.options['multiclassification'])
