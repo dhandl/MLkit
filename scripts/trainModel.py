@@ -179,7 +179,7 @@ def parse_options():
     os.makedirs(opts.dataDir)
 
   if not opts.name:
-    opts.name =  datetime.now().strftime('%Y-%m-%d_%H-%M_')
+    opts.name = datetime.now().strftime('%Y-%m-%d_%H-%M_')
 
   if type(opts.trainsize) is str: 
     if '.' in opts.trainsize:
