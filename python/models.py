@@ -113,7 +113,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   return model, history, y_predicted
 
 
-def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False):
+def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False):
   print "Performing a Deep Recurrent Neural Net!"
 
   if type(sequence) == list:
@@ -138,7 +138,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     model_inputs = Input(shape=(X_train.shape[1], ))
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
     layer = BatchNormalization()(layer)
-    layer = Dropout(dropout)(layer)
+    #layer = Dropout(dropout)(layer)
     
   if mergeModels:
     combined = concatenate([c['channel'] for c in sequence]+[layer])
@@ -147,9 +147,12 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
       combined = concatenate([c['channel'] for c in sequence])
     else:
       combined = sequence[0]['channel']
-    #for layer in combinedDim:
-    #  combined = Dense(layer, activation = activation)(combined)
-    #  combined = Dropout(dropout)(combined)
+
+  for l in combinedDim:
+    combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer))(combined)
+    combined = BatchNormalization()(combined)
+    combined = Dropout(dropout)(combined)
+
   if multiclass:
     combined_output = Dense(len(np.bincount(y_train)), activation='softmax')(combined)
     loss = 'categorical_crossentropy'
@@ -172,12 +175,12 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
-                class_weight=class_weight, sample_weight=w_train, epochs=epochs, batch_size=batchSize,
+                class_weight=class_weight, epochs=epochs, batch_size=batchSize,
                 callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
                 #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
     else:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,
-                class_weight=class_weight, sample_weight=w_train, epochs=epochs, batch_size=batchSize,
+                class_weight=class_weight, epochs=epochs, batch_size=batchSize,
                 callbacks = [EarlyStopping(verbose=True, patience=10, monitor='acc')])
   except KeyboardInterrupt:
       print 'Training ended early.'
