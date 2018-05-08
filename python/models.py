@@ -175,8 +175,8 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
-                class_weight=class_weight, epochs=epochs, batch_size=batchSize,
-                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+                class_weight=class_weight, epochs=epochs, batch_size=batchSize)#,
+                #callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
                 #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
     else:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,

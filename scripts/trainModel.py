@@ -245,7 +245,7 @@ def main():
 
   elif (opts.analysis.lower() == 'rnn'):
       
-    if mergeModels:
+    if alg.options['mergeModels']:
         print 'Standardize training set...'
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
