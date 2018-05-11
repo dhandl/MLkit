@@ -154,19 +154,19 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     combined = Dropout(dropout)(combined)
 
   if multiclass:
-    combined_output = Dense(len(np.bincount(y_train)), activation='softmax')(combined)
-    loss = 'categorical_crossentropy'
+    combined_output = Dense(len(np.bincount(y_train.astype(int))), activation='softmax')(combined)
+    loss = 'sparse_categorical_crossentropy'
   else:
-    combined_outputs = Dense(1, activation='sigmoid')(combined)
-    loss = 'binary_crossentropy'
+    combined_output = Dense(2, activation='softmax')(combined)
+    loss = 'sparse_categorical_crossentropy'
   
   if mergeModels:
-    combined_rnn = Model(inputs=[seq['input'] for seq in sequence]+[model_inputs], outputs=combined_outputs)
+    combined_rnn = Model(inputs=[seq['input'] for seq in sequence]+[model_inputs], outputs=combined_output)
   else:
     if len(sequence)>1:
-      combined_rnn = Model(inputs=[seq['input'] for seq in sequence], outputs=combined_outputs)
+      combined_rnn = Model(inputs=[seq['input'] for seq in sequence], outputs=combined_output)
     else:
-      combined_rnn = Model(inputs=sequence[0]['input'], outputs=combined_outputs)
+      combined_rnn = Model(inputs=sequence[0]['input'], outputs=combined_output)
 
   combined_rnn.summary()
   combined_rnn.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
@@ -175,8 +175,8 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
-                class_weight=class_weight, epochs=epochs, batch_size=batchSize)#,
-                #callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+                class_weight=class_weight, epochs=epochs, batch_size=batchSize,
+                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
                 #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
     else:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,
