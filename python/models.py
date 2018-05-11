@@ -6,7 +6,7 @@ from keras.models import Sequential, Model, load_model
 from keras.layers.core import Dense, Activation, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge, Dense, Dropout, Input, concatenate, Flatten, LeakyReLU
-from keras.regularizers import l2
+from keras.regularizers import l2, l1
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras import initializers
 from keras.optimizers import SGD
@@ -70,15 +70,15 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)]:
-    model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer)))
+    model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
     model.add(Dropout(dropout))
     model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(classes, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
   else:
-    model.add(Dense(1, activation='sigmoid'))
-    loss = 'binary_crossentropy'
+    model.add(Dense(2, activation='softmax'))
+    loss = 'sparse_categorical_crossentropy'
 
   # Set loss and optimizer
   if optimizer.lower() == 'sgd':

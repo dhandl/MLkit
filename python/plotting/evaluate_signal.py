@@ -23,55 +23,72 @@ from getRatio import getRatio
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name' 'path')
 
-inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+#inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/AnalysisChallenge2018/skimmed'
 
-modelDir = 'TrainedModels/models/2018-04-12_10-21_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+Dir = 'TrainedModels/models/'
+modelfile = '2018-05-09_15-56_DNN_adam_layer32_batch8_GlorotUniformInitializer_dropout0p5_l1-0p01'
+
+modelDir = Dir+modelfile+'.h5'
 
 #SIGNAL = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
-SIGNAL = ['stop_bWN_350_200']
+#SIGNAL = ['stop_tN_500_327']
+SIGNAL = ['stop_tN_800_500']
 
-BACKGROUND = ['powheg_ttbar', 'powheg_singletop', 'sherpa22_Wjets']
+BACKGROUND = ['bkgs']
 
 PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
-                {'name':'met',    'threshold':100e3,  'type':'geq'},
+                {'name':'met',    'threshold':230e3,  'type':'geq'},
                 {'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                ]
 
 VAR = [
-        'n_jet',
-        'ht',
-        'jet_pt[0]',
-        'bjet_pt[0]',
-        'jet_pt[1]',
-        'jet_pt[2]',
-        'jet_pt[3]',
-        'lep_pt[0]',
-        'amt2',
-        'mt',
+        #'met',
+        #'mt',
+        #'Lp',
+        #'dphi_met_lep',
+        #'met_sig',
+        #'m3'
         'met',
-        'dphi_met_lep',
-        'met_sig',
-        'ht_sig',
-        'm_bl',
-        'dr_bjet_lep',
-        'mT_blMET'
+        'met_phi',
+        'n_jet',
+        'lep_pt[0]',
+        'lep_eta[0]',
+        'lep_phi[0]',
+        'jet_pt[0]',
+        'jet_eta[0]',
+        'jet_phi[0]',
+        'jet_m[0]',
+        'jet_bweight[0]',
+        'jet_pt[1]',
+        'jet_eta[1]',
+        'jet_phi[1]',
+        'jet_m[1]',
+        'jet_bweight[1]',
+        'jet_pt[2]',
+        'jet_eta[2]',
+        'jet_phi[2]',
+        'jet_m[2]',
+        'jet_bweight[2]',
+        'jet_pt[3]',
+        'jet_eta[3]',
+        'jet_phi[3]',
+        'jet_m[3]',
+        'jet_bweight[3]'
       ]
 
 WEIGHTS = [
-           'weight',
-           'xs_weight',
-           'sf_total',
-           'weight_sherpa22_njets'
+           'event_weight'
           ]
 
-LUMI = 36.1e3
+LUMI = 1.
 
 RESOLUTION = np.array([50,0,1], dtype=float)
 
-SCALING = './test.pkl'
+SCALING = Dir+modelfile+'_scaler.pkl'
 
 def evaluate(model, dataset, scaler):
   dataset = scaler.transform(dataset)
@@ -216,17 +233,20 @@ def main():
     s['sig_max'] = s['sig'].max()
     s['sig_err'] = np.array(significance_err)
     print s['sig']
-    print s['sig'].max(), bins[np.where(s['sig'] == s['sig'].max())]
+    sigMax_index = bins[np.where(s['sig'] == s['sig'].max())][0]
+    print s['sig'].max(), sigMax_index
 
   x = np.array([s['m_stop'] for s in Signal], dtype=float)
   y = np.array([s['m_X'] for s in Signal], dtype=float)
   z = np.array([s['sig_max'] for s in Signal],dtype=float)
 
-  print x, y, z
+  #print x, y, z
+
+  print Signal[0]['outputScore'][np.where(bins[:-1] >= sigMax_index)], Signal[0]['output_var'][np.where(bins[:-1] >= sigMax_index)]
+  print totalBkgOutput[np.where(bins[:-1] >= sigMax_index)], totalBkgVar[np.where(bins[:-1] >= sigMax_index)]
 
   print Signal[0]['outputScore'], Signal[0]['output_var']
   print totalBkgOutput, totalBkgVar
-
   # Set up a regular grid of interpolation points
 
   print('Plotting the output score...')
@@ -237,32 +257,33 @@ def main():
   ax1.set_ylabel("Events", ha='left')
 
   sb_ratio = Signal[0]['outputScore'].sum()/totalBkgOutput.sum()
-  if sb_ratio < 0.2:
-    #ATTENTION! Simplified error propagation (treated as uncorrelated)
-    scaled = Signal[0]['outputScore'] / Signal[0]['outputScore'].sum() * totalBkgOutput.sum()
-    scaled_var = scaled*scaled * ( (Signal[0]['output_var']/Signal[0]['outputScore'])**2 + (totalBkgVar.sum()/totalBkgOutput.sum())**2 + (Signal[0]['output_var'].sum()/Signal[0]['outputScore'].sum())**2 )
-    scaled_label = 'Signal scaled to Bkg'
-    
-  else:
-    scaled = Signal[0]['outputScore']
-    scaled_var = Signal[0]['output_var']
-    scaled_label = 'Signal'
+  #if sb_ratio < 0.2:
+  #  #ATTENTION! Simplified error propagation (treated as uncorrelated)
+  #  scaled = Signal[0]['outputScore'] / Signal[0]['outputScore'].sum() * totalBkgOutput.sum()
+  #  scaled_var = scaled*scaled * ( (Signal[0]['output_var']/Signal[0]['outputScore'])**2 + (totalBkgVar.sum()/totalBkgOutput.sum())**2 + (Signal[0]['output_var'].sum()/Signal[0]['outputScore'].sum())**2 )
+  #  scaled_label = 'Signal scaled to Bkg'
+  #  
+  #else:
+  scaled = Signal[0]['outputScore']
+  scaled_var = Signal[0]['output_var']
+  scaled_label = 'Signal'
 
   plt.bar(center, totalBkgOutput, width=db, yerr=np.sqrt(totalBkgVar), color='b', alpha=0.5, error_kw=dict(ecolor='b', lw=1.5), label='Background')  
-  plt.bar(center, scaled, width=db, color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5), Label=scaled_label)  
+  plt.bar(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label='Signal', color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5))  
 
-  ax1.set_ylim((0, totalBkgOutput.max()*(1+0.33)))
+  ax1.set_ylim((0.1, totalBkgOutput.max()*(15.)))
+  ax1.set_yscale('log')
   leg = plt.legend(loc="best", frameon=False)
 
   AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI*0.001)
+  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI)
 
-  #ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)
-  #r = getRatio(totalBkgOutput, bins, np.sqrt(totalBkgVar), Signal[0]['outputScore'], bins, np.sqrt(Signal[0]['output_var']), 'r')
-  #ax2.set_ylabel('variation/nom.')
-
-
+#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
+#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
   plt.show()
+#        plt.savefig("plots/"+fileName+"_evaluated_grid.png")
+#        plt.close()
+
 
 if __name__ == "__main__":
     main()
