@@ -188,7 +188,7 @@ def applyCut(df, cut=None):
       elif c['type'] == 'not':
         df = df[ df[c['name']] != c['threshold'] ]
       elif c['type'] == 'condition':
-        df = df[(df[c['name']] < c['threshold']) | ((df[c['name']] > c['threshold']) & (df[c['variable']] < c['lessthan']) & (df[c['variable']] > c['morethan']))]
+        df = df[(df[c['name']] < c['threshold']) | ((df[c['name']] > c['threshold']) & (df[c['variable']] < c['lessthan']) | (df[c['variable']] > c['morethan']))]
   return df
 
 
