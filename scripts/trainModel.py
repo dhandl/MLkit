@@ -121,7 +121,10 @@ def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isi
     infofile.write('Used weights: ' + Iweights + '\n')
     presels = ''
     for pre in Ipreselection:
-        presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + '; '
+        if pre['type'] == 'condition':
+            presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + ' variable: ' + pre['variable'] + ' lessthan: ' + str(pre['lessthan']) + ' and morethan: ' +  str(pre['morethan']) + '; '
+        else:
+            presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + '; '
     infofile.write('Used preselection: ' + presels + '\n')
     infofile.write('Used Lumi: ' + str(Ilumi) + '\n')
     sigs = ''

@@ -264,6 +264,10 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
       xdict['name']= x.split()[0].split('-')[0]
       xdict['threshold']= float(x.split()[1])
       xdict['type'] = x.split()[3]
+      if xdict['type'] == 'condition':
+          xdict['variable'] = x.split()[5]
+          xdict['lessthan'] = float(x.split()[7])
+          xdict['morethan'] = float(x.split()[10])
       preselection.append(xdict)
   lumi=float(infos[7].replace('Used Lumi: ','').replace('\n',''))
   background=infos[9].replace('Used background files: ','').replace('; \n','').replace(' ','').split(';')
