@@ -264,12 +264,17 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
       xdict['name']= x.split()[0].split('-')[0]
       xdict['threshold']= float(x.split()[1])
       xdict['type'] = x.split()[3]
+      if xdict['type'] == 'condition':
+          xdict['variable'] = x.split()[5]
+          xdict['lessthan'] = float(x.split()[7])
+          xdict['morethan'] = float(x.split()[10])
       preselection.append(xdict)
   lumi=float(infos[7].replace('Used Lumi: ','').replace('\n',''))
   background=infos[9].replace('Used background files: ','').replace('; \n','').replace(' ','').split(';')
   #signal=infos[8].replace('Used signal files: ','').replace('; \n','').replace(' ','').split(';')
   
-  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
+  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
+  
    
   #For Debugging
   #print variables, type(variables)
