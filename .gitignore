@@ -10,8 +10,6 @@
 *.root
 TrainedModels
 TrainedModels/*
-notes
-notes/*
-slides
-slides/*
+plots
+plots/*
 .gitignore
