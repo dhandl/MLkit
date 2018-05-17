@@ -227,8 +227,7 @@ def main():
   checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
-    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'],                              alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], 
-                             opts.reproduce)
+    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'],                opts.reproduce)
 
   elif (opts.analysis.lower() == 'nn'):
       
@@ -241,7 +240,7 @@ def main():
                                      alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
                                      alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
-                                     alg.options['nesterov'], alg.options['multiclassification'])
+                                     alg.options['nesterov'], alg.options['multiclassification'], reproduce=opts.reproduce)
 
     with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
       pickle.dump(history.history, hist_pi)

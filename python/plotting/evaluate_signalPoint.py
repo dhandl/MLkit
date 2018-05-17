@@ -7,11 +7,12 @@ from prepareTraining import prepareTraining
 def evaluate_signalPoint(modelDir, signalPoints, save=False):
     
     '''
-    Takes one point from signalGrid and plots pie charts for predicted and true signal/backgrounds
+    Takes one point after the other from signalGrid and plots pie charts for predicted and true signal/backgrounds
     
     - modelDir: Directory of model
     - signalPoints: Signal points to look at, type=list
     '''
+    print '-----NOT WORKING YET!-----'
     
     inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
     
