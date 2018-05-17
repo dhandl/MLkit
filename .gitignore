@@ -1,0 +1,17 @@
+*.pyc
+*~
+.*
+*.h5
+*.json
+*.yaml
+*.pdf
+*.png
+*.eps
+*.root
+TrainedModels
+TrainedModels/*
+notes
+notes/*
+slides
+slides/*
+.gitignore
