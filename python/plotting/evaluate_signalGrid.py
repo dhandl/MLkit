@@ -255,7 +255,7 @@ if __name__ == "__main__":
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
     
-def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Grid_test"):
+def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName=modelDir.replace("TrainedModels/models/","").replace(".h5","")):
   print('Evaluating singal grid...')  
     
   infofile = open(modelDir.replace(".h5","_infofile.txt"))
