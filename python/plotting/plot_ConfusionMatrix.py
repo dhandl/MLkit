@@ -7,7 +7,7 @@ import os
 def draw_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues,save=False,fileName="CM_test"):
+                          cmap=plt.cm.Blues,save=False,fileName="CM_test",isTrain=False):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -42,16 +42,21 @@ def draw_confusion_matrix(cm, classes,
     fig = plt.gcf()
     fig.set_size_inches(9., 7.)
     
+    if isTrain:
+        extraStr = 'Train'
+    else:
+        extraStr = ''
+        
     if save:
         if not os.path.exists("./plots/"):
             os.makedirs("./plots/")
             print("Creating folder plots")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix.pdf")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix.png")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + extraStr +".pdf")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + extraStr +".png")
         plt.close()
     
     
-def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False):
+def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False,isTrain=False):
     """
     Plotting (and printing) the confusion matrix
     """
@@ -62,4 +67,4 @@ def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False):
     
     draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'],
                       normalize=True,
-                      title='Normalized Confusion Matrix',save=save,fileName=filename)
+                      title='Normalized Confusion Matrix',save=save,fileName=filename,isTrain=isTrain)

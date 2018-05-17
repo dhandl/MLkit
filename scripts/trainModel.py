@@ -204,7 +204,6 @@ def main():
   t = timer.Timer()
   t.start()
   
-
   opts = parse_options()
 
   print 'Loading configuration...'
@@ -286,6 +285,13 @@ def main():
     
     
 def trainextern():
+    
+  """
+  Train and evaluate model for different parameters
+  
+  NOT WORKING YET
+  """
+    
   # define timer to check how long the job runs
   t = timer.Timer()
   t.start()

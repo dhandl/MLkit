@@ -87,7 +87,10 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
     
     plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, filename=filenames, save=save)
+    plot_ConfusionMatrix.plot_confusion_matrix(y_test, y_predict_test, filename=filenames, save=save, isTrain=False)
+    
+    plt.figure()
+    plot_ConfusionMatrix.plot_confusion_matrix(y_train, y_predict_train, filename=filenames, save=save, isTrain=True)
     
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
@@ -103,8 +106,86 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
-    plt.figure()
     evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
+    
+    # end timer and print time
+    t.stop()
+    t0 = t.elapsed
+    t.reset()
+    runtimeSummary(t0)
+    
+def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
+    """
+    Plot all important things for specific dataset, which is not the one used for training
+        
+    - modelDir: Directory of model
+    
+    - datasetDir: Directory of dataset
+    
+    - binning = [bins, start, stop] default: [50,0,1.]
+    
+    - save: Save Files in ./plots/ (True/False)
+    """
+    t = timer.Timer()
+    t.start()
+    
+    #Load models
+    
+    print("Loading dataset...")
+    
+    dataset = h5py.File(datasetDir)
+    
+    filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","") + '_differentDataset'
+    
+    print("Using dataset from:", datasetDir)
+    
+    print("Loading model...")
+    
+    try:
+        pickleDir = modelDir.replace(".h5", "_history.pkl")
+        model = load_model(modelDir)
+        model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
+        print("Neuronal Network detected!")
+        print("Scaling and reading values...")
+    except IOError:
+        model = joblib.load(modelDir)
+        print("Boosted Decision Tree detected!")
+        return 0
+    
+    #Get the data and scale it, if necessary
+    
+    X = dataset["X"][:]
+    y = dataset["y"][:]
+    
+    scaler = StandardScaler()
+    
+    X_scaled = scaler.fit_transform(X)
+    
+    y_predict = model.predict(X_scaled)
+    
+    sig_predicted = y_predict[y==0]
+    sig_w = dataset["w"][y==0]
+    
+    bkg_predicted= y_predict[y!=0]
+    bkg_w = dataset["w"][y!=0]
+    
+    #Do various plots
+    
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix(y, y_predict, filename=filenames, save=save, isTrain=False)
+    
+    #plt.figure()
+    #plot_Classification.plot_classification(y, y_predict, fileName=filenames, save=save)
+    
+    #plt.figure()
+    #plot_Classification2.plot_classification_2(y, y_predict, fileName=filenames, save=save)
+    
+    #plt.figure()
+    #plot_piechart.plot_pie_chart(y, y_predict, fileName=filenames, save=save)
+    
+    #plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames)
+    
+    evaluate_signalGrid.evaluate_signalGridCut(modelDir, save=save, fileName=filenames)
     
     # end timer and print time
     t.stop()
