@@ -19,6 +19,7 @@ fi
 
 export WorkDir=`pwd`
 export PYTHONPATH=$PYTHONPATH:$WorkDir/python
+export PYTHONPATH=$PYTHONPATH:$WorkDir/python/plotting
 export PYTHONPATH=$PYTHONPATH:$WorkDir/config
 export PATH=$PATH:$WorkDir/scripts
 

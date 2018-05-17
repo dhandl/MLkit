@@ -5,6 +5,13 @@ preselection = [
                 {'name':'met',    'threshold':100e3,  'type':'geq'},
                 {'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
+                #{'name':'dphi_jet0_ptmiss', 'threshold':0.4,    'type':'greater'},
+                #{'name':'dphi_jet1_ptmiss', 'threshold':0.4,    'type':'greater'}
+                #{'name':'ht',   'threshold':200e3,  'type':'geq'},
+                #{'name':'dphi_b_lep_max',   'threshold':2.8,  'type':'leq'}
+                #{'name':'dphi_b_lep_max',   'threshold':2.6,  'type':'condition',   'variable':'ht',   'lessthan':225e3,   'morethan': 275e3}
+                #{'name':'dr_bjet_lep',    'threshold':2.5,  'type':'leq'}
+                #{'name':'dphi_met_lep',    'threshold':2,  'type':'leq'}
                 #{'name':'tt_cat_TRUTH3',  'threshold':0,      'type':'geq'},
                 #{'name':'tt_cat_TRUTH3',  'threshold':6,      'type':'leq'},
                 #{'name':'tt_cat_TRUTH3',  'threshold':1,      'type':'not'},
@@ -14,23 +21,27 @@ preselection = [
 lumi = 140e3 
 
 nvar = [
-        'n_jet',
         'ht',
         'jet_pt[0]',
         'bjet_pt[0]',
-        'jet_pt[1]',
-        'jet_pt[2]',
-        'jet_pt[3]',
-        'lep_pt[0]',
         'amt2',
         'mt',
         'met',
         'dphi_met_lep',
+        'dphi_b_lep_max',
+        'dphi_jet0_ptmiss',
         'met_sig',
+        'met_proj_lep',
         'ht_sig',
         'm_bl',
         'dr_bjet_lep',
-        'mT_blMET'
+        'mT_blMET',
+        #'jet_pt[1]',
+        #'jet_pt[2]',
+        #'jet_pt[3]',
+        #'lep_pt[0]',
+        #'n_jet',
+        #'n_bjet',
         #'dr_jet_jet_max',
         #'ttbar_pt',
         #'ttbar_dphi',
@@ -38,7 +49,17 @@ nvar = [
         #'m_jet_jet_min',
         #'m_jet_jet_max'
         #'tt_cat_TRUTH3'
-]
+        #'n_lep',
+        #'lep_eta[0]',
+        #'lep_phi[0]',
+        #'jet_eta[0]',
+        #'jet_phi[0]',
+        #'dphi_jet1_ptmiss',
+        #'dphi_jet2_ptmiss',
+        #'dphi_jet3_ptmiss',
+        #'dphi_min_ptmiss',
+        #'dphi_b_ptmiss_max'
+        ]
 
 weight = [
           'weight',
