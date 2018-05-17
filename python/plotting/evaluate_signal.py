@@ -28,7 +28,7 @@ Sample = namedtuple('Sample', 'name' 'path')
 inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/AnalysisChallenge2018/skimmed'
 
 Dir = 'TrainedModels/models/'
-modelfile = '2018-05-11_14-54_DNN_rmsprop_layer256_batch16_GlorotUniformInitializer_dropout0p5_l1-0p01'
+modelfile = '2018-05-11_12-49_DNN_rmsprop_layer128_batch16_GlorotUniformInitializer_dropout0p5_l1-0p01'
 
 modelDir = Dir+modelfile+'.h5'
 
@@ -41,7 +41,7 @@ BACKGROUND = ['bkgs']
 PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
-                {'name':'met',    'threshold':300e3,  'type':'geq'},
+                {'name':'met',    'threshold':250e3,  'type':'geq'},
                 {'name':'mt',    'threshold':110e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                ]
@@ -300,8 +300,8 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI)
 
-#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
-#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
+  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
+  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
   plt.show()
 #        plt.savefig("plots/"+fileName+"_evaluated_grid.png")
 #        plt.close()

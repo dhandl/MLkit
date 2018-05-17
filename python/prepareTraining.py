@@ -109,12 +109,21 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
 
 
 def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
-  files = os.listdir(path)
+  if os.path.isdir(path):
+    files = os.listdir(path)
+  else:
+    path, pattern = os.path.split(path)
+    fList = os.listdir(path)
+    files = []
+    for f in fList:
+      if f.startswith(pattern):
+        files.append(f)
+
   if len(files) == 1:
     f = files[0]
     print f
-    if os.path.isfile(path+f) and f.endswith(".h5"):
-      _df = pd.read_hdf(path+f)
+    if os.path.isfile(os.path.join(path, f)) and f.endswith(".h5"):
+      _df = pd.read_hdf(os.path.join(path, f))
       df = applyCut(_df, cut)
       df = selectVarList(df, nvar+weights)
       del _df
@@ -122,15 +131,15 @@ def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
     first = True
     for f in files:
       print f
-      if os.path.isfile(path+f) and f.endswith(".h5"):
+      if os.path.isfile(os.path.join(path, f)) and f.endswith(".h5"):
         if first:
-          _df = pd.read_hdf(path+f)
+          _df = pd.read_hdf(os.path.join(path, f))
           df = applyCut(_df, cut)
           df = selectVarList(df, nvar+weights)
           del _df
           first = False
         else:
-          _df = pd.read_hdf(path+f)
+          _df = pd.read_hdf(os.path.join(path, f))
           df_slice = applyCut(_df, cut)
           df_slice = selectVarList(df_slice, nvar+weights)
           df = pd.concat((df, df_slice), ignore_index=True)

@@ -181,7 +181,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     else:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,
                 class_weight=class_weight, epochs=epochs, batch_size=batchSize,
-                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='acc')])
+                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
   except KeyboardInterrupt:
       print 'Training ended early.'
 
