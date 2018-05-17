@@ -23,25 +23,26 @@ from getRatio import getRatio
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name' 'path')
 
+
 #inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
 inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/AnalysisChallenge2018/skimmed'
 
 Dir = 'TrainedModels/models/'
-modelfile = '2018-05-09_15-56_DNN_adam_layer32_batch8_GlorotUniformInitializer_dropout0p5_l1-0p01'
+modelfile = '2018-05-11_12-49_DNN_rmsprop_layer128_batch16_GlorotUniformInitializer_dropout0p5_l1-0p01'
 
 modelDir = Dir+modelfile+'.h5'
 
 #SIGNAL = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
-#SIGNAL = ['stop_tN_500_327']
-SIGNAL = ['stop_tN_800_500']
+SIGNAL = ['stop_tN_500_327']
+#SIGNAL = ['stop_tN_800_500']
 
 BACKGROUND = ['bkgs']
 
 PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
-                {'name':'met',    'threshold':230e3,  'type':'geq'},
-                {'name':'mt',    'threshold':90e3,  'type':'geq'},
+                {'name':'met',    'threshold':250e3,  'type':'geq'},
+                {'name':'mt',    'threshold':110e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                ]
 
@@ -89,6 +90,17 @@ LUMI = 1.
 RESOLUTION = np.array([50,0,1], dtype=float)
 
 SCALING = Dir+modelfile+'_scaler.pkl'
+
+def asimovZ(s, b, b_err, syst=False):
+  tot = s + b
+  b2 = b*b
+  if syst:
+    b_err2 = np.sqrt( b_err*b_err + (b*0.25)*(b*0.25) )
+  else:
+    b_err2 = b_err * b_err
+  b_plus_err2 = b + b_err2
+  Z = np.sqrt(2 * ((tot)*np.log(tot * b_plus_err2 / (b2 + tot * b_err2)) - b2 / b_err2 * np.log(1 + b_err2 * s / (b * b_plus_err2))))
+  return Z
 
 def evaluate(model, dataset, scaler):
   dataset = scaler.transform(dataset)
@@ -180,42 +192,47 @@ def main():
   for s in Signal:
     significance = []
     significance_err = []
+    asimov = []
     tot_rel = np.sqrt(np.sum(s['output_var'])) / s['nEvents']
     for i in range(len(bins[1:])):
       #eff_sig = s['outputScore'][:i+1].sum() / s['nEvents']
       #eff_bkg = totalBkgOutput[:i+1].sum() / totalBkgOutput.sum()
-      eff_sig = s['outputScore'][i:-1].sum() / s['nEvents']
-      eff_bkg = totalBkgOutput[i:-1].sum() / totalBkgOutput.sum()
+      eff_sig = s['outputScore'][i:].sum() / s['nEvents']
+      eff_bkg = totalBkgOutput[i:].sum() / totalBkgOutput.sum()
  
       #err_sig = np.sqrt(np.sum(s['output_var'][:i+1])) / s['nEvents']
       #err_bkg = np.sqrt(np.sum(totalBkgVar[:i+1])) / totalBkgOutput.sum()
-      err_sig = np.sqrt(np.sum(s['output_var'][i:-1])) / s['nEvents']
-      err_bkg = np.sqrt(np.sum(totalBkgVar[i:-1])) / totalBkgOutput.sum()
+      err_sig = np.sqrt(np.sum(s['output_var'][i:])) / s['nEvents']
+      err_bkg = np.sqrt(np.sum(totalBkgVar[i:])) / totalBkgOutput.sum()
 
       #if totalBkgOutput[:i+1].sum() > 0.:
       #  rel_err_bkg = np.sqrt(np.sum(totalBkgVar[:i+1])) / totalBkgOutput[:i+1].sum()
-      if totalBkgOutput[i:-1].sum() > 0.:
-        rel_err_bkg = np.sqrt(np.sum(totalBkgVar[i:-1])) / totalBkgOutput[i:-1].sum()
+      if totalBkgOutput[i:].sum() > 0.:
+        rel_err_bkg = np.sqrt(np.sum(totalBkgVar[i:])) / totalBkgOutput[i:].sum()
       else:
         rel_err_bkg = 0.
       #if s['outputScore'][:i+1].sum() > 0.:
       #  rel_err_sig = np.sqrt(np.sum(s['output_var'][:i+1])) / s['outputScore'][:i+1].sum()
-      if s['outputScore'][i:-1].sum() > 0.:
-        rel_err_sig = np.sqrt(np.sum(s['output_var'][i:-1])) / s['outputScore'][i:-1].sum()
+      if s['outputScore'][i:].sum() > 0.:
+        rel_err_sig = np.sqrt(np.sum(s['output_var'][i:])) / s['outputScore'][i:].sum()
       else:
         rel_err_sig = 0.
       
-      total_rel_err = np.sqrt(rel_err_sig**2. + rel_err_bkg**2. + 0.25**2.)
+      #total_rel_err = np.sqrt(rel_err_sig**2. + rel_err_bkg**2. + 0.25**2.)
+      total_rel_err = np.sqrt(rel_err_bkg**2. + 0.25**2.)
 
       if (eff_sig == 0) or (eff_bkg == 0):
         Z = 0.
         Z_err = 0.
+        ams = 0.
       elif (err_sig / eff_sig > 0.75) or (err_bkg / eff_bkg > 0.75):
-        Z = 0
-        Z_err = 0
+        Z = 0.
+        Z_err = 0.
+        ams = 0.
       else:
         #Z = ROOT.RooStats.NumberCountingUtils.BinomialExpZ(s['outputScore'][:i+1].sum(), totalBkgOutput[:i+1].sum(), total_rel_err)
-        Z = ROOT.RooStats.NumberCountingUtils.BinomialExpZ(s['outputScore'][i:-1].sum(), totalBkgOutput[i:-1].sum(), total_rel_err)
+        Z = ROOT.RooStats.NumberCountingUtils.BinomialExpZ(s['outputScore'][i:].sum(), totalBkgOutput[i:].sum(), total_rel_err)
+        ams = asimovZ( s['outputScore'][i:].sum(), totalBkgOutput[i:].sum(), np.sqrt(totalBkgVar[i:].sum()))
 
         Zplus_sig = ROOT.RooStats.NumberCountingUtils.BinomialExpZ((eff_sig + err_sig) * s['nEvents'], eff_bkg * totalBkgOutput.sum(), total_rel_err)
         Zmins_sig = ROOT.RooStats.NumberCountingUtils.BinomialExpZ((eff_sig - err_sig) * s['nEvents'], eff_bkg * totalBkgOutput.sum(), total_rel_err)
@@ -228,13 +245,18 @@ def main():
 
       significance.append(Z)
       significance_err.append(Z_err)
+      asimov.append(ams)
 
     s['sig'] = np.array(significance)
     s['sig_max'] = s['sig'].max()
     s['sig_err'] = np.array(significance_err)
+    s['ams'] = np.array(asimov)
     print s['sig']
+    print s['ams']
     sigMax_index = bins[np.where(s['sig'] == s['sig'].max())][0]
-    print s['sig'].max(), sigMax_index
+    Z = asimovZ(Signal[0]['outputScore'][np.where(bins[:-1] == sigMax_index)], totalBkgOutput[np.where(bins[:-1] == sigMax_index)], np.sqrt(totalBkgVar[np.where(bins[:-1] == sigMax_index)]), syst=False)
+    Z_syst = asimovZ(Signal[0]['outputScore'][np.where(bins[:-1] == sigMax_index)], totalBkgOutput[np.where(bins[:-1] == sigMax_index)], np.sqrt(totalBkgVar[np.where(bins[:-1] == sigMax_index)]), syst=True)
+    print s['sig'].max(), sigMax_index, Z, Z_syst
 
   x = np.array([s['m_stop'] for s in Signal], dtype=float)
   y = np.array([s['m_X'] for s in Signal], dtype=float)
@@ -278,8 +300,8 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI)
 
-#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
-#  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
+  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
+  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
   plt.show()
 #        plt.savefig("plots/"+fileName+"_evaluated_grid.png")
 #        plt.close()
