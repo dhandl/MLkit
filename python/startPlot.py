@@ -15,6 +15,7 @@ import plot_Classification
 import plot_Classification2
 import plot_learning_curve
 import plot_output_score
+#import plot_output_score2D
 import plot_piechart
 import evaluate_signalGrid
 
@@ -81,6 +82,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     bkg_w_train = dataset["w_train"][y_train!=0]
     bkg_w_test = dataset["w_test"][y_test!=0]
     
+    outputScore = y_predict_test[:,0]
     
     #Do various plots
     
@@ -105,6 +107,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_piechart.plot_pie_chart(y_test, y_predict_test, fileName=filenames, save=save)
     
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
+    
+    #plt.figure()
+    #plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
     
     evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
     
