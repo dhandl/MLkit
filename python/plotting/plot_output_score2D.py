@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def plot_output_score2D(output_score, X_test, xlabel, ylabel, save=False, fileName='Test'):
     #https://stackoverflow.com/questions/30509890/how-to-plot-a-smooth-2d-color-plot-for-z-fx-y?rq=1
