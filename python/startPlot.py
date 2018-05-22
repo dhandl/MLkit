@@ -15,7 +15,7 @@ import plot_Classification
 import plot_Classification2
 import plot_learning_curve
 import plot_output_score
-#import plot_output_score2D
+import plot_output_score2D
 import plot_piechart
 import evaluate_signalGrid
 
@@ -108,8 +108,8 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
-    #plt.figure()
-    #plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
+    plt.figure()
+    plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
     
     evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
     
@@ -117,7 +117,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     t.stop()
     t0 = t.elapsed
     t.reset()
-    runtimeSummary(t0)
+    #runtimeSummary(t0)
     
 def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     """
@@ -197,6 +197,13 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     t0 = t.elapsed
     t.reset()
     runtimeSummary(t0)
+    
+def main():
+    modelDir = 'TrainedModels/models/2018-05-18_15-33_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    startPlot(modelDir, binning=[50,0,1.], save=False)
+    
+#if __name__== '__main__':
+    #main()
     
 def runtimeSummary(t0):
   hour = t0 // 3600
