@@ -117,7 +117,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     t.stop()
     t0 = t.elapsed
     t.reset()
-    #runtimeSummary(t0)
+    runtimeSummary(t0)
     
 def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     """
