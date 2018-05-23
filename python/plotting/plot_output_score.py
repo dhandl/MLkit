@@ -50,7 +50,7 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
 
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.9, 'Work in progress')
+  AtlasStyle_mpl.ATLASLabel2(ax1, 0.02, 0.9, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=140)
   if ratio:
     ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)

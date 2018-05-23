@@ -15,6 +15,7 @@ import plot_Classification
 import plot_Classification2
 import plot_learning_curve
 import plot_output_score
+import plot_output_score_multiclass
 import plot_output_score2D
 import plot_piechart
 import evaluate_signalGrid
@@ -44,7 +45,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","")
     
-    #filenames='TEST_20180523'
+    #filenames='TEST_20180523_3'
     
     print("Using dataset from:", datasetDir)
     
@@ -85,6 +86,13 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     bkg_w_train = dataset["w_train"][y_train!=0]
     bkg_w_test = dataset["w_test"][y_test!=0]
     
+    bkg1_predicted_test = y_predict_test[y_test==1]
+    bkg1_w_test = dataset["w_test"][y_test==1]
+    bkg2_predicted_test = y_predict_test[y_test==2]
+    bkg2_w_test = dataset["w_test"][y_test==2]
+    bkg3_predicted_test = y_predict_test[y_test==3]
+    bkg3_w_test = dataset["w_test"][y_test==3]
+    
     outputScore = y_predict_test[:,0]
     
     #Do various plots
@@ -110,6 +118,8 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_piechart.plot_pie_chart(y_test, y_predict_test, fileName=filenames, save=save)
     
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
+    
+    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted_test[:,0], sig_w_test, bkg1_predicted_test[:,0], bkg1_w_test, bkg2_predicted_test[:,0], bkg2_w_test, bkg3_predicted_test[:,0], bkg3_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
     plt.figure()
     plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
@@ -209,7 +219,8 @@ def main():
     modelDir2 = 'TrainedModels/models/2018-05-18_15-04_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir3 = 'TrainedModels/models/2018-05-18_15-12_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
-    startPlot(modelDir4, binning=[50,0,1.], save=True)
+    modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    startPlot(modelDir, binning=[50,0,1.], save=True)
     
 if __name__== '__main__':
     main()
