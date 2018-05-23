@@ -90,13 +90,16 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     
   classes = len(np.bincount(y_train.astype(int)))
   if classWeight.lower() == 'balanced':
+    print 'Using method balanced for class weights'
     w = compute_class_weight('balanced', np.unique(y_train), y_train)
     class_weight={i:w[i] for i in range(len(w))}
-  elif classWeight.lower() == 'SumOfWeights':
+  elif classWeight.lower() == 'sumofweights':
+    print 'Using method SumOfWeights for class weights'
     sumofweights = w_train.sum()
-    w = sumofweights / (classes * np.bincount(y_train))
+    w = sumofweights / (classes * np.bincount(y_train.astype(int)))
     class_weight={i:w[i] for i in range(len(w))}
   else:
+    print 'Using no class weights'
     class_weight = None
 
   #create 'one-hot' vector for y
