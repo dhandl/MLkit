@@ -172,7 +172,6 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted_test[:,0], sig_w_test, bkg1_predicted_test[:,0], bkg1_w_test, bkg2_predicted_test[:,0], bkg2_w_test, bkg3_predicted_test[:,0], bkg3_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
-    
     if (variables[4] == 'mt' and variables[5] =='met'):
         print '2D output score will be plotted'
         plt.figure()
@@ -180,6 +179,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     else: 
         print 'WARNING: 2D output score will not be plotted, as mt and met are missing'
     
+    plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
     
     evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
@@ -277,7 +277,7 @@ def main():
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
-    dirs.append(modelDir1)
+    #dirs.append(modelDir1)
     dirs.append(modelDir2)
     dirs.append(modelDir3)
     dirs.append(modelDir4)
