@@ -1,13 +1,20 @@
 import itertools
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import h5py
+
+from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import StandardScaler
+
+import prepareTraining as pT
+from collections import namedtuple
+Sample = namedtuple('Sample', 'name dataframe')
 
 def draw_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues,save=False,fileName="CM_test",isTrain=False):
+                          cmap=plt.cm.Blues,save=False,fileName="Test",isTrain=False, addStr = ''):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -51,12 +58,12 @@ def draw_confusion_matrix(cm, classes,
         if not os.path.exists("./plots/"):
             os.makedirs("./plots/")
             print("Creating folder plots")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + extraStr +".pdf")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + extraStr +".png")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + addStr + extraStr +".pdf")
+        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + addStr + extraStr +".png")
         plt.close()
     
     
-def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False,isTrain=False):
+def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False,isTrain=False, addStr=''):
     """
     Plotting (and printing) the confusion matrix
     """
@@ -67,4 +74,81 @@ def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False,isTrain=
     
     draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'],
                       normalize=True,
-                      title='Normalized Confusion Matrix',save=save,fileName=filename,isTrain=isTrain)
+                      title='Normalized Confusion Matrix',save=save,fileName=filename,isTrain=isTrain, addStr=addStr)
+    
+def plot_confusion_matrix_datapoint(SignalList, model, preselection, nvar, weight, lumi, save=False, fileName='Test', multiclass=True):
+    
+    '''
+    Evaluate the confusion matrix on certain datapoints. sigList is supposed to be in a form like in config/samples.py
+    '''
+    
+    input='/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+    
+    bkgList = [
+    {'name':'powheg_ttbar', 'path':input+'powheg_ttbar/'},
+    {'name':'powheg_singletop', 'path':input+'powheg_singletop/'},
+    {'name':'sherpa22_Wjets', 'path':input+'sherpa22_Wjets/'}
+    ]
+    
+    #Loading background once
+    print 'Loading background...'
+    
+    Background = []
+    for b in bkgList:
+      print 'Loading background {} from {}...'.format(b['name'], b['path'])
+      Background.append(Sample(b['name'], pT.loadDataFrame(b['path'], preselection, nvar, weight, lumi)))
+      
+    bkg = np.empty([0, Background[0].dataframe[0].shape[1]])
+    bkg_w = np.empty(0)
+    bkg_y = np.empty(0)
+    
+    for i, b in enumerate(Background):
+      i = i + 1
+      bkg = np.concatenate((bkg, b.dataframe[0]))
+      bkg_w = np.concatenate((bkg_w, b.dataframe[1]))
+      bkg_y = np.concatenate((bkg_y, np.full(b.dataframe[0].shape[0], i)))
+      
+    #Evaluating on signal for each set of points
+    print 'Evaluating on signal sets...'
+    
+    for sigList in SignalList:
+        Signal = []
+        addStr = '_stop_bWN_'
+        name=False
+        for s in sigList:
+            if not name:
+                addStr += s['name'].replace('stop_bWN_', '')
+                name=True
+            else:
+                addStr += s['name'].replace(s['name'][:12], '')
+            
+            print 'Loading signal {} from {}...'.format(s['name'], s['path'])
+            Signal.append(Sample(s['name'], pT.loadDataFrame(s['path'], preselection, nvar, weight, lumi)))
+        
+        sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
+        sig_w = np.empty(0)
+        sig_y = np.empty(0)
+    
+        for s in Signal:
+            sig = np.concatenate((sig, s.dataframe[0]))
+            sig_w = np.concatenate((sig_w, s.dataframe[1]))
+            sig_y = np.concatenate((sig_y, np.zeros(s.dataframe[0].shape[0])))
+      
+        X = np.concatenate((sig, bkg))
+        w = np.concatenate((sig_w, bkg_w))
+  
+        if multiclass:
+            y = np.concatenate((sig_y, bkg_y))
+        else:
+            y = []
+            for _df, ID in [(sig, 0), (bkg, 1)]:
+                y.extend([ID] * _df.shape[0])
+            y = np.array(y)
+
+        scaler=StandardScaler()
+
+        X_scaled = scaler.fit_transform(X)
+        y_predict = model.predict(X_scaled)
+        y_true = y
+
+        plot_confusion_matrix(y_true, y_predict, filename=fileName, save=save, addStr=addStr)

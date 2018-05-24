@@ -482,6 +482,8 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
   
   preselection = preselection_evaluate
   
+  print 'Using the following preselection to evaluate:' , preselection
+  
   signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
   
   #Get Scaler and model from modelDir

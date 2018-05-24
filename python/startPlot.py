@@ -36,20 +36,65 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     #Load models
     
-    print("Loading dataset...")
+    print 'Loading infos from infofile...'
     
     infofile = open(modelDir.replace(".h5","_infofile.txt"))
-    datasetDir = "TrainedModels/datasets/" + infofile.readlines()[3].replace("Used dataset: ", "").replace("\n","") + ".h5"
+    infos = infofile.readlines()
+    
+    variables=infos[4].replace('Used variables for training: ','').replace('\n','').split()
+    weights=infos[5].replace('Used weights: ', '').replace('\n','').split()
+    lumi=float(infos[7].replace('Used Lumi: ','').replace('\n',''))
+    
+    preselection_raw=infos[6].replace('Used preselection: ', '').replace('; \n', '').split(';')
+    preselection=[]
+    for x in preselection_raw:
+        xdict = {}
+        xdict['name']= x.split()[0].split('-')[0]
+        xdict['threshold']= float(x.split()[1])
+        xdict['type'] = x.split()[3]
+        if xdict['type'] == 'condition':
+            xdict['variable'] = x.split()[5]
+            xdict['lessthan'] = float(x.split()[7])
+            xdict['morethan'] = float(x.split()[10])
+        preselection.append(xdict)
+        
+    print "Loading dataset..."
+    datasetDir = "TrainedModels/datasets/" + infos[3].replace("Used dataset: ", "").replace("\n","") + ".h5"
     
     dataset = h5py.File(datasetDir)
     
     filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","")
     
-    #filenames='TEST_20180523_3'
+    #filenames='TEST_20180524'
     
-    print("Using dataset from:", datasetDir)
+    print "Using dataset from:", datasetDir
     
-    print("Loading model...")
+    print 'Reading files for specific confusion matrices...'
+    
+    Signal = []
+    input = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+    
+    point1 = [{'name':'stop_bWN_250_100', 'path':input+'stop_bWN_250_100/'},{'name':'stop_bWN_250_130', 'path':input+'stop_bWN_250_130/'},{'name':'stop_bWN_250_160', 'path':input+'stop_bWN_250_160/'}]
+    point2 = [{'name':'stop_bWN_300_150', 'path':input+'stop_bWN_300_150/'},{'name':'stop_bWN_300_180', 'path':input+'stop_bWN_300_180/'},{'name':'stop_bWN_300_210', 'path':input+'stop_bWN_300_210/'}]
+    point3 = [{'name':'stop_bWN_350_200', 'path':input+'stop_bWN_350_200/'},{'name':'stop_bWN_350_230', 'path':input+'stop_bWN_350_230/'},{'name':'stop_bWN_350_260', 'path':input+'stop_bWN_350_260/'}]
+    point4 = [{'name':'stop_bWN_400_250', 'path':input+'stop_bWN_400_250/'},{'name':'stop_bWN_400_280', 'path':input+'stop_bWN_400_280/'},{'name':'stop_bWN_400_310', 'path':input+'stop_bWN_400_310/'}]
+    point5 = [{'name':'stop_bWN_450_300', 'path':input+'stop_bWN_450_300/'},{'name':'stop_bWN_450_330', 'path':input+'stop_bWN_450_330/'},{'name':'stop_bWN_450_360', 'path':input+'stop_bWN_450_360/'}]
+    point6 = [{'name':'stop_bWN_500_350', 'path':input+'stop_bWN_500_350/'},{'name':'stop_bWN_500_380', 'path':input+'stop_bWN_500_380/'}]
+    point7 = [{'name':'stop_bWN_550_400', 'path':input+'stop_bWN_550_400/'},{'name':'stop_bWN_550_430', 'path':input+'stop_bWN_550_430/'},{'name':'stop_bWN_550_460', 'path':input+'stop_bWN_550_460/'}]
+    point8 = [{'name':'stop_bWN_600_450', 'path':input+'stop_bWN_600_450/'},{'name':'stop_bWN_600_480', 'path':input+'stop_bWN_600_480/'},{'name':'stop_bWN_600_510', 'path':input+'stop_bWN_600_510/'}]
+    point9 = [{'name':'stop_bWN_650_500', 'path':input+'stop_bWN_650_500/'},{'name':'stop_bWN_650_530', 'path':input+'stop_bWN_650_530/'},{'name':'stop_bWN_650_560', 'path':input+'stop_bWN_650_560/'}]
+    
+    Signal.append(point1)
+    Signal.append(point2)
+    Signal.append(point3)
+    Signal.append(point4)
+    Signal.append(point5)
+    Signal.append(point6)
+    Signal.append(point7)
+    Signal.append(point8)
+    Signal.append(point9)
+    
+    print "Loading model..."
     
     try:
         pickleDir = modelDir.replace(".h5", "_history.pkl")
@@ -63,6 +108,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
         return 0
     
     #Get the data and scale it, if necessary
+    print 'Loading data from dataset...'
     
     X_train = dataset["X_train"][:]
     X_test = dataset["X_test"][:]
@@ -96,6 +142,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     outputScore = y_predict_test[:,0]
     
     #Do various plots
+    print 'Start plotting...'
     
     plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
     
@@ -104,6 +151,10 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix(y_train, y_predict_train, filename=filenames, save=save, isTrain=True)
+    
+    print '----- Plotting the confusion matrices for different datapoints-----'
+    plt.figure()
+    plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection, variables, weights, lumi, save=save, fileName=filenames)
     
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
@@ -220,7 +271,7 @@ def main():
     modelDir3 = 'TrainedModels/models/2018-05-18_15-12_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
-    startPlot(modelDir, binning=[50,0,1.], save=True)
+    startPlot(modelDir2, binning=[50,0,1.], save=True)
     
 if __name__== '__main__':
     main()
