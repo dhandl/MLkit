@@ -172,8 +172,13 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted_test[:,0], sig_w_test, bkg1_predicted_test[:,0], bkg1_w_test, bkg2_predicted_test[:,0], bkg2_w_test, bkg3_predicted_test[:,0], bkg3_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
-    plt.figure()
-    plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
+    
+    if (variables[4] == 'mt' and variables[5] =='met'):
+        print '2D output score will be plotted'
+        plt.figure()
+        plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
+    else: 
+        print 'WARNING: output score will not be plotted, as mt and met are missing'
     
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
     
