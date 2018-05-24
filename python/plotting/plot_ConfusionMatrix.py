@@ -82,6 +82,16 @@ def plot_confusion_matrix_datapoint(SignalList, model, preselection, nvar, weigh
     Evaluate the confusion matrix on certain datapoints. sigList is supposed to be in a form like in config/samples.py
     '''
     
+    print '----- Plotting the confusion matrices for different datapoints-----'
+    
+    met_cut = False
+    for pre in preselection:
+        if pre['name'] == 'met':
+            met_cut = True
+    
+    if not met_cut:
+        print 'Using no met-preselection!'
+    
     input='/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
     
     bkgList = [
@@ -150,5 +160,8 @@ def plot_confusion_matrix_datapoint(SignalList, model, preselection, nvar, weigh
         X_scaled = scaler.fit_transform(X)
         y_predict = model.predict(X_scaled)
         y_true = y
+        
+        if not met_cut:
+            addStr += '_no_met_cut'
 
         plot_confusion_matrix(y_true, y_predict, filename=fileName, save=save, addStr=addStr)

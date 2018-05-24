@@ -58,6 +58,13 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
             xdict['morethan'] = float(x.split()[10])
         preselection.append(xdict)
         
+    preselection_no_met = [ 
+                {'name':'n_jet',  'threshold':4,      'type':'geq'},
+                {'name':'n_bjet',  'threshold':1,      'type':'geq'},
+                {'name':'mt',    'threshold':90e3,  'type':'geq'},
+                {'name':'n_lep',  'threshold':1,      'type':'exact'}
+                ]
+        
     print "Loading dataset..."
     datasetDir = "TrainedModels/datasets/" + infos[3].replace("Used dataset: ", "").replace("\n","") + ".h5"
     
@@ -69,7 +76,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     print "Using dataset from:", datasetDir
     
-    print 'Reading files for specific confusion matrices...'
+    print 'Defining files for specific confusion matrices...'
     
     Signal = []
     input = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
@@ -152,9 +159,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix(y_train, y_predict_train, filename=filenames, save=save, isTrain=True)
     
-    print '----- Plotting the confusion matrices for different datapoints-----'
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection, variables, weights, lumi, save=save, fileName=filenames)
+    
+    plt.figure()
+    plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection_no_met, variables, weights, lumi, save=save, fileName=filenames)
     
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
@@ -277,7 +286,7 @@ def main():
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
-    #dirs.append(modelDir1)
+    dirs.append(modelDir1)
     dirs.append(modelDir2)
     dirs.append(modelDir3)
     dirs.append(modelDir4)
