@@ -178,7 +178,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
         plt.figure()
         plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
     else: 
-        print 'WARNING: output score will not be plotted, as mt and met are missing'
+        print 'WARNING: 2D output score will not be plotted, as mt and met are missing'
     
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
     
@@ -276,7 +276,13 @@ def main():
     modelDir3 = 'TrainedModels/models/2018-05-18_15-12_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
-    startPlot(modelDir2, binning=[50,0,1.], save=True)
+    dirs = []
+    dirs.append(modelDir1)
+    dirs.append(modelDir2)
+    dirs.append(modelDir3)
+    dirs.append(modelDir4)
+    for mdir in dirs:
+        startPlot(mdir, save=True)
     
 if __name__== '__main__':
     main()

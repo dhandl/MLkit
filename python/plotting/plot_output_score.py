@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import AtlasStyle_mpl
 
 def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileName="Test", normed=False, save=False, ratio=True):
-  print('Plotting the output score...')
+  print('Plotting the binary output score...')
   fig = plt.figure(figsize=(8,6))
   if ratio:
     ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)

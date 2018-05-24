@@ -12,7 +12,7 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
     
     #Binary Classification
     
-    print 'Generating plots fOr binary Classification...'
+    print 'Generating ROC-plots for binary Classification...'
     
     y_train_binary = deepcopy(y_train)
     y_train_binary[y_train_binary > 0] = 1
@@ -53,7 +53,7 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         
     #Multiclass Classification
     
-    print 'Generating plots for Multiclass Classification...'
+    print 'Generating ROC-plots for Multiclass Classification...'
         
     y_train_bkg1 = np.array([x for x in y_train if x in [0,1]])
     y_train_bkg2 = np.array([x for x in y_train if x in [0,2]])
