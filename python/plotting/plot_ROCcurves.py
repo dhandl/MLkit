@@ -34,7 +34,7 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
     #auc_train = auc(fpr_train, tpr_train, reorder=True)
     #auc_test = auc(fpr_test, tpr_test, reorder=True)
     
-    plt.figure(1)
+    plt.figure('ROC1')
     plt.plot(tpr_train_binary, 1.-fpr_train_binary, lw=1, label='Training (AUC = %0.2f)'%(auc_train_binary), color='b')
     plt.plot(tpr_test_binary, 1.-fpr_test_binary, lw=1, label='Testing (AUC = %0.2f)'%(auc_test_binary), color='r')
     #plt.plot(fpr_train_binary, 1.-tpr_train_binary, lw=1, label='Training (AUC = %0.2f)'%(auc_train_binary), color='b')
@@ -80,9 +80,9 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         auc_train_bkg1 = roc_auc_score(y_train_bkg1, y_predict_train_bkg1)
         auc_test_bkg1 = roc_auc_score(y_test_bkg1, y_predict_test_bkg1)
         
-        plt.figure(2)
+        plt.figure('ROC2')
         plt.plot(tpr_train_bkg1, 1.-fpr_train_bkg1, lw=1, label=r'$t\bar{t}$ (AUC = %0.2f)'%(auc_train_bkg1), color='b')
-        plt.figure(3)
+        plt.figure('ROC3')
         plt.plot(tpr_test_bkg1, 1.-fpr_test_bkg1, lw=1, label=r'$t\bar{t}$ (AUC = %0.2f)'%(auc_test_bkg1), color = 'b')
         
     except ValueError:
@@ -95,9 +95,9 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         auc_train_bkg2 = roc_auc_score(y_train_bkg2, y_predict_train_bkg2)
         auc_test_bkg2 = roc_auc_score(y_test_bkg2, y_predict_test_bkg2)
         
-        plt.figure(2)
+        plt.figure('ROC2')
         plt.plot(tpr_train_bkg2, 1.-fpr_train_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_train_bkg2), color='r')
-        plt.figure(3)
+        plt.figure('ROC3')
         plt.plot(tpr_test_bkg2, 1.-fpr_test_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_test_bkg2), color='r')
     
     except ValueError:
@@ -111,16 +111,16 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         auc_train_bkg3 = roc_auc_score(y_train_bkg3, y_predict_train_bkg3)
         auc_test_bkg3 = roc_auc_score(y_test_bkg3, y_predict_test_bkg3)
     
-        plt.figure(2)
+        plt.figure('ROC2')
         plt.plot(tpr_train_bkg3, 1.-fpr_train_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_train_bkg3), color='g')
-        plt.figure(3)
+        plt.figure('ROC3')
         plt.plot(tpr_test_bkg3, 1.-fpr_test_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_test_bkg3), color='g')
     
     except ValueError:
         print 'Class 3 has not been identified correctly'
     
     
-    plt.figure(2)
+    plt.figure('ROC2')
     plt.plot([0, 1], [1, 0], '--', color=(0.6, 0.6, 0.6), label='Luck')
     plt.xlim([0., 1.])
     plt.ylim([0., 1.])
@@ -130,7 +130,7 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
     plt.legend(loc="best")
     plt.grid()
     
-    plt.figure(3)
+    plt.figure('ROC3')
     plt.plot([0, 1], [1, 0], '--', color=(0.6, 0.6, 0.6), label='Luck')
     plt.xlim([0., 1.])
     plt.ylim([0., 1.])
@@ -146,13 +146,15 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         if not os.path.exists("./plots/"):
             os.makedirs("./plots/")
             print("Creating folder plots")
-        plt.figure(1)
+        plt.figure('ROC1')
         plt.savefig("plots/"+fileName+"_ROCcurveBinary.pdf")
         plt.savefig("plots/"+fileName+"_ROCcurveBinary.png")
-        plt.figure(2)
+        plt.close()
+        plt.figure('ROC2')
         plt.savefig("plots/"+fileName+"_ROCcurveMulticlassTraining.pdf")
         plt.savefig("plots/"+fileName+"_ROCcurveMulticlassTraining.png")
-        plt.figure(3)
+        plt.close()
+        plt.figure('ROC3')
         plt.savefig("plots/"+fileName+"_ROCcurveMulticlassTesting.pdf")
         plt.savefig("plots/"+fileName+"_ROCcurveMulticlassTesting.png")
         plt.close()
