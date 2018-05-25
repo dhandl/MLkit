@@ -12,7 +12,7 @@ import numpy as np
 
 from prepareTraining import prepareTraining
 from prepareSequentialTraining import prepareSequentialTraining
-from models import trainBDT, trainNN, trainRNN
+from models import trainBDT, trainNN, trainRNN, trainOptNN
 
 from sklearn.externals import joblib
 from sklearn.preprocessing import StandardScaler
@@ -167,6 +167,7 @@ def parse_options():
   parser.add_argument('-t', '--trainsize', help='Size of training data. Both (float/int) possible', default=None)
   parser.add_argument('-u', '--testsize', help='Size of test data. Both (float/int) possible', default=None)
   parser.add_argument('-p', '--plot', help='Plotting the output (True/False)', default=False,type=bool)
+  parser.add_argument('-x', '--hyperoptimization', help='Optimize certain hyperparameters (True/False)', default=False,type=bool)
 
   opts = parser.parse_args()
 
@@ -233,16 +234,28 @@ def main():
     print 'Standardize training and test set...'
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)  
-      
-    model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
-                                     alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
-                                     alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
-                                     alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
-                                     alg.options['nesterov'], alg.options['multiclassification'], reproduce=opts.reproduce)
-
-    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
-      pickle.dump(history.history, hist_pi)
+    X_test = scaler.transform(X_test)
+    
+    if opts.hyperoptimization:
+        print 'Using hyperas for hyperparameter optimization'
+        
+        model, y_pred = trainOptNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
+                                        alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
+                                        alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
+                                        alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
+                                        alg.options['nesterov'], alg.options['multiclassification'], reproduce=opts.reproduce)
+        #with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
+            #pickle.dump(history.history, hist_pi)
+        
+    else:
+        model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
+                                        alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
+                                        alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
+                                        alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
+                                        alg.options['nesterov'], alg.options['multiclassification'], reproduce=opts.reproduce)
+        
+        with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
+            pickle.dump(history.history, hist_pi)
 
   elif (opts.analysis.lower() == 'rnn'):
       

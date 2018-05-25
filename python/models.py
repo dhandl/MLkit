@@ -12,7 +12,6 @@ from keras import initializers
 from keras.optimizers import SGD
 from keras.utils import np_utils
 
-
 # scikit-learn
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.model_selection import train_test_split
@@ -154,6 +153,121 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
 
   print "DNN finished!"
   return model, history, y_predicted
+
+def trainOptNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, classWeight='SumOfWeights', learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, multiclass = False, reproduce = False):
+    
+    #hyperas
+    print 'Import hyperas packages...'
+    from hyperas import optim
+    from hyperopt import Trials, STATUS_OK, tpe
+    from hyperas.distributions import choice, uniform
+  
+    if reproduce:
+        
+        print 'Constant seed is activated, TensorFlow is forced to use single thread'
+        
+        import tensorflow as tf
+        import random as rn
+        from keras import backend as K
+        
+        # The below is necessary in Python 3.2.3 onwards to
+        # have reproducible behavior for certain hash-based operations.
+        # See these references for further details:
+        # https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONHASHSEED
+        # https://github.com/keras-team/keras/issues/2280#issuecomment-306959926
+        os.environ['PYTHONHASHSEED'] = '0'
+        
+        # The below is necessary for starting Numpy generated random numbers
+        # in a well-defined initial state.
+        np.random.seed(42)
+        
+        # The below is necessary for starting core Python generated random numbers
+        # in a well-defined state.
+        rn.seed(12345)
+        
+        # Force TensorFlow to use single thread.
+        # Multiple threads are a potential source of
+        # non-reproducible results.
+        # For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
+        session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+        
+        # The below tf.set_random_seed() will make random number generation
+        # in the TensorFlow backend have a well-defined initial state.
+        # For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
+        tf.set_random_seed(1234)
+
+        sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+        K.set_session(sess)
+
+        #from https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
+    
+    classes = len(np.bincount(y_train.astype(int)))
+    if classWeight.lower() == 'balanced':
+        print 'Using method balanced for class weights'
+        w = compute_class_weight('balanced', np.unique(y_train), y_train)
+        class_weight={i:w[i] for i in range(len(w))}
+    elif classWeight.lower() == 'sumofweights':
+        print 'Using method SumOfWeights for class weights'
+        sumofweights = w_train.sum()
+        w = sumofweights / (classes * np.bincount(y_train.astype(int)))
+        class_weight={i:w[i] for i in range(len(w))}
+    else:
+        print 'Using no class weights'
+        class_weight = None
+
+    best_run, best_model = optim.minimize(model=create_model,
+                                          data=(X_train, y_train, X_test, y_test, class_weight),
+                                          algo=tpe.suggest,
+                                          max_evals=5,
+                                          trials=Trials())
+    print("Evalutation of best performing model:")
+    print(best_model.evaluate(X_test, Y_test))
+    print("Best performing model chosen hyper-parameters:")
+    print(best_run)
+    
+    y_predicted = best_model.predict(X_test)
+    
+    return best_model, y_predicted
+    
+def create_model(X_train, y_train, X_test, y_test, class_weight):
+    #Fix parameters
+    initializer='normal'
+    activation='relu'
+    dropout=0.5
+    epochs=50
+    
+    model = Sequential()
+    model.add(Dense({{choice([8, 16, 32, 64, 128])}}, input_shape=X_train.shape[1], activation=activation, kernel_initializer=initializer))
+    model.add(BatchNormalization())
+    
+    model.add(Dense({{choice([8, 16, 32, 64, 128])}}, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
+    model.add(Dropout(dropout))
+    model.add(BatchNormalization())
+    model.add(Dense({{choice([8, 16, 32, 64, 128])}}, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
+    model.add(Dropout(dropout))
+    model.add(BatchNormalization())
+    model.add(Dense({{choice([8, 16, 32, 64, 128])}}, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
+    model.add(Dropout(dropout))
+    model.add(BatchNormalization())
+    model.add(Dense({{choice([8, 16, 32, 64, 128])}}, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
+    model.add(Dropout(dropout))
+    model.add(BatchNormalization())
+    
+    model.add(Dense(classes, activation='softmax'))
+
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    history = model.fit(X_train, y_train,
+              batch_size={{choice([32, 64, 128])}},
+              epochs=epochs,
+              verbose=2,
+              shuffle=True,
+              class_weight=class_weight,
+              sample_weight=None, validation_data=(X_test,y_test,None),
+              callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
+    score, acc = model.evaluate(X_test, y_test, verbose=0)
+    print('Test accuracy:', acc)
+    return {'loss': -acc, 'status': STATUS_OK, 'model': model, 'history': history}
 
 
 def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False):
