@@ -192,6 +192,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
     
     evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
+    evaluate_signalGrid.evaluate_signalGridCuts(modelDir, save=save, fileName=filenames)
     
     # end timer and print time
     t.stop()

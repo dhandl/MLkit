@@ -255,7 +255,7 @@ if __name__ == "__main__":
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
     
-def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Grid_test"):
+def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Test"):
   print('Evaluating singal grid...')  
   
   infofile = open(modelDir.replace(".h5","_infofile.txt"))
@@ -464,7 +464,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
         
 ########### Evaluate on different cuts than in dataset
 
-def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Grid_test"):
+def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Test"):
   print('Evaluating singal grid...') 
   
   if fileName=='Grid_test':
