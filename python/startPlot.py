@@ -159,11 +159,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix(y_train, y_predict_train, filename=filenames, save=save, isTrain=True)
     
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection, variables, weights, lumi, save=save, fileName=filenames)
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection, variables, weights, lumi, save=save, fileName=filenames)
     
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection_no_met, variables, weights, lumi, save=save, fileName=filenames)
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix_datapoint(Signal, model, preselection_no_met, variables, weights, lumi, save=save, fileName=filenames)
     
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
@@ -287,12 +287,15 @@ def main():
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir5 = 'TrainedModels/models/2018-05-11_13-34_DNN_ADAM_layer4x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir6 = 'TrainedModels/models/2018-05-28_14-44_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir7 = 'TrainedModels/models/2018-05-28_16-11_DNN_ADAM_layer1x10_batch10_NormalInitializer_dropout0p5_l2-0p01_multiclass_TEST.h5'
+    modelDir8 = 'TrainedModels/models/2018-05-28_17-57_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
     #dirs.append(modelDir3)
     #dirs.append(modelDir4)
-    dirs.append(modelDir)
+    dirs.append(modelDir8)
     for mdir in dirs:
         startPlot(mdir, save=True)
     

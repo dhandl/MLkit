@@ -142,7 +142,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
               class_weight=class_weight,
               sample_weight=None, validation_data=(X_test,y_test,None),
-              callbacks = [EarlyStopping(verbose=True, patience=10, monitor='val_acc')])
+              callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
   except KeyboardInterrupt:
     print '--- Training ended early ---'
   print 'Testing...'

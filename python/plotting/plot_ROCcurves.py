@@ -50,6 +50,7 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
     plt.title('Receiver operating characteristic')
     plt.legend(loc="best")
     plt.grid()
+    #plt.show()
         
     #Multiclass Classification
     

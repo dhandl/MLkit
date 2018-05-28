@@ -36,9 +36,9 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
   
   bkgs = [bkg1_predicted.ravel(),bkg2_predicted.ravel(),bkg3_predicted.ravel()]
   bweights = [bkg1_w,bkg2_w,bkg3_w]
-  labels = [r'$t\overline{t}$ radiation low','single top', r'$W$+jets']
+  labels = [r'$t\overline{t}$','single top', r'$W$+jets']
   
-  s_hist, s_bins, s_patches = plt.hist(sig_predicted.ravel(), weights=sig_w, histtype='stepfilled', color='r', label='ttbar nominal', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed) 
+  s_hist, s_bins, s_patches = plt.hist(sig_predicted.ravel(), weights=sig_w, histtype='stepfilled', color='r', label='signal', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed) 
   b_hist, b_bins, b_patches = plt.hist(bkgs, weights=bweights, histtype='stepfilled', label=labels, alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed, stacked=True)
   
   #s_w = getSumW2(sig_predicted.ravel(), sig_w, binning)
