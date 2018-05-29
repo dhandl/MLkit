@@ -30,11 +30,15 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   ax1.xaxis.set_ticks_position('both')
   ax1.yaxis.set_ticks_position('both')
 
-  s_histTrain, s_binsTrain, s_patchesTrain = plt.hist(sig_predicted_train.ravel(), weights=sig_w_train, histtype='stepfilled', color='r', label='Signal (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
-  b_histTrain, b_binsTrain, b_patchesTrain = plt.hist(bkg_predicted_train.ravel(), weights=bkg_w_train, histtype='stepfilled', color='b', label='Background (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  #s_histTrain, s_binsTrain, s_patchesTrain = plt.hist(sig_predicted_train.ravel(), weights=sig_w_train, histtype='stepfilled', color='r', label='Signal (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  s_histTrain, s_binsTrain, s_patchesTrain = plt.hist(sig_predicted_train.ravel(), weights=None, histtype='stepfilled', color='r', label='Signal (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  #b_histTrain, b_binsTrain, b_patchesTrain = plt.hist(bkg_predicted_train.ravel(), weights=bkg_w_train, histtype='stepfilled', color='b', label='Background (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  b_histTrain, b_binsTrain, b_patchesTrain = plt.hist(bkg_predicted_train.ravel(), weights=None, histtype='stepfilled', color='b', label='Background (Training)', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
 
-  s_histTest, s_binsTest = np.histogram(sig_predicted_test.ravel(), weights=sig_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
-  b_histTest, b_binsTest = np.histogram(bkg_predicted_test.ravel(), weights=bkg_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  #s_histTest, s_binsTest = np.histogram(sig_predicted_test.ravel(), weights=sig_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  s_histTest, s_binsTest = np.histogram(sig_predicted_test.ravel(), weights=None, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  #b_histTest, b_binsTest = np.histogram(bkg_predicted_test.ravel(), weights=bkg_w_test, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  b_histTest, b_binsTest = np.histogram(bkg_predicted_test.ravel(), weights=None, bins=binning[0], range=(binning[1], binning[2]), density=normed)
 
   width = (s_binsTrain[1] - s_binsTrain[0])
   center = (s_binsTrain[:-1] + s_binsTrain[1:]) / 2

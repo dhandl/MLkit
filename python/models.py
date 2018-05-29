@@ -189,7 +189,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
       combined = sequence[0]['channel']
 
   for l in combinedDim:
-    combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer))(combined)
+    combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer))(combined)
     combined = BatchNormalization()(combined)
     combined = Dropout(dropout)(combined)
 

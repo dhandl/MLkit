@@ -37,22 +37,22 @@ def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
   if not multiclass:
     for i in range(0, len(y_train)):
       if (y_train[i]<0.5):
-        nb += 1.
-        nb_w += w_train[i]
-      if (y_train[i]>0.5):
         ns += 1.
         ns_w += w_train[i]
+      if (y_train[i]>0.5):
+        nb += 1.
+        nb_w += w_train[i]
     ns_train = ns; nsw_tain = ns_w
     nb_train = nb; nbw_train = nb_w
     print 'Number of unweighted training events (sig/bkg): %0.2f / %0.2f'%(ns, nb)
     print 'Number of weighted training events (sig/bkg): %0.2f / %0.2f'%(ns_w, nb_w)
     for i in range(0, len(y_test)):
       if (y_test[i]<0.5):
-        nb += 1.
-        nb_w += w_test[i]
-      if (y_test[i]>0.5):
         ns += 1.
         ns_w += w_test[i]
+      if (y_test[i]>0.5):
+        nb += 1.
+        nb_w += w_test[i]
 
   elif multiclass:
     for i in range(0, len(y_train)):

@@ -213,14 +213,14 @@ def main():
     s['sig'] = np.array(significance)
     s['sig_max'] = s['sig'].max()
     s['sig_err'] = np.array(significance_err)
-    print s['sig']
-    print s['sig'].max(), bins[np.where(s['sig'] == s['sig'].max())]
+    #print s['sig']
+    print s['m_stop'], s['m_X'], s['sig'].max(), bins[np.where(s['sig'] == s['sig'].max())]
 
   x = np.array([s['m_stop'] for s in Signal], dtype=float)
   y = np.array([s['m_X'] for s in Signal], dtype=float)
   z = np.array([s['sig_max'] for s in Signal],dtype=float)
 
-  print x, y, z
+  #print x, y, z
   # Set up a regular grid of interpolation points
   fig, ax1 = plt.subplots(figsize=(8,6))
   xi, yi = np.linspace(x.min(), x.max(), 100), np.linspace(y.min(), y.max(), 100)
@@ -421,14 +421,14 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
     s['sig'] = np.array(significance)
     s['sig_max'] = s['sig'].max()
     s['sig_err'] = np.array(significance_err)
-    print s['sig']
-    print s['sig'].max(), bins[np.where(s['sig'] == s['sig'].max())]
+    #print s['sig']
+    print s['m_stop'], s['m_X'], s['sig'].max(), bins[np.where(s['sig'] == s['sig'].max())]
 
   x = np.array([s['m_stop'] for s in Signal], dtype=float)
   y = np.array([s['m_X'] for s in Signal], dtype=float)
   z = np.array([s['sig_max'] for s in Signal],dtype=float)
 
-  print x, y, z
+  #print x, y, z
   # Set up a regular grid of interpolation points
   fig, ax1 = plt.subplots(figsize=(8,6))
   xi, yi = np.linspace(x.min(), x.max(), 100), np.linspace(y.min(), y.max(), 100)
