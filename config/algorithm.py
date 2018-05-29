@@ -5,11 +5,11 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass',
+          'DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass',
           {
-          'layers':[128,128,128,128],
+          'layers':[80],
           'ncycles':50,
-          'batchSize':100,
+          'batchSize':40,
           'dropout':0.5,
           'optimizer':'adam',
           'activation':'relu',
