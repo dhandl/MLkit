@@ -7,7 +7,7 @@ import timer
 from sklearn.externals import joblib
 import pickle
 
-sys.path.append("./python/plotting/")
+sys.path.append('./python/plotting/')
 
 import plot_TrainTest_score
 import plot_ConfusionMatrix
@@ -23,7 +23,7 @@ import plot_ROCcurves
 import plot_Correlation
 
 def startPlot(modelDir, binning=[50,0,1.], save=False):
-    """
+    '''
     Plot all important things
         
     - modelDir: Directory of model
@@ -31,7 +31,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     - binning = [bins, start, stop] default: [50,0,1.]
     
     - save: Save Files in ./plots/ (True/False)
-    """
+    '''
     t = timer.Timer()
     t.start()
     
@@ -39,7 +39,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     print 'Loading infos from infofile...'
     
-    infofile = open(modelDir.replace(".h5","_infofile.txt"))
+    infofile = open(modelDir.replace('.h5','_infofile.txt'))
     infos = infofile.readlines()
     
     variables=infos[4].replace('Used variables for training: ','').replace('\n','').split()
@@ -66,16 +66,16 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                 ]
         
-    print "Loading dataset..."
-    datasetDir = "TrainedModels/datasets/" + infos[3].replace("Used dataset: ", "").replace("\n","") + ".h5"
+    print 'Loading dataset...'
+    datasetDir = 'TrainedModels/datasets/' + infos[3].replace('Used dataset: ', '').replace('\n','') + '.h5'
     
     dataset = h5py.File(datasetDir)
     
-    filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","")
+    filenames = modelDir.replace('TrainedModels/models/','').replace('.h5','')
     
     #filenames='TEST_20180524'
     
-    print "Using dataset from:", datasetDir
+    print 'Using dataset from:', datasetDir
     
     print 'Defining files for specific confusion matrices...'
     
@@ -102,26 +102,26 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     Signal.append(point8)
     Signal.append(point9)
     
-    print "Loading model..."
+    print 'Loading model...'
     
     try:
-        pickleDir = modelDir.replace(".h5", "_history.pkl")
+        pickleDir = modelDir.replace('.h5', '_history.pkl')
         model = load_model(modelDir)
-        model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
-        print("Neuronal Network detected!")
-        print("Scaling and reading values...")
+        model.load_weights(modelDir.replace('.h5' , '_weights.h5').replace('models' , 'weights'))
+        print('Neuronal Network detected!')
+        print('Scaling and reading values...')
     except IOError:
         model = joblib.load(modelDir)
-        print("Boosted Decision Tree detected!")
+        print('Boosted Decision Tree detected!')
         return 0
     
     #Get the data and scale it, if necessary
     print 'Loading data from dataset...'
     
-    X_train = dataset["X_train"][:]
-    X_test = dataset["X_test"][:]
-    y_train= dataset["y_train"][:]
-    y_test= dataset["y_test"][:]
+    X_train = dataset['X_train'][:]
+    X_test = dataset['X_test'][:]
+    y_train= dataset['y_train'][:]
+    y_test= dataset['y_test'][:]
        
     scaler = StandardScaler()
 
@@ -133,21 +133,29 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     sig_predicted_train = y_predict_train[y_train==0]
     sig_predicted_test = y_predict_test[y_test==0]
-    sig_w_train = dataset["w_train"][y_train==0]
-    sig_w_test = dataset["w_test"][y_test==0]
+    sig_w_train = dataset['w_train'][y_train==0]
+    sig_w_test = dataset['w_test'][y_test==0]
     bkg_predicted_train = y_predict_train[y_train!=0]
     bkg_predicted_test = y_predict_test[y_test!=0]
-    bkg_w_train = dataset["w_train"][y_train!=0]
-    bkg_w_test = dataset["w_test"][y_test!=0]
+    bkg_w_train = dataset['w_train'][y_train!=0]
+    bkg_w_test = dataset['w_test'][y_test!=0]
     
     bkg1_predicted_test = y_predict_test[y_test==1]
-    bkg1_w_test = dataset["w_test"][y_test==1]
+    bkg1_w_test = dataset['w_test'][y_test==1]
     bkg2_predicted_test = y_predict_test[y_test==2]
-    bkg2_w_test = dataset["w_test"][y_test==2]
+    bkg2_w_test = dataset['w_test'][y_test==2]
     bkg3_predicted_test = y_predict_test[y_test==3]
-    bkg3_w_test = dataset["w_test"][y_test==3]
+    bkg3_w_test = dataset['w_test'][y_test==3]
     
     outputScore = y_predict_test[:,0]
+    
+    vars_2D = [
+            {'x':'met','y':'mt','xlabel':r'$E_{T}^{miss}$','ylabel':r'$m_{T}$', 'xbinning':[100,1000,80], 'ybinning':[90,700,80], 'xmev':True, 'ymev':True},
+            {'x':'met_proj_lep', 'y':'dphi_met_lep','xlabel':r'$E_{T}^{miss}-on-l$', 'ylabel':r'$\Delta\Phi(l, E_{T}^{miss})$', 'xbinning':[90,700,100], 'ybinning': [0,3.2,100], 'xmev':True, 'ymev':False},
+            {'x':'ht','y':'jet_pt[0]','xlabel':r'$h_{T}$', 'ylabel':r'$p_{T}^{jet0}$', 'xbinning':[0,1000,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True},
+            {'x':'amt2','y':'m_bl', 'xlabel':r'$am_{T2}$ [GeV]', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,700,100], 'ybinning': [0,700,100], 'xmev':False, 'ymev':True},
+            {'x':'dr_bjet_lep','y':'m_bl', 'xlabel':r'$\Delta R(b,l)$', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,3.2,100], 'ybinning': [0,1000,100], 'xmev':False, 'ymev':True}
+            ]
     
     #Do various plots
     print 'Start plotting...'
@@ -181,13 +189,8 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_output_score.plot_output_score(sig_predicted_test[:,0], sig_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
     
     plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted_test[:,0], sig_w_test, bkg1_predicted_test[:,0], bkg1_w_test, bkg2_predicted_test[:,0], bkg2_w_test, bkg3_predicted_test[:,0], bkg3_w_test, bkg_predicted_test[:,0], bkg_w_test, binning, save=save, fileName=filenames)
-    
-    if (variables[4] == 'mt' and variables[5] =='met'):
-        print '2D output score will be plotted'
-        plt.figure()
-        plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
-    else: 
-        print 'WARNING: 2D output score will not be plotted, as mt and met are missing and/or moved'
+       
+    plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X_test, save=save, fileName=filenames)
     
     plot_Correlation.plotCorrelation(X_train[y_train==0], X_train[y_train!=0], X_test[y_test==0], X_test[y_test!=0], variables, fileName=filenames, save=save)
     
@@ -201,10 +204,10 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     t.stop()
     t0 = t.elapsed
     t.reset()
-    #runtimeSummary(t0)
+    runtimeSummary(t0)
     
 def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
-    """
+    '''
     Plot all important things for specific dataset, which is not the one used for training
         
     - modelDir: Directory of model
@@ -214,37 +217,37 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     - binning = [bins, start, stop] default: [50,0,1.]
     
     - save: Save Files in ./plots/ (True/False)
-    """
+    '''
     t = timer.Timer()
     t.start()
     
     #Load models
     
-    print("Loading dataset...")
+    print('Loading dataset...')
     
     dataset = h5py.File(datasetDir)
     
-    filenames = modelDir.replace("TrainedModels/models/","").replace(".h5","") + '_differentDataset'
+    filenames = modelDir.replace('TrainedModels/models/','').replace('.h5','') + '_differentDataset'
     
-    print("Using dataset from:", datasetDir)
+    print('Using dataset from:', datasetDir)
     
-    print("Loading model...")
+    print('Loading model...')
     
     try:
-        pickleDir = modelDir.replace(".h5", "_history.pkl")
+        pickleDir = modelDir.replace('.h5', '_history.pkl')
         model = load_model(modelDir)
-        model.load_weights(modelDir.replace(".h5" , "_weights.h5").replace("models" , "weights"))
-        print("Neuronal Network detected!")
-        print("Scaling and reading values...")
+        model.load_weights(modelDir.replace('.h5' , '_weights.h5').replace('models' , 'weights'))
+        print('Neuronal Network detected!')
+        print('Scaling and reading values...')
     except IOError:
         model = joblib.load(modelDir)
-        print("Boosted Decision Tree detected!")
+        print('Boosted Decision Tree detected!')
         return 0
     
     #Get the data and scale it, if necessary
     
-    X = dataset["X"][:]
-    y = dataset["y"][:]
+    X = dataset['X'][:]
+    y = dataset['y'][:]
     
     scaler = StandardScaler()
     
@@ -253,10 +256,10 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     y_predict = model.predict(X_scaled)
     
     sig_predicted = y_predict[y==0]
-    sig_w = dataset["w"][y==0]
+    sig_w = dataset['w'][y==0]
     
     bkg_predicted= y_predict[y!=0]
-    bkg_w = dataset["w"][y!=0]
+    bkg_w = dataset['w'][y!=0]
     
     #Do various plots
     
@@ -284,24 +287,25 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     
 def main():
     print '---------- Warning: startPlot in main ----------'
+    modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir1 = 'TrainedModels/models/2018-05-18_15-33_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir2 = 'TrainedModels/models/2018-05-18_15-04_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir3 = 'TrainedModels/models/2018-05-18_15-12_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir4 = 'TrainedModels/models/2018-05-18_15-26_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
-    modelDir = 'TrainedModels/models/2018-05-17_10-44_DNN_ADAM_layer4x128_batch100_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir5 = 'TrainedModels/models/2018-05-11_13-34_DNN_ADAM_layer4x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir6 = 'TrainedModels/models/2018-05-28_14-44_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir7 = 'TrainedModels/models/2018-05-28_16-11_DNN_ADAM_layer1x10_batch10_NormalInitializer_dropout0p5_l2-0p01_multiclass_TEST.h5'
     modelDir8 = 'TrainedModels/models/2018-05-28_17-57_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir9 = 'TrainedModels/models/2018-05-29_11-33_DNN_SGD_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir10= 'TrainedModels/models/2018-05-29_10-59_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir11= 'TrainedModels/models/2018-05-29_17-14_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
     #dirs.append(modelDir3)
     #dirs.append(modelDir4)
-    dirs.append(modelDir9)
-    dirs.append(modelDir10)
+    #dirs.append(modelDir9)
+    dirs.append(modelDir11)
     for mdir in dirs:
         startPlot(mdir, save=True)
     
