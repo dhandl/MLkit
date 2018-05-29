@@ -20,6 +20,7 @@ import plot_output_score2D
 import plot_piechart
 import evaluate_signalGrid
 import plot_ROCcurves
+import plot_Correlation
 
 def startPlot(modelDir, binning=[50,0,1.], save=False):
     """
@@ -186,7 +187,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
         plt.figure()
         plot_output_score2D.plot_output_score2D(outputScore, X_test, r'$E_T^{miss}$', r'$m_T$', save=save, fileName=filenames)
     else: 
-        print 'WARNING: 2D output score will not be plotted, as mt and met are missing'
+        print 'WARNING: 2D output score will not be plotted, as mt and met are missing and/or moved'
+    
+    plot_Correlation.plotCorrelation(X_train[y_train==0], X_train[y_train!=0], X_test[y_test==0], X_test[y_test!=0], variables, fileName=filenames, save=save)
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
@@ -198,7 +201,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     t.stop()
     t0 = t.elapsed
     t.reset()
-    runtimeSummary(t0)
+    #runtimeSummary(t0)
     
 def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     """
@@ -290,12 +293,15 @@ def main():
     modelDir6 = 'TrainedModels/models/2018-05-28_14-44_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir7 = 'TrainedModels/models/2018-05-28_16-11_DNN_ADAM_layer1x10_batch10_NormalInitializer_dropout0p5_l2-0p01_multiclass_TEST.h5'
     modelDir8 = 'TrainedModels/models/2018-05-28_17-57_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir9 = 'TrainedModels/models/2018-05-29_11-33_DNN_SGD_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir10= 'TrainedModels/models/2018-05-29_10-59_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
     #dirs.append(modelDir3)
     #dirs.append(modelDir4)
-    dirs.append(modelDir8)
+    dirs.append(modelDir9)
+    dirs.append(modelDir10)
     for mdir in dirs:
         startPlot(mdir, save=True)
     
