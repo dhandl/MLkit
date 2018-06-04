@@ -12,12 +12,15 @@ def plot_pie_chart(y_true, y_predict, fileName="Test", save=False):
             
     sizes_true = np.bincount(y_true.astype(int))
     
+    sum_true = float(np.sum(sizes_true))
+    sum_predicted = float(np.sum(sizes_predicted))
+    
     namelabels = [r'Signal',r'$t\overline{t}$',r'Single Top','$W$ + jets']
     labels_true = []
     labels_predicted=[]
     for i in range(0,4):
-        labels_true.append(namelabels[i] + ' [' + str(sizes_true[i]) + ']')
-        labels_predicted.append(namelabels[i] + ' [' + str(sizes_predicted[i]) + ']')
+        labels_true.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_true[i]/sum_true)) + ']')
+        labels_predicted.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_predicted[i]/sum_predicted)) + ']')
     
     plt.pie(sizes_predicted,labels=labels_predicted)
     plt.title('predicted distribution')

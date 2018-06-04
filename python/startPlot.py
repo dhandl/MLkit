@@ -299,13 +299,14 @@ def main():
     modelDir9 = 'TrainedModels/models/2018-05-29_11-33_DNN_SGD_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir10= 'TrainedModels/models/2018-05-29_10-59_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir11= 'TrainedModels/models/2018-05-29_17-14_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir12= 'TrainedModels/models/2018-06-04_13-23_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
     #dirs.append(modelDir3)
     #dirs.append(modelDir4)
     #dirs.append(modelDir9)
-    dirs.append(modelDir11)
+    dirs.append(modelDir12)
     for mdir in dirs:
         startPlot(mdir, save=True)
     
