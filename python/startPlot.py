@@ -154,7 +154,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
             {'x':'met_proj_lep', 'y':'dphi_met_lep','xlabel':r'$E_{T}^{miss}-on-l$', 'ylabel':r'$\Delta\Phi(l, E_{T}^{miss})$', 'xbinning':[90,700,100], 'ybinning': [0,3.2,100], 'xmev':True, 'ymev':False},
             {'x':'ht','y':'jet_pt[0]','xlabel':r'$h_{T}$', 'ylabel':r'$p_{T}^{jet0}$', 'xbinning':[0,1000,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True},
             {'x':'amt2','y':'m_bl', 'xlabel':r'$am_{T2}$ [GeV]', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,700,100], 'ybinning': [0,700,100], 'xmev':False, 'ymev':True},
-            {'x':'dr_bjet_lep','y':'m_bl', 'xlabel':r'$\Delta R(b,l)$', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,3.2,100], 'ybinning': [0,1000,100], 'xmev':False, 'ymev':True}
+            {'x':'dr_bjet_lep','y':'m_bl', 'xlabel':r'$\Delta R(b,l)$', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,3.2,100], 'ybinning': [0,1000,100], 'xmev':False, 'ymev':True},
+            {'x':'met', 'y':'ht','xlabel':r'$E_{T}^{miss}$', 'ylabel':r'$h_{T}$', 'xbinning':[100,1000,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True},
+            {'x':'mt', 'y':'ht','xlabel':r'$m_{T}$', 'ylabel':r'$h_{T}$', 'xbinning':[90,700,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True}
             ]
     
     #Do various plots
