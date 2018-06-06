@@ -249,7 +249,7 @@ def main():
   AtlasStyle_mpl.LumiLabel(ax1, 0.022, 0.875, lumi=LUMI*0.001)
   plt.show()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
     
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
@@ -259,10 +259,10 @@ if __name__ == "__main__":
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------##
     
-def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Test"):
+def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName='Test'):
   print('Evaluating signal grid...')  
   
-  infofile = open(modelDir.replace(".h5","_infofile.txt"))
+  infofile = open(modelDir.replace('.h5','_infofile.txt'))
   infos = infofile.readlines()
   
   #Parse Strings for correct datatypes
@@ -466,11 +466,11 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   #plt.show()
   
   if save:
-        if not os.path.exists("./plots/"):
-            os.makedirs("./plots/")
-            print("Creating folder plots")
-        plt.savefig("plots/"+fileName+"_evaluated_grid.pdf")
-        plt.savefig("plots/"+fileName+"_evaluated_grid.png")
+        if not os.path.exists('./plots/'):
+            os.makedirs('./plots/')
+            print('Creating folder plots')
+        plt.savefig('plots/'+fileName+'_evaluated_grid.pdf')
+        plt.savefig('plots/'+fileName+'_evaluated_grid.png')
         plt.close()
   
   diag_150 = {}
@@ -529,23 +529,30 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   plt.legend(loc='best', handles=[d150[0],d120[0],d90[0],signalP,ttbar,singletop,Wjets,tps])
   
   if save:
-        if not os.path.exists("./plots/"):
-            os.makedirs("./plots/")
-            print("Creating folder plots")
-        plt.savefig("plots/"+fileName+"_StatisticTraining.pdf")
-        plt.savefig("plots/"+fileName+"_StatisticTraining.png")
+        if not os.path.exists('./plots/'):
+            os.makedirs('./plots/')
+            print('Creating folder plots')
+        plt.savefig('plots/'+fileName+'_StatisticTraining.pdf')
+        plt.savefig('plots/'+fileName+'_StatisticTraining.png')
         plt.close()
+        
+        filepath = 'plots/' + fileName + '_StatisticTrainingValues.txt'
+        infofile = open(filepath, 'w')
+        infofile.write('M150: ' + ';'.join(sortedLabels150) + ' ' +';'.join([str(i) for i in values_150])+'\n')
+        infofile.write('M120: ' + ';'.join(sortedLabels120) + ' ' + ';'.join([str(i) for i in values_120])+'\n')
+        infofile.write('M90: ' + ';'.join(sortedLabels90) + ' '+ ';'.join([str(i) for i in values_90]))
+        infofile.close()
         
         
 ########### Evaluate on different cuts than in dataset
 
-def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName="Test"):
+def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float), save=False, fileName='Test'):
   print('Evaluating singal grid...') 
   
   if fileName=='Grid_test':
-      fileName=modelDir.replace("TrainedModels/models/","").replace(".h5","")
+      fileName=modelDir.replace('TrainedModels/models/','').replace('.h5','')
     
-  infofile = open(modelDir.replace(".h5","_infofile.txt"))
+  infofile = open(modelDir.replace('.h5','_infofile.txt'))
   infos = infofile.readlines()
   
   #Parse Strings for correct datatypes
@@ -723,13 +730,13 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
   #plt.show()
   
   if save:
-        if not os.path.exists("./plots/"):
-            os.makedirs("./plots/")
-            print("Creating folder plots")
+        if not os.path.exists('./plots/'):
+            os.makedirs('./plots/')
+            print('Creating folder plots')
         isFile = True
         n = 1
         while isFile:
-            filepath = './plots/' + fileName + "_evaluated_grid_cuts_" + str(n) + '_infofile.txt'
+            filepath = './plots/' + fileName + '_evaluated_grid_cuts_' + str(n) + '_infofile.txt'
             if os.path.isfile(filepath) and filepath.endswith('.txt'):
                 n += 1
                 isFile=True
@@ -745,6 +752,6 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
                         presels += pre['name'] + '-threshold: ' + str(pre['threshold']) + ' type: ' + pre['type'] + '; '
                 infofile.write('Used preselection for evaluation: ' + presels)
                 infofile.close()            
-        plt.savefig("plots/"+fileName+"_evaluated_grid_cuts_" + str(n) + ".pdf")
-        plt.savefig("plots/"+fileName+"_evaluated_grid_cuts_" + str(n) + ".png")
+        plt.savefig('plots/'+fileName+'_evaluated_grid_cuts_' + str(n) + '.pdf')
+        plt.savefig('plots/'+fileName+'_evaluated_grid_cuts_' + str(n) + '.png')
         plt.close()
