@@ -364,7 +364,7 @@ def main():
     modelDir17= 'TrainedModels/models/2018-06-06_12-19_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir18= 'TrainedModels/models/2018-06-07_13-23_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir19= 'TrainedModels/models/2018-06-07_14-32_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
-    modelDir20= 'TrainedModels/models/2018-06-07_15-17_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass_DEBUG.h5'
+    modelDir20= 'TrainedModels/models/2018-06-07_18-04_DNN_ADAM_layer3x32_batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)

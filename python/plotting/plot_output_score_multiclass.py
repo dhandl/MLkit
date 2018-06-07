@@ -56,7 +56,8 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
   else:
     ax1.set_ylabel("Events", ha='left')
   
-  ax1.set_ylim((0, s_hist.max()*(1+0.33)))
+  #ax1.set_ylim((0, s_hist.max()*(1+0.33)))
+  ax1.set_ylim((0, b_hist[0].max()))
   leg = plt.legend(loc="best", frameon=False)
   p = leg.get_window_extent()
   #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
