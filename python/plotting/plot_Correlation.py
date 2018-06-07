@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 import os
 
 
-def plotCorrelation(s_train, b_train, s_test, b_test, nvar_raw, fileName='Test', save=False):
+def plotCorrelation(s_train, b_train, s_test, b_test, out_s_train, out_s_test, out_b_train, out_b_test, nvar_raw, fileName='Test', save=False):
     print 'Plotting correlations between variables...'
     fileDir = "plots/"+fileName
     if save:
@@ -23,6 +24,13 @@ def plotCorrelation(s_train, b_train, s_test, b_test, nvar_raw, fileName='Test',
                 novars.append(x)
                 
     nvar = nvar_raw
+    nvar.append('output-score') #Output Score
+    
+    s_train = np.concatenate((s_train,np.transpose(out_s_train.reshape(1,len(out_s_train)))), axis=1)
+    s_test = np.concatenate((s_test,np.transpose(out_s_test.reshape(1,len(out_s_test)))), axis=1)
+    b_train = np.concatenate((b_train,np.transpose(out_b_train.reshape(1,len(out_b_train)))), axis=1)
+    b_test = np.concatenate((b_test,np.transpose(out_b_test.reshape(1,len(out_b_test)))), axis=1)
+    
     print 'Not in list for training: ' + ', '.join(novars)
 
     # Signal Training

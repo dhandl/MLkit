@@ -14,15 +14,15 @@ Sample = namedtuple('Sample', 'name dataframe')
 def draw_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues,save=False,fileName="Test",isTrain=False, addStr = ''):
-    """
+                          cmap=plt.cm.Blues,save=False,fileName='Test',isTrain=False, addStr = ''):
+    '''
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     cm is the confusion matrix
-    """
+    '''
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
+        print('Normalized confusion matrix')
     else:
         print('Confusion matrix, without normalization')
 
@@ -39,8 +39,8 @@ def draw_confusion_matrix(cm, classes,
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black", fontsize=14)
+                 horizontalalignment='center',
+                 color='white' if cm[i, j] > thresh else 'black', fontsize=14)
 
     plt.tight_layout()
     plt.ylabel('true label')
@@ -55,18 +55,18 @@ def draw_confusion_matrix(cm, classes,
         extraStr = ''
         
     if save:
-        if not os.path.exists("./plots/"):
-            os.makedirs("./plots/")
-            print("Creating folder plots")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + addStr + extraStr +".pdf")
-        plt.savefig("plots/"+fileName+"_ConfusionMatrix" + addStr + extraStr +".png")
+        if not os.path.exists('./plots/'):
+            os.makedirs('./plots/')
+            print('Creating folder plots')
+        plt.savefig('plots/'+fileName+'_ConfusionMatrix' + addStr + extraStr +'.pdf')
+        plt.savefig('plots/'+fileName+'_ConfusionMatrix' + addStr + extraStr +'.png')
         plt.close()
     
     
-def plot_confusion_matrix(y_true, y_predict, filename="Test",save=False,isTrain=False, addStr=''):
-    """
+def plot_confusion_matrix(y_true, y_predict, filename='Test',save=False,isTrain=False, addStr=''):
+    '''
     Plotting (and printing) the confusion matrix
-    """
+    '''
     print('Plotting the confusion matrix...')
     yhat_cls = np.argmax(y_predict, axis=1)
     cnf_matrix = confusion_matrix(y_true, yhat_cls)
