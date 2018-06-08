@@ -372,6 +372,7 @@ def main():
     modelDir19= 'TrainedModels/models/2018-06-07_14-32_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir20= 'TrainedModels/models/2018-06-07_18-04_DNN_ADAM_layer3x32_batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir21= 'TrainedModels/models/2018-06-08_10-03_DNN_ADAM_layer1x60_batch60_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir22= 'TrainedModels/models/2018-06-07_12-07_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -380,14 +381,16 @@ def main():
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
     #dirs.append(modelDir18)
-    #dirs.append(modelDir21)
+    dirs.append(modelDir22)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels.txt').readlines()]
     dirs2errors = []
-    for mdir in dirs2:
-        try:
-            startPlot('TrainedModels/models/'+mdir, save=True)
-        except:
-            dirs2errors.append(mdir)
+    for mdir in dirs:
+        startPlot(mdir, save=True)
+    #for mdir in dirs:
+        #try:
+            #startPlot('TrainedModels/models/'+mdir, save=True)
+        #except:
+            #dirs2errors.append(mdir)
     print 'Following models could not be plotted:'
     print dirs2errors
     
