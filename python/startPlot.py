@@ -144,6 +144,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     y_train= dataset['y_train'][:]
     y_test= dataset['y_test'][:]
     y = dataset['y'][:]
+    w = dataset['w'][:]
        
     scaler = StandardScaler()
 
@@ -187,12 +188,14 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     vars_2D = [
             {'x':'met','y':'mt','xlabel':r'$E_{T}^{miss}$','ylabel':r'$m_{T}$', 'xbinning':[100,1000,80], 'ybinning':[90,700,80], 'xmev':True, 'ymev':True},
-            {'x':'met_proj_lep', 'y':'dphi_met_lep','xlabel':r'$E_{T}^{miss}-on-l$', 'ylabel':r'$\Delta\Phi(l, E_{T}^{miss})$', 'xbinning':[90,700,100], 'ybinning': [0,3.2,100], 'xmev':True, 'ymev':False},
-            {'x':'ht','y':'jet_pt[0]','xlabel':r'$h_{T}$', 'ylabel':r'$p_{T}^{jet0}$', 'xbinning':[0,1000,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True},
-            {'x':'amt2','y':'m_bl', 'xlabel':r'$am_{T2}$ [GeV]', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,700,100], 'ybinning': [0,700,100], 'xmev':False, 'ymev':True},
+            {'x':'met_proj_lep', 'y':'dphi_met_lep','xlabel':r'$E_{T,l}^{miss}$', 'ylabel':r'$\Delta\Phi(l, E_{T}^{miss})$', 'xbinning':[90,700,100], 'ybinning': [0,3.2,100], 'xmev':True, 'ymev':False},
+            {'x':'met','y':'jet_pt[0]','xlabel':r'$E_{T}^{miss}$', 'ylabel':r'$p_{T}^{jet0}$', 'xbinning':[100,1000,80], 'ybinning': [25,1000,80], 'xmev':True, 'ymev':True},
+            {'x':'amt2','y':'m_bl', 'xlabel':r'$am_{T2}$ [GeV]', 'ylabel':r'$m_{b,l}$', 'xbinning':[90,700,100], 'ybinning': [0,700,100], 'xmev':False, 'ymev':True},
             {'x':'dr_bjet_lep','y':'m_bl', 'xlabel':r'$\Delta R(b,l)$', 'ylabel':r'$m_{b,l}$', 'xbinning':[0,3.2,100], 'ybinning': [0,1000,100], 'xmev':False, 'ymev':True},
-            {'x':'met', 'y':'ht','xlabel':r'$E_{T}^{miss}$', 'ylabel':r'$h_{T}$', 'xbinning':[100,1000,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True},
-            {'x':'mt', 'y':'ht','xlabel':r'$m_{T}$', 'ylabel':r'$h_{T}$', 'xbinning':[90,700,80], 'ybinning': [0,1000,80], 'xmev':True, 'ymev':True}
+            {'x':'met', 'y':'ht','xlabel':r'$E_{T}^{miss}$', 'ylabel':r'$h_{T}$', 'xbinning':[100,1000,80], 'ybinning': [100,1000,80], 'xmev':True, 'ymev':True},
+            {'y':'mt', 'x':'ht','ylabel':r'$m_{T}$', 'xlabel':r'$h_{T}$', 'ybinning':[90,700,80], 'xbinning': [100,1000,80], 'ymev':True, 'xmev':True},
+            {'x':'met','y':'bjet_pt[0]','xlabel':r'$E_{T}^{miss}$','ylabel':r'$p_{T}^{bjet0}$', 'xbinning':[100,1000,80], 'ybinning':[25,1000,80], 'xmev':True, 'ymev':True},
+            {'x':'met_proj_lep','y':'mt','xlabel':r'$E_{T,l}^{miss}$','ylabel':r'$m_{T}$', 'xbinning':[100,1000,80], 'ybinning':[90,700,80], 'xmev':True, 'ymev':True}
             ]
     
     #Do various plots
@@ -233,23 +236,26 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     #Pie Charts
     plt.figure()
-    plot_piechart.plot_pie_chart(y, y_predict, fileName=filenames, save=save)
+    plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
     
     #Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
     plot_output_score.plot_output_score_datapoint(Signal1, model, preselection, variables, weights, lumi, binning, save=save, fileName=filenames)
     
     #Output Score for cuts that are used in training
-    plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames)
+    plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
+    plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
     
     #Output Score for cuts that are manually specified
     print 'Plotting the output score for met250'
-    plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='met250')
+    plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=True)
+    plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=False)
     
-    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames)
+    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
+    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
     
-    plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, save=save, fileName=filenames)
+    plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, y, save=save, fileName=filenames)
     
-    plot_Correlation.plotCorrelation(X_train[y_train==0], X_train[y_train!=0], X_test[y_test==0], X_test[y_test!=0], sig_predicted_train[:,0], sig_predicted_test[:,0], bkg_predicted_train[:,0], bkg_predicted_test[:,0], variables, fileName=filenames, save=save)
+    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save)
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
@@ -365,6 +371,7 @@ def main():
     modelDir18= 'TrainedModels/models/2018-06-07_13-23_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir19= 'TrainedModels/models/2018-06-07_14-32_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir20= 'TrainedModels/models/2018-06-07_18-04_DNN_ADAM_layer3x32_batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir21= 'TrainedModels/models/2018-06-08_10-03_DNN_ADAM_layer1x60_batch60_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -373,9 +380,16 @@ def main():
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
     #dirs.append(modelDir18)
-    dirs.append(modelDir20)
-    for mdir in dirs:
-        startPlot(mdir, save=True)
+    #dirs.append(modelDir21)
+    dirs2 = [x.replace('\n','') for x in open('notes/allModels.txt').readlines()]
+    dirs2errors = []
+    for mdir in dirs2:
+        try:
+            startPlot('TrainedModels/models/'+mdir, save=True)
+        except:
+            dirs2errors.append(mdir)
+    print 'Following models could not be plotted:'
+    print dirs2errors
     
 if __name__== '__main__':
     main()
