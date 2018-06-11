@@ -50,6 +50,10 @@ Signal3 = [
 
 Signal = Signal1
 
+Signal_Evaluate = Signal1
+Signal_Evaluate.extend(Signal2)
+Signal_Evaluate.extend(Signal3)
+
 Background = [
   #{'name':'ttbar_radHi_TRUTH3',  'path':input+'TestBkg/'}
   #{'name':'ttbar_radLo_TRUTH3', 'path':input+'ttbar_radLo_TRUTH3/'}

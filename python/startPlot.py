@@ -256,6 +256,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, y, save=save, fileName=filenames)
     
     plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save)
+    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
@@ -373,6 +374,9 @@ def main():
     modelDir20= 'TrainedModels/models/2018-06-07_18-04_DNN_ADAM_layer3x32_batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir21= 'TrainedModels/models/2018-06-08_10-03_DNN_ADAM_layer1x60_batch60_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir22= 'TrainedModels/models/2018-06-07_12-07_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir23= 'TrainedModels/models/2018-06-11_14-38_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir24= 'TrainedModels/models/2018-06-11_14-54_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir25= 'TrainedModels/models/2018-06-11_16-42_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -380,8 +384,8 @@ def main():
     #dirs.append(modelDir4)
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
-    #dirs.append(modelDir18)
-    dirs.append(modelDir22)
+    dirs.append(modelDir24)
+    dirs.append(modelDir25)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:
