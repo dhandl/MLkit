@@ -12,7 +12,7 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
             os.makedirs("./plots/")
             print("Creating folder plots")
             
-    variables = [{'met': r'$E_{T}^{miss}$'}, {'mt': r'$m_{T}$'}, {'dphi_met_lep': r'$\Delta\Phi(l, E_{T}^{miss})$'}, {'amt2': '$am_{T2}$'}, {'n_jet': 'N jets'}, {'n_bjet': 'N bjets'}, {'jet_pt': r'$p_{T}^{jet}$'}, {'ht': r'$h_{T}$'}, {'dphi_jet0_ptmiss': r'$\Delta\Phi(jet0, p_{T}^{miss})$'}, {'dphi_jet1_ptmiss': r'$\Delta\Phi(jet1, p_{T}^{miss})$'}, {'lep_pt[0]': r'$p_{T}^{lep}$'}, {'m_bl': r'$m_{b,l}$'}, {'jet_pt[0]': r'$p_{T}^{jet0}$'}, {'jet_pt[1]': r'$p_{T}^{jet1}$'}, {'jet_pt[2]': r'$p_{T}^{jet2}$'}, {'jet_pt[3]': r'$p_{T}^{jet3}$'}, {'met_sig': r'$E_{T}^{miss, sig}$'}, {'ht_sig': r'$h_{T}^{sig}$'}, {'dphi_b_lep_max': r'$\max(\Delta\Phi(b, l))$'}, {'dphi_b_ptmiss_max': r'$\max(\Delta\Phi(b, p_{T}^{miss}))$'}, {'met_proj_lep': r'$E_{T,l}^{miss}$'}, {'dr_bjet_lep': r'$\Delta R(b,l)$'}, {'bjet_pt': r'$p_{T}^{bjet0}$'}, {'mT_blMET': r'$m_{T}^{blMET}$'}, {'bjet_pt[0]':r'$p_{T}^{bjet0}$'}]
+    variables = [{'met': r'$E_{T}^{miss}$'}, {'mt': r'$m_{T}$'}, {'dphi_met_lep': r'$\Delta\Phi(l, E_{T}^{miss})$'}, {'amt2': '$am_{T2}$'}, {'n_jet': 'N jets'}, {'n_bjet': 'N bjets'}, {'jet_pt': r'$p_{T}^{jet}$'}, {'ht': r'$h_{T}$'}, {'dphi_jet0_ptmiss': r'$\Delta\Phi(jet0, p_{T}^{miss})$'}, {'dphi_jet1_ptmiss': r'$\Delta\Phi(jet1, p_{T}^{miss})$'}, {'lep_pt[0]': r'$p_{T}^{lep}$'}, {'m_bl': r'$m_{b,l}$'}, {'jet_pt[0]': r'$p_{T}^{jet0}$'}, {'jet_pt[1]': r'$p_{T}^{jet1}$'}, {'jet_pt[2]': r'$p_{T}^{jet2}$'}, {'jet_pt[3]': r'$p_{T}^{jet3}$'}, {'met_sig': r'$E_{T}^{miss, sig}$'}, {'ht_sig': r'$h_{T}^{sig}$'}, {'dphi_b_lep_max': r'$\max(\Delta\Phi(b, l))$'}, {'dphi_b_ptmiss_max': r'$\max(\Delta\Phi(b, p_{T}^{miss}))$'}, {'met_proj_lep': r'$E_{T,l}^{miss}$'}, {'dr_bjet_lep': r'$\Delta R(b,l)$'}, {'bjet_pt': r'$p_{T}^{bjet0}$'}, {'mT_blMET': r'$m_{T}^{blMET}$'}, {'bjet_pt[0]':r'$p_{T}^{bjet0}$'},{'jet_eta[0]':r'$\eta^{jet0}$'},{'jet_eta[1]':r'$\eta^{jet1}$'},{'jet_eta[2]':r'$\eta^{jet2}$'},{'jet_eta[3]':r'$\eta^{jet3}$'},{'jet_phi[0]':r'$\Phi^{jet0}$'},{'jet_phi[1]':r'$\Phi^{jet1}$'},{'jet_phi[2]':r'$\Phi^{jet2}$'},{'jet_phi[3]':r'$\Phi^{jet3}$'},{'met_phi':r'$\Phi(E_{T}^{miss})$'},{'lep_eta[0]':r'$\eta^{lep0}$'},{'lep_phi[0]':r'$\Phi^{lep0}$'},{'jet_e[0]':r'$E^{jet0}$'},{'jet_e[1]':r'$E^{jet1}$'},{'jet_e[2]':r'$E^{jet2}$'},{'jet_e[3]':r'$E^{jet3}$'},{'lep_e[0]':r'$E^{lep0}$'},{'jet_mv2c10[0]':r'$b_{tag}^{jet0}$'},{'jet_mv2c10[1]':r'$b_{tag}^{jet1}$'},{'jet_mv2c10[2]':r'$b_{tag}^{jet2}$'},{'jet_mv2c10[3]':r'$b_{tag}^{jet3}$'}]
     
     novars = []
     for v in variables:
@@ -22,7 +22,7 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
             except ValueError:
                 novars.append(x)
                 
-    nvar = nvar_raw
+    nvar = nvar_raw[:]
     
     addStr=''
     if plotEPD:
@@ -53,8 +53,12 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     print 'Not in list for training: ' + ', '.join(novars)
 
     # Signal
-    fig_x=10
-    fig_y=10
+    if len(nvar)<=20:
+        fig_x=10
+        fig_y=10
+    else:
+        fig_x=20
+        fig_y=20
     corr_strain, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=s, columns = nvar)
     corr = df.corr()

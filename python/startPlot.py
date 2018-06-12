@@ -377,6 +377,8 @@ def main():
     modelDir23= 'TrainedModels/models/2018-06-11_14-38_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir24= 'TrainedModels/models/2018-06-11_14-54_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir25= 'TrainedModels/models/2018-06-11_16-42_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir26= 'TrainedModels/models/2018-06-12_13-39_DNN_ADAM_layer1x100_batch50_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir27= 'TrainedModels/models/2018-06-12_16-48_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -384,8 +386,8 @@ def main():
     #dirs.append(modelDir4)
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
-    dirs.append(modelDir24)
-    dirs.append(modelDir25)
+    #dirs.append(modelDir24)
+    dirs.append(modelDir27)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:
