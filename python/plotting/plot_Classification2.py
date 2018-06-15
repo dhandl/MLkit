@@ -41,10 +41,10 @@ def plot_classification_2(y_true, y_predict, fileName="Test", save=False):
             
     width=1.
     
-    bar0 = plt.bar(classes, issignal, width, label=r'Signal')
-    bar1 = plt.bar(classes, istt, width, bottom=issignal, label=r'$t\overline{t}$')
-    bar2 = plt.bar(classes, issinglet, width, bottom=np.array(istt)+np.array(issignal), label=r'Single Top')
-    bar3 = plt.bar(classes, isWjets, width, bottom=np.array(issinglet)+np.array(istt)+np.array(issignal), label='$W$ + jets')
+    bar0 = plt.bar(classes, issignal, width, label=r'Signal', color='r')
+    bar1 = plt.bar(classes, istt, width, bottom=issignal, label=r'$t\overline{t}$', color='b')
+    bar2 = plt.bar(classes, issinglet, width, bottom=np.array(istt)+np.array(issignal), label=r'Single Top', color='g')
+    bar3 = plt.bar(classes, isWjets, width, bottom=np.array(issinglet)+np.array(istt)+np.array(issignal), label='$W$ + jets', color='orange')
     
     plt.xlabel('predicted label')
     #plt.legend(loc='best',handles=[explain_patch, bar0, bar1, bar2, bar3])

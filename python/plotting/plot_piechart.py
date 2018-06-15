@@ -21,8 +21,10 @@ def plot_pie_chart(y_true, y_predict, w, fileName="Test", save=False):
     for i in range(0,4):
         labels_true.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_true[i]/sum_true)) + ']')
         labels_predicted.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_predicted[i]/sum_predicted)) + ']')
+        
+    colors=['r','b','g','orange']
     
-    plt.pie(sizes_predicted,labels=labels_predicted)
+    plt.pie(sizes_predicted,labels=labels_predicted,colors=colors)
     plt.title('predicted distribution')
     plt.axis('equal')
     if save:
@@ -34,7 +36,7 @@ def plot_pie_chart(y_true, y_predict, w, fileName="Test", save=False):
         plt.close()
         
     plt.figure()
-    plt.pie(sizes_true,labels=labels_true)
+    plt.pie(sizes_true,labels=labels_true,colors=colors)
     plt.title('true distribution')
     plt.axis('equal')
     if save:
@@ -66,26 +68,28 @@ def plot_pie_chart(y_true, y_predict, w, fileName="Test", save=False):
         #labels_true.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_true[i]/sum_true)) + ']')
         #labels_predicted.append(namelabels[i] + ' [' + str('{:.1%}'.format(sizes_predicted[i]/sum_predicted)) + ']')
     
-    #plt.pie(sizes_predicted,labels=labels_predicted)
+    #colors=['r','b','g','orange']
+    
+    #plt.pie(sizes_predicted,labels=labels_predicted, colors=colors)
     #plt.title('predicted distribution')
     #plt.axis('equal')
     #if save:
         #if not os.path.exists("./plots/"):
             #os.makedirs("./plots/")
             #print("Creating folder plots")
-        #plt.savefig("plots/"+fileName+"_predicted_pie.pdf")
-        #plt.savefig("plots/"+fileName+"_predicted_pie.png")
+        #plt.savefig("plots/"+fileName+"_predicted_pie_old.pdf")
+        #plt.savefig("plots/"+fileName+"_predicted_pie_old.png")
         #plt.close()
         
     #plt.figure()
-    #plt.pie(sizes_true,labels=labels_true)
+    #plt.pie(sizes_true,labels=labels_true, colors=colors)
     #plt.title('true distribution')
     #plt.axis('equal')
     #if save:
         #if not os.path.exists("./plots/"):
             #os.makedirs("./plots/")
             #print("Creating folder plots")
-        #plt.savefig("plots/"+fileName+"_true_pie.pdf")
-        #plt.savefig("plots/"+fileName+"_true_pie.png")
+        #plt.savefig("plots/"+fileName+"_true_pie_old.pdf")
+        #plt.savefig("plots/"+fileName+"_true_pie_old.png")
         #plt.close()
     

@@ -223,12 +223,21 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix(y_train[X_train[:,variables.index('met')]>=250e3], y_predict_train[X_train[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=True, addStr='met250')
     
-    #Classification Plots    
+    Classification Plots    
     plt.figure()
-    plot_Classification.plot_classification(y_test, y_predict_test, fileName=filenames, save=save)
+    plot_Classification.plot_classification(y_test, y_predict_test, w, fileName=filenames, save=save)
+    
+    plt.figure()
+    plot_Classification.plot_classification(y, y_predict, w, fileName=filenames, save=save, weighted=True)
+    
+    plt.figure()
+    plot_Classification.plot_classification(y_train, y_predict_train, w, fileName=filenames, save=save, train=True)
     
     plt.figure()
     plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
+    
+    plt.figure()
+    plot_Classification.plot_classification_datapoint(Signal1, model, preselection, variables, weights, lumi, save=save, fileName=filenames, multiclass=True)    
     
     #Learning Curve
     plt.figure()
@@ -379,6 +388,8 @@ def main():
     modelDir25= 'TrainedModels/models/2018-06-11_16-42_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir26= 'TrainedModels/models/2018-06-12_13-39_DNN_ADAM_layer1x100_batch50_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir27= 'TrainedModels/models/2018-06-12_16-48_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir28= 'TrainedModels/models/2018-06-07_12-07_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir29= 'TrainedModels/models/2018-06-11_14-35_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -387,12 +398,13 @@ def main():
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
     #dirs.append(modelDir24)
-    dirs.append(modelDir27)
-    dirs2 = [x.replace('\n','') for x in open('notes/allModels.txt').readlines()]
+    dirs.append(modelDir25)
+    dirs.append(modelDir29)
+    dirs2 = [x.replace('\n','') for x in open('notes/allModels2.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:
         startPlot(mdir, save=True)
-    #for mdir in dirs:
+    #for mdir in dirs2:
         #try:
             #startPlot('TrainedModels/models/'+mdir, save=True)
         #except:
