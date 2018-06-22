@@ -59,11 +59,16 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     else:
         fig_x=20
         fig_y=20
+        
+    font_scale=1.2
+    fs=12
+        
     corr_strain, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=s, columns = nvar)
     corr = df.corr()
+    sns.set(font_scale=font_scale)
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title("Correlation Signal") 
+    plt.title("Correlation Signal",fontsize=fs) 
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
     if save:
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Signal.pdf", bbox_inches='tight')
@@ -73,8 +78,9 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     corr_btrain, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=b, columns = nvar)
     corr = df.corr()
+    sns.set(font_scale=font_scale)
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title("Correlation Background")
+    plt.title("Correlation Background",fontsize=fs)
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
     if save:
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_all.pdf", bbox_inches='tight')
@@ -84,8 +90,9 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     corr_stest, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=b1, columns = nvar)
     corr = df.corr()
+    sns.set(font_scale=font_scale)
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title(r"Correlation $t\overline{t}$")
+    plt.title(r"Correlation $t\overline{t}$",fontsize=fs)
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
     if save:
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_ttbar.pdf", bbox_inches='tight')
@@ -96,7 +103,7 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     df = pd.DataFrame(data=b2, columns = nvar)
     corr = df.corr()
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title("Correlation single top")
+    plt.title("Correlation single top",fontsize=fs)
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
     if save:
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_singletop.pdf", bbox_inches='tight')
@@ -106,6 +113,7 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=b3, columns = nvar)
     corr = df.corr()
+    sns.set(font_scale=font_scale)
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
     plt.title(r"Correlation $W$ + jets")
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)

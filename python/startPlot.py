@@ -223,7 +223,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_ConfusionMatrix.plot_confusion_matrix(y_train[X_train[:,variables.index('met')]>=250e3], y_predict_train[X_train[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=True, addStr='met250')
     
-    Classification Plots    
+    #Classification Plots    
     plt.figure()
     plot_Classification.plot_classification(y_test, y_predict_test, w, fileName=filenames, save=save)
     
@@ -390,6 +390,8 @@ def main():
     modelDir27= 'TrainedModels/models/2018-06-12_16-48_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir28= 'TrainedModels/models/2018-06-07_12-07_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     modelDir29= 'TrainedModels/models/2018-06-11_14-35_DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir30= 'TrainedModels/models/2018-06-11_15-23_DNN_ADAM_layer3x128batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
+    modelDir31= 'TrainedModels/models/2018-06-11_15-15_DNN_ADAM_layer3x128batch64_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
     dirs = []
     #dirs.append(modelDir1)
     #dirs.append(modelDir2)
@@ -398,8 +400,9 @@ def main():
     #dirs.append(modelDir9)
     #dirs.append(modelDir16)
     #dirs.append(modelDir24)
-    dirs.append(modelDir25)
-    dirs.append(modelDir29)
+    #dirs.append(modelDir27)
+    #dirs.append(modelDir29)
+    dirs.append(modelDir31)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels2.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:
