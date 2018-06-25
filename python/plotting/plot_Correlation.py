@@ -52,7 +52,6 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     
     print 'Not in list for training: ' + ', '.join(novars)
 
-    # Signal
     if len(nvar)<=20:
         fig_x=10
         fig_y=10
@@ -62,7 +61,25 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
         
     font_scale=1.2
     fs=12
+         
+    #Signal
+    corr_strain, ax = plt.subplots(figsize=(fig_x,fig_y))
+    df = pd.DataFrame(data=s, columns = nvar)
+    corr = df.corr()
+    sns.set(font_scale=font_scale)
+    sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
+    plt.title("Correlation Signal",fontsize=fs) 
+    plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
+    if save:
+        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Signal.pdf", bbox_inches='tight')
+        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Signal.png", bbox_inches='tight')
+        plt.close()
         
+    #For no reasons the first plot differs in pixel size compared to the others
+    #As this looks rather stupid when directly comparing, the first (wrong sized) plot is overwritten with the same plot, but correct size
+    #Probably this is the least elegant way to do this, but it works
+        
+    #Signal
     corr_strain, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=s, columns = nvar)
     corr = df.corr()
@@ -102,6 +119,7 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
     df = pd.DataFrame(data=b2, columns = nvar)
     corr = df.corr()
+    sns.set(font_scale=font_scale)
     sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
     plt.title("Correlation single top",fontsize=fs)
     plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)

@@ -402,7 +402,7 @@ def main():
     #dirs.append(modelDir24)
     #dirs.append(modelDir27)
     #dirs.append(modelDir29)
-    dirs.append(modelDir31)
+    dirs.append(modelDir24)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels2.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:
