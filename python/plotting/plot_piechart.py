@@ -25,7 +25,7 @@ def plot_pie_chart(y_true, y_predict, w, fileName="Test", save=False):
     colors=['r','b','g','orange']
     
     plt.pie(sizes_predicted,labels=labels_predicted,colors=colors)
-    plt.title('predicted distribution')
+    #plt.title('predicted distribution')
     plt.axis('equal')
     if save:
         if not os.path.exists("./plots/"):
@@ -37,7 +37,7 @@ def plot_pie_chart(y_true, y_predict, w, fileName="Test", save=False):
         
     plt.figure()
     plt.pie(sizes_true,labels=labels_true,colors=colors)
-    plt.title('true distribution')
+    #plt.title('true distribution')
     plt.axis('equal')
     if save:
         if not os.path.exists("./plots/"):

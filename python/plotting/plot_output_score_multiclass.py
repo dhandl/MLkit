@@ -66,7 +66,7 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
   
   #ax1.set_ylim((0, s_hist.max()*(1+0.33)))
   if log:
-      ax1.set_ylim((0, b_hist[2].max()*(10)))
+      ax1.set_ylim((0, b_hist[2].max()*(30)))
   else:
       ax1.set_ylim((0, b_hist[2].max()*(1+0.33)))
   

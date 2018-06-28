@@ -247,7 +247,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
     
-    #Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
+    Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
     plot_output_score.plot_output_score_datapoint(Signal1, model, preselection, variables, weights, lumi, binning, save=save, fileName=filenames)
     
     #Output Score for cuts that are used in training
@@ -402,7 +402,7 @@ def main():
     #dirs.append(modelDir24)
     #dirs.append(modelDir27)
     #dirs.append(modelDir29)
-    dirs.append(modelDir24)
+    dirs.append(modelDir25)
     dirs2 = [x.replace('\n','') for x in open('notes/allModels2.txt').readlines()]
     dirs2errors = []
     for mdir in dirs:

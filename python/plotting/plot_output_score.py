@@ -62,7 +62,7 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   #ax1.set_ylim((0, s_hist.max()*(1+0.33)))
   
   if log:
-      ax1.set_ylim((0, b_hist.max()*(10)))
+      ax1.set_ylim((0, b_hist.max()*(30)))
   else:
       ax1.set_ylim((0, b_hist.max()*(1+0.33)))
       
