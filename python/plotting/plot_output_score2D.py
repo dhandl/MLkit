@@ -3,12 +3,12 @@ import numpy as np
 import scipy.interpolate
 import os
 
-def draw_output_score2D(output_score, x, y, xname, yname, xlabel, ylabel, xmev, ymev, xbinning, ybinning, save=False, fileName='Test'):
+def draw_output_score2D(output_score, x, y, xname, yname, xlabel, ylabel, xmev, ymev, xbinning, ybinning, save=False, fileName='Test', addStr = ''):
     
     rescale=False
     
     output_score_threshhold = 0.
-    print 'Threshold for Output Score (' + xname + 'VS' + yname + '):', output_score_threshhold
+    #print 'Threshold for Output Score (' + xname + 'VS' + yname + '):', output_score_threshhold
     
     if xmev:
         xscale=0.001
@@ -20,7 +20,7 @@ def draw_output_score2D(output_score, x, y, xname, yname, xlabel, ylabel, xmev, 
         xscale=1.
         xstring = ''
         rescale=True
-        print '-> Can not (yet) be plotted'
+        print '-> Can not (yet) be plotted for', addStr
         return 0
         
     if ymev:
@@ -33,7 +33,7 @@ def draw_output_score2D(output_score, x, y, xname, yname, xlabel, ylabel, xmev, 
         yscale=1.
         ystring = ''
         rescale=True
-        print '-> Can not (yet) be plotted'
+        print '-> Can not (yet) be plotted for', addStr
         return 0
     
     x = x[output_score>=output_score_threshhold]*xscale
@@ -57,17 +57,17 @@ def draw_output_score2D(output_score, x, y, xname, yname, xlabel, ylabel, xmev, 
     
     plt.xlabel(xlabel + xstring)
     plt.ylabel(ylabel + ystring)
-    plt.title('Output Score')
+    plt.title('EPD')
     
     if save:
         if not os.path.exists('./plots/'):
             os.makedirs('./plots/')
             print('Creating folder plots')
-        plt.savefig('plots/'+fileName+'_output_score2D_'+xname+'-'+yname+'.pdf')
-        plt.savefig('plots/'+fileName+'_output_score2D_'+xname+'-'+yname+'.png')
+        plt.savefig('plots/'+fileName+'_output_score2D_'+xname+'-'+yname+'_'+addStr+'.pdf')
+        plt.savefig('plots/'+fileName+'_output_score2D_'+xname+'-'+yname+'_'+addStr+'.png')
         plt.close()
         
-def plot_output_score2D(vars_NN, vars_plot, output_score, X_test, save=False, fileName='Test'):
+def plot_output_score2D(vars_NN, vars_plot, output_score, X, y_class, save=False, fileName='Test'):
     
     print 'Plotting the 2D output score...'
     
@@ -80,9 +80,48 @@ def plot_output_score2D(vars_NN, vars_plot, output_score, X_test, save=False, fi
                 print '2D output score will not be plotted for', tpl
                 break
         if plottable:
-            x = X_test[:,vars_NN.index(tpl[0])]
-            y = X_test[:,vars_NN.index(tpl[1])]
-            draw_output_score2D(output_score, x, y, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName)
+            print 'Plotting the 2D EPD for', dics['x'], ',' , dics['y']
+            
+            #2D Output Score for all
+            #print '2D Output Score for all samples'
+            x = X[:,vars_NN.index(tpl[0])]
+            y = X[:,vars_NN.index(tpl[1])]
+            draw_output_score2D(output_score, x, y, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='all')
+            
+            #2D Output Score for Signal
+            #print '2D Output Score for Signal'
+            x_signal = X[:,vars_NN.index(tpl[0])][y_class==0]
+            y_signal = X[:,vars_NN.index(tpl[1])][y_class==0]
+            output_score_signal = output_score[y_class==0]
+            draw_output_score2D(output_score_signal, x_signal, y_signal, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='signal')
+            
+            #2D Output Score for total Background
+            #print '2D Output Score for Background'
+            x_bkg = X[:,vars_NN.index(tpl[0])][y_class!=0]
+            y_bkg = X[:,vars_NN.index(tpl[1])][y_class!=0]
+            output_score_bkg = output_score[y_class!=0]
+            draw_output_score2D(output_score_bkg, x_bkg, y_bkg, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='bkg')
+            
+            #2D Output Score for ttbar
+            #print '2D Output Score for ttbar'
+            x_ttbar = X[:,vars_NN.index(tpl[0])][y_class==1]
+            y_ttbar = X[:,vars_NN.index(tpl[1])][y_class==1]
+            output_score_ttbar = output_score[y_class==1]
+            draw_output_score2D(output_score_ttbar, x_ttbar, y_ttbar, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='ttbar')
+            
+            #2D Output Score for single top
+            #print '2D Output Score for single top'
+            x_singletop = X[:,vars_NN.index(tpl[0])][y_class==2]
+            y_singletop = X[:,vars_NN.index(tpl[1])][y_class==2]
+            output_score_singletop = output_score[y_class==2]
+            draw_output_score2D(output_score_singletop, x_singletop, y_singletop, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='singletop')
+            
+            #2D Output Score for w+jets
+            #print '2D Output Score for W + jets'
+            x_wjets = X[:,vars_NN.index(tpl[0])][y_class==3]
+            y_wjets = X[:,vars_NN.index(tpl[1])][y_class==3]
+            output_score_wjets = output_score[y_class==3]
+            draw_output_score2D(output_score_wjets, x_wjets, y_wjets, dics['x'], dics['y'], dics['xlabel'], dics['ylabel'], dics['xmev'], dics['ymev'], dics['xbinning'], dics['ybinning'], save=save, fileName=fileName, addStr='wjets')
             
         
 #def plot_output_score2D(output_score, X_test, xlabel, ylabel, save=False, fileName='Test'):

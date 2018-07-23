@@ -5,13 +5,13 @@ preselection = [
                 {'name':'met',    'threshold':100e3,  'type':'geq'},
                 {'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
-                #{'name':'dphi_jet0_ptmiss', 'threshold':0.4,    'type':'greater'},
+                #{'name':'dphi_jet0_ptmiss', 'threshold':1.8,    'type':'geq'},
                 #{'name':'dphi_jet1_ptmiss', 'threshold':0.4,    'type':'greater'}
                 #{'name':'ht',   'threshold':200e3,  'type':'geq'},
                 #{'name':'dphi_b_lep_max',   'threshold':2.8,  'type':'leq'}
                 #{'name':'dphi_b_lep_max',   'threshold':2.6,  'type':'condition',   'variable':'ht',   'lessthan':225e3,   'morethan': 275e3}
                 #{'name':'dr_bjet_lep',    'threshold':2.5,  'type':'leq'}
-                #{'name':'dphi_met_lep',    'threshold':2,  'type':'leq'}
+                #{'name':'dphi_met_lep',    'threshold':1.8,  'type':'geq'}
                 #{'name':'tt_cat_TRUTH3',  'threshold':0,      'type':'geq'},
                 #{'name':'tt_cat_TRUTH3',  'threshold':6,      'type':'leq'},
                 #{'name':'tt_cat_TRUTH3',  'threshold':1,      'type':'not'},
@@ -21,7 +21,7 @@ preselection = [
 preselection_evaluate = [ 
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
-                {'name':'met',    'threshold':100e3,  'type':'geq'},
+                {'name':'met',    'threshold':250e3,  'type':'geq'},
                 {'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                 #{'name':'dphi_jet0_ptmiss', 'threshold':0.4,    'type':'greater'},
@@ -43,7 +43,7 @@ lumi = 140e3
 
 nvar = [
         'ht',
-        'jet_pt[0]',
+        #'jet_pt[0]',
         'bjet_pt[0]',
         'amt2',
         'mt',
@@ -51,18 +51,18 @@ nvar = [
         'dphi_met_lep',
         'dphi_b_lep_max',
         'dphi_jet0_ptmiss',
-        'met_sig',
-        'met_proj_lep',
-        'ht_sig',
+        #'met_sig',
+        #'met_proj_lep',
+        #'ht_sig',
         'm_bl',
-        'dr_bjet_lep',
-        'mT_blMET',
+        'dr_bjet_lep'
+        #'mT_blMET' #15vars
+        #'n_jet',
+        #'n_bjet'
         #'jet_pt[1]',
         #'jet_pt[2]',
         #'jet_pt[3]',
         #'lep_pt[0]',
-        #'n_jet',
-        #'n_bjet',
         #'dr_jet_jet_max',
         #'ttbar_pt',
         #'ttbar_dphi',

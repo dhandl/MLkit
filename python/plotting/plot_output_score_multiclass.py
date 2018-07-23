@@ -10,10 +10,11 @@ import pandas as pd
 # matplot lib for plotting
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 import AtlasStyle_mpl
 
-def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, bkg2_predicted, bkg2_w, bkg3_predicted, bkg3_w, bkg_predicted, bkg_w, binning, fileName="Test", normed=False, save=False, ratio=False):
+def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, bkg2_predicted, bkg2_w, bkg3_predicted, bkg3_w, bkg_predicted, bkg_w, binning, fileName="Test", title='Discriminating power', normed=False, save=False, ratio=False,  log=False, sample=None, addStr=''):
   print('Plotting the multiclass output score...')
   fig = plt.figure(figsize=(8,6))
   if ratio:
@@ -34,12 +35,19 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
   #b2_hist, b2_bins, b2_patches = plt.hist(bkg2_predicted.ravel(), weights=bkg2_w, histtype='stepfilled', color='g', label='single top', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
   #b3_hist, b3_bins, b3_patches = plt.hist(bkg3_predicted.ravel(), weights=bkg3_w, histtype='stepfilled', color='m', label='W+jets', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
   
-  bkgs = [bkg1_predicted.ravel(),bkg2_predicted.ravel(),bkg3_predicted.ravel()]
-  bweights = [bkg1_w,bkg2_w,bkg3_w]
-  labels = [r'$t\overline{t}$','single top', r'$W$+jets']
+  bkgs = [bkg3_predicted.ravel(),bkg2_predicted.ravel(),bkg1_predicted.ravel()]
+  bweights = [bkg3_w,bkg2_w,bkg1_w]
+  labels = [r'$W$+jets','single top',r'$t\overline{t}$']
+  colors=['orange','g','b']
   
   s_hist, s_bins, s_patches = plt.hist(sig_predicted.ravel(), weights=sig_w, histtype='stepfilled', color='r', label='signal', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed) 
-  b_hist, b_bins, b_patches = plt.hist(bkgs, weights=bweights, histtype='stepfilled', label=labels, alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed, stacked=True)
+  b_hist, b_bins, b_patches = plt.hist(bkgs, weights=bweights, histtype='stepfilled', color=colors,label=labels, alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed, stacked=True)
+  
+  log_str = ''
+  
+  if log:
+      plt.yscale('log', nonposy='clip')
+      log_str = '_log'
   
   #s_w = getSumW2(sig_predicted.ravel(), sig_w, binning)
   #b1_w = getSumW2(bkg1_predicted.ravel(), bkg1_w, binning)
@@ -56,13 +64,26 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
   else:
     ax1.set_ylabel("Events", ha='left')
   
-  ax1.set_ylim((0, s_hist.max()*(1+0.33)))
-  leg = plt.legend(loc="best", frameon=False)
+  #ax1.set_ylim((0, s_hist.max()*(1+0.33)))
+  if log:
+      ax1.set_ylim((0, b_hist[2].max()*(30)))
+  else:
+      ax1.set_ylim((0, b_hist[2].max()*(1+0.33)))
+  
+  if sample is not None:
+    sample_patch = mpatches.Patch(color='None', label=sample)
+    leg = plt.legend(loc='best', frameon=False, handles=[s_patches[0], b_patches[0][0], b_patches[1][0], b_patches[2][0], sample_patch])
+  else:
+    leg = plt.legend(loc='best', frameon=False)
+  
   p = leg.get_window_extent()
   #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
   #ax1.text(0.65, 0.7, "KS Test S (B): %.3f (%.3f)"%(ks_sig, ks_bkg), transform=ax1.transAxes)
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
   #ax.text(0.55, 0.7, "KS p-value S (B): %.3f (%.3f)"%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
+  
+  if title is not None:
+      plt.title(title)
 
   AtlasStyle_mpl.ATLASLabel2(ax1, 0.02, 0.9, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=140)
@@ -78,14 +99,14 @@ def plot_output_score_multiclass(sig_predicted, sig_w, bkg1_predicted, bkg1_w, b
     ax2.xaxis.set_ticks_position('both')
     ax2.yaxis.set_ticks_position('both')
 
-  ax1.set(xlabel='Output score')
+  ax1.set(xlabel='EPD')
 
   if save:
     if not os.path.exists("./plots/"):
         os.makedirs("./plots/")
         print("Creating folder plots")
-    plt.savefig("plots/"+fileName+"_output_score_multiclass.pdf")
-    plt.savefig("plots/"+fileName+"_output_score_multiclass.png")
+    plt.savefig("plots/"+fileName+"_output_score_multiclass"+addStr+log_str+".pdf")
+    plt.savefig("plots/"+fileName+"_output_score_multiclass"+addStr+log_str+".png")
     plt.close()
     
   try:

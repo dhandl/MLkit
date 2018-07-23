@@ -51,11 +51,11 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
     Background = []
     for s in sigList:
       print 'Loading signal {} from {}...'.format(s['name'], s['path'])
-      Signal.append(Sample(s['name'], loadDataFrame(s['path'], preselection, nvar, weight, lumi)))
+      Signal.append(Sample(s['name'], loadDataFrame(s['path'], preselection, nvar, weight, lumi, output=output)))
       
     for b in bkgList:
       print 'Loading background {} from {}...'.format(b['name'], b['path'])
-      Background.append(Sample(b['name'], loadDataFrame(b['path'], preselection, nvar, weight, lumi)))
+      Background.append(Sample(b['name'], loadDataFrame(b['path'], preselection, nvar, weight, lumi, output=output)))
   
     sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
     sig_w = np.empty(0)
@@ -108,7 +108,7 @@ def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=1
   return (X_train, X_test, y_train, y_test, w_train, w_test)
 
 
-def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
+def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3,output=None):
   if os.path.isdir(path):
     files = os.listdir(path)
   else:
@@ -118,6 +118,9 @@ def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
     for f in fList:
       if f.startswith(pattern):
         files.append(f)
+
+  if output is not None:
+    saveFiles(files, output)
 
   if len(files) == 1:
     f = files[0]
@@ -149,6 +152,12 @@ def loadDataFrame(path, cut=None, nvar=None, weights=[], lumi=100e3):
   weight_df = weightFrame(weight_df, weights, lumi)
   return df, weight_df
 
+def saveFiles(files, output):
+    info = open(output.replace('.h5', '.txt'),'a')
+    for f in files:
+        info.write(f + '\n')
+    info.write('\n')
+    info.close()
 
 def weightFrame(df, weights, lumi=100e3):
   first = True

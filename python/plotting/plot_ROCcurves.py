@@ -97,9 +97,9 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         auc_test_bkg2 = roc_auc_score(y_test_bkg2, y_predict_test_bkg2)
         
         plt.figure('ROC2')
-        plt.plot(tpr_train_bkg2, 1.-fpr_train_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_train_bkg2), color='r')
+        plt.plot(tpr_train_bkg2, 1.-fpr_train_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_train_bkg2), color='g')
         plt.figure('ROC3')
-        plt.plot(tpr_test_bkg2, 1.-fpr_test_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_test_bkg2), color='r')
+        plt.plot(tpr_test_bkg2, 1.-fpr_test_bkg2, lw=1, label='Single Top (AUC = %0.2f)'%(auc_test_bkg2), color='g')
     
     except ValueError:
         print 'Class 2 has not been identified correctly'
@@ -113,9 +113,9 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
         auc_test_bkg3 = roc_auc_score(y_test_bkg3, y_predict_test_bkg3)
     
         plt.figure('ROC2')
-        plt.plot(tpr_train_bkg3, 1.-fpr_train_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_train_bkg3), color='g')
+        plt.plot(tpr_train_bkg3, 1.-fpr_train_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_train_bkg3), color='orange')
         plt.figure('ROC3')
-        plt.plot(tpr_test_bkg3, 1.-fpr_test_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_test_bkg3), color='g')
+        plt.plot(tpr_test_bkg3, 1.-fpr_test_bkg3, lw=1, label=r'$W$ + jets (AUC = %0.2f)'%(auc_test_bkg3), color='orange')
     
     except ValueError:
         print 'Class 3 has not been identified correctly'
