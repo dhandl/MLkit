@@ -23,30 +23,36 @@ from getRatio import getRatio
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name' 'path')
 
+sys.path.append('./python/plotting/')
+import plot_ROCcurves
 
 #inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
-inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/AnalysisChallenge2018/skimmed'
+inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 Dir = 'TrainedModels/models/'
-modelfile = '2018-05-11_12-49_DNN_rmsprop_layer128_batch16_GlorotUniformInitializer_dropout0p5_l1-0p01'
+#modelfile = '2018-07-31_11-18_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
+#modelfile = '2018-07-31_10-52_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
+#modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
+modelfile = '2018-07-31_14-15_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
 
 modelDir = Dir+modelfile+'.h5'
 
 #SIGNAL = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
-SIGNAL = ['stop_tN_500_327']
+SIGNAL = ['stop_bWN_450_300_mc16d']
 #SIGNAL = ['stop_tN_800_500']
 
-BACKGROUND = ['bkgs']
+BACKGROUND = ['mc16d_ttbar', 'mc16d_singletop', 'mc16d_Wjets']
 
 PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
-                {'name':'met',    'threshold':250e3,  'type':'geq'},
+                {'name':'met',    'threshold':100e3,  'type':'geq'},
                 {'name':'mt',    'threshold':110e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'}
                ]
 
 VAR = [
+        #'bjet_pt[0]', 'amt2', 'mt', 'met', 'dphi_met_lep', 'ht_sig', 'dr_bjet_lep'
         #'met',
         #'mt',
         #'Lp',
@@ -56,36 +62,41 @@ VAR = [
         'met',
         'met_phi',
         'n_jet',
-        'lep_pt[0]',
-        'lep_eta[0]',
-        'lep_phi[0]',
+        'n_bjet',
         'jet_pt[0]',
         'jet_eta[0]',
         'jet_phi[0]',
-        'jet_m[0]',
-        'jet_bweight[0]',
+        'jet_e[0]',
+        #'jet_bweight[0]',
         'jet_pt[1]',
         'jet_eta[1]',
         'jet_phi[1]',
-        'jet_m[1]',
-        'jet_bweight[1]',
+        'jet_e[1]',
+        #'jet_bweight[1]',
         'jet_pt[2]',
         'jet_eta[2]',
         'jet_phi[2]',
-        'jet_m[2]',
-        'jet_bweight[2]',
+        'jet_e[2]',
+        #'jet_bweight[2]',
         'jet_pt[3]',
         'jet_eta[3]',
         'jet_phi[3]',
-        'jet_m[3]',
-        'jet_bweight[3]'
-      ]
+        'jet_e[3]',
+        #'jet_bweight[3]'
+        'lep_pt[0]',
+        'lep_eta[0]',
+        'lep_phi[0]',
+        'lep_e[0]'
+     ]
 
 WEIGHTS = [
-           'event_weight'
+           'weight',
+           'xs_weight',
+           'sf_total',
+           'weight_sherpa22_njets'
           ]
 
-LUMI = 1.
+LUMI = 140e3
 
 RESOLUTION = np.array([50,0,1], dtype=float)
 
@@ -291,21 +302,20 @@ def main():
   scaled_label = 'Signal'
 
   plt.bar(center, totalBkgOutput, width=db, yerr=np.sqrt(totalBkgVar), color='b', alpha=0.5, error_kw=dict(ecolor='b', lw=1.5), label='Background')  
-  plt.bar(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label='Signal', color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5))  
+  plt.bar(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label=Signal[0]['name'], color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5))  
 
   ax1.set_ylim((0.1, totalBkgOutput.max()*(15.)))
   ax1.set_yscale('log')
   leg = plt.legend(loc="best", frameon=False)
 
   AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI)
+  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI*0.001)
 
-  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.pdf")
-  plt.savefig("TrainedModels/plots/"+modelfile+"_outputScore.png")
-  plt.show()
-#        plt.savefig("plots/"+fileName+"_evaluated_grid.png")
-#        plt.close()
+  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.pdf")
+  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
+  plt.close()
 
+  #plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=modelfile+'_eval-bWN-450-300')
 
 if __name__ == "__main__":
     main()

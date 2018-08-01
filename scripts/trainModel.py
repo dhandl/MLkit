@@ -117,6 +117,7 @@ def saveInfos(Imodel, Ianalysis, Idataset, Ivariables, Ipreselection, Ilumi, Isi
     infofile.write('Used parameters for this analysis algorithm: ' + Ialgorithmparams + '\n')
     infofile.write('Used multiclass: ' + str(Imulticlass) + '\n')
     infofile.write('Used dataset: ' + Idataset + '\n')
+    infofile.write('Used scaler: ' + Imodel + '_scaler.pkl' + '\n')
     infofile.write('Used variables for training: ' + Ivariables + '\n')
     infofile.write('Used weights: ' + Iweights + '\n')
     presels = ''
@@ -277,15 +278,15 @@ def main():
       pickle.dump(history.history, hist_pi)
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
-  
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
-  
+
   try:
     print('Saving Scaler to file...')
     joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
   except NameError:
       print('No Scaler found')
-
+ 
+  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
+  
   # end timer and print time
   t.stop()
   t0 = t.elapsed
@@ -375,15 +376,15 @@ def trainextern():
       pickle.dump(history.history, hist_pi)
 
   saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
-  
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
-  
+
   try:
     print('Saving Scaler to file...')
     joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
   except NameError:
       print('No Scaler found')
-
+ 
+  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
+  
   # end timer and print time
   t.stop()
   t0 = t.elapsed

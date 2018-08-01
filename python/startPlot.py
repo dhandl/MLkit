@@ -12,13 +12,13 @@ sys.path.append('./python/plotting/')
 import plot_TrainTest_score
 import plot_ConfusionMatrix
 import plot_Classification
-import plot_Classification2
+#import plot_Classification2
 import plot_learning_curve
 import plot_output_score
 import plot_output_score_multiclass
 import plot_output_score2D
 import plot_piechart
-import evaluate_signalGrid
+#import evaluate_signalGrid
 import plot_ROCcurves
 import plot_Correlation
 
@@ -42,11 +42,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     infofile = open(modelDir.replace('.h5','_infofile.txt'))
     infos = infofile.readlines()
     
-    variables=infos[4].replace('Used variables for training: ','').replace('\n','').split()
-    weights=infos[5].replace('Used weights: ', '').replace('\n','').split()
-    lumi=float(infos[7].replace('Used Lumi: ','').replace('\n',''))
+    variables=infos[5].replace('Used variables for training: ','').replace('\n','').split()
+    weights=infos[6].replace('Used weights: ', '').replace('\n','').split()
+    lumi=float(infos[8].replace('Used Lumi: ','').replace('\n',''))
     
-    preselection_raw=infos[6].replace('Used preselection: ', '').replace('; \n', '').split(';')
+    preselection_raw=infos[7].replace('Used preselection: ', '').replace('; \n', '').split(';')
     preselection=[]
     for x in preselection_raw:
         xdict = {}
@@ -81,46 +81,44 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     filenames = modelDir.replace('TrainedModels/models/','').replace('.h5','')
     
-    #filenames='TEST_20180524'
-    
     print 'Using dataset from:', datasetDir
     
-    print 'Defining files for specific confusion matrices...'
+    #print 'Defining files for specific confusion matrices...'
     
-    Signal = []
-    input = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+    #Signal = []
+    #input = '/project/etp5/dhandl/samples/SUSY/Stop1L/EarlyRun2/hdf5/cut_mt30_met60_preselection/'
     
-    point1 = [{'name':'stop_bWN_250_100', 'path':input+'stop_bWN_250_100/'},{'name':'stop_bWN_250_130', 'path':input+'stop_bWN_250_130/'},{'name':'stop_bWN_250_160', 'path':input+'stop_bWN_250_160/'}]
-    point2 = [{'name':'stop_bWN_300_150', 'path':input+'stop_bWN_300_150/'},{'name':'stop_bWN_300_180', 'path':input+'stop_bWN_300_180/'},{'name':'stop_bWN_300_210', 'path':input+'stop_bWN_300_210/'}]
-    point3 = [{'name':'stop_bWN_350_200', 'path':input+'stop_bWN_350_200/'},{'name':'stop_bWN_350_230', 'path':input+'stop_bWN_350_230/'},{'name':'stop_bWN_350_260', 'path':input+'stop_bWN_350_260/'}]
-    point4 = [{'name':'stop_bWN_400_250', 'path':input+'stop_bWN_400_250/'},{'name':'stop_bWN_400_280', 'path':input+'stop_bWN_400_280/'},{'name':'stop_bWN_400_310', 'path':input+'stop_bWN_400_310/'}]
-    point5 = [{'name':'stop_bWN_450_300', 'path':input+'stop_bWN_450_300/'},{'name':'stop_bWN_450_330', 'path':input+'stop_bWN_450_330/'},{'name':'stop_bWN_450_360', 'path':input+'stop_bWN_450_360/'}]
-    point6 = [{'name':'stop_bWN_500_350', 'path':input+'stop_bWN_500_350/'},{'name':'stop_bWN_500_380', 'path':input+'stop_bWN_500_380/'}]
-    point7 = [{'name':'stop_bWN_550_400', 'path':input+'stop_bWN_550_400/'},{'name':'stop_bWN_550_430', 'path':input+'stop_bWN_550_430/'},{'name':'stop_bWN_550_460', 'path':input+'stop_bWN_550_460/'}]
-    point8 = [{'name':'stop_bWN_600_450', 'path':input+'stop_bWN_600_450/'},{'name':'stop_bWN_600_480', 'path':input+'stop_bWN_600_480/'},{'name':'stop_bWN_600_510', 'path':input+'stop_bWN_600_510/'}]
-    point9 = [{'name':'stop_bWN_650_500', 'path':input+'stop_bWN_650_500/'},{'name':'stop_bWN_650_530', 'path':input+'stop_bWN_650_530/'},{'name':'stop_bWN_650_560', 'path':input+'stop_bWN_650_560/'}]
+    #point1 = [{'name':'stop_bWN_250_100', 'path':input+'stop_bWN_250_100/'},{'name':'stop_bWN_250_130', 'path':input+'stop_bWN_250_130/'},{'name':'stop_bWN_250_160', 'path':input+'stop_bWN_250_160/'}]
+    #point2 = [{'name':'stop_bWN_300_150', 'path':input+'stop_bWN_300_150/'},{'name':'stop_bWN_300_180', 'path':input+'stop_bWN_300_180/'},{'name':'stop_bWN_300_210', 'path':input+'stop_bWN_300_210/'}]
+    #point3 = [{'name':'stop_bWN_350_200', 'path':input+'stop_bWN_350_200/'},{'name':'stop_bWN_350_230', 'path':input+'stop_bWN_350_230/'},{'name':'stop_bWN_350_260', 'path':input+'stop_bWN_350_260/'}]
+    #point4 = [{'name':'stop_bWN_400_250', 'path':input+'stop_bWN_400_250/'},{'name':'stop_bWN_400_280', 'path':input+'stop_bWN_400_280/'},{'name':'stop_bWN_400_310', 'path':input+'stop_bWN_400_310/'}]
+    #point5 = [{'name':'stop_bWN_450_300', 'path':input+'stop_bWN_450_300/'},{'name':'stop_bWN_450_330', 'path':input+'stop_bWN_450_330/'},{'name':'stop_bWN_450_360', 'path':input+'stop_bWN_450_360/'}]
+    #point6 = [{'name':'stop_bWN_500_350', 'path':input+'stop_bWN_500_350/'},{'name':'stop_bWN_500_380', 'path':input+'stop_bWN_500_380/'}]
+    #point7 = [{'name':'stop_bWN_550_400', 'path':input+'stop_bWN_550_400/'},{'name':'stop_bWN_550_430', 'path':input+'stop_bWN_550_430/'},{'name':'stop_bWN_550_460', 'path':input+'stop_bWN_550_460/'}]
+    #point8 = [{'name':'stop_bWN_600_450', 'path':input+'stop_bWN_600_450/'},{'name':'stop_bWN_600_480', 'path':input+'stop_bWN_600_480/'},{'name':'stop_bWN_600_510', 'path':input+'stop_bWN_600_510/'}]
+    #point9 = [{'name':'stop_bWN_650_500', 'path':input+'stop_bWN_650_500/'},{'name':'stop_bWN_650_530', 'path':input+'stop_bWN_650_530/'},{'name':'stop_bWN_650_560', 'path':input+'stop_bWN_650_560/'}]
     
-    Signal1 = [
-    [{'name':'stop_bWN_250_100', 'path':input+'stop_bWN_250_100/'}],
-    [{'name':'stop_bWN_300_150', 'path':input+'stop_bWN_300_150/'}],
-    [{'name':'stop_bWN_350_200', 'path':input+'stop_bWN_350_200/'}],
-    [{'name':'stop_bWN_400_250', 'path':input+'stop_bWN_400_250/'}],
-    [{'name':'stop_bWN_450_300', 'path':input+'stop_bWN_450_300/'}],
-    [{'name':'stop_bWN_500_350', 'path':input+'stop_bWN_500_350/'}],
-    [{'name':'stop_bWN_550_400', 'path':input+'stop_bWN_550_400/'}],
-    [{'name':'stop_bWN_600_450', 'path':input+'stop_bWN_600_450/'}],
-    [{'name':'stop_bWN_650_500', 'path':input+'stop_bWN_650_500/'}]
-    ]
+    #Signal1 = [
+    #[{'name':'stop_bWN_250_100', 'path':input+'stop_bWN_250_100/'}],
+    #[{'name':'stop_bWN_300_150', 'path':input+'stop_bWN_300_150/'}],
+    #[{'name':'stop_bWN_350_200', 'path':input+'stop_bWN_350_200/'}],
+    #[{'name':'stop_bWN_400_250', 'path':input+'stop_bWN_400_250/'}],
+    #[{'name':'stop_bWN_450_300', 'path':input+'stop_bWN_450_300/'}],
+    #[{'name':'stop_bWN_500_350', 'path':input+'stop_bWN_500_350/'}],
+    #[{'name':'stop_bWN_550_400', 'path':input+'stop_bWN_550_400/'}],
+    #[{'name':'stop_bWN_600_450', 'path':input+'stop_bWN_600_450/'}],
+    #[{'name':'stop_bWN_650_500', 'path':input+'stop_bWN_650_500/'}]
+    #]
     
-    Signal.append(point1)
-    Signal.append(point2)
-    Signal.append(point3)
-    Signal.append(point4)
-    Signal.append(point5)
-    Signal.append(point6)
-    Signal.append(point7)
-    Signal.append(point8)
-    Signal.append(point9)
+    #Signal.append(point1)
+    #Signal.append(point2)
+    #Signal.append(point3)
+    #Signal.append(point4)
+    #Signal.append(point5)
+    #Signal.append(point6)
+    #Signal.append(point7)
+    #Signal.append(point8)
+    #Signal.append(point9)
     
     print 'Loading model...'
     
@@ -145,10 +143,10 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     y_test= dataset['y_test'][:]
     y = dataset['y'][:]
     w = dataset['w'][:]
-       
-    scaler = StandardScaler()
+    
+    scaler = joblib.load(modelDir.replace('.h5' , '_scaler.pkl'))
 
-    X_train_scaled = scaler.fit_transform(X_train)
+    X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     X_scaled = scaler.transform(X)
     
@@ -205,7 +203,7 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0], sig_predicted_test[:,0], sig_w_train, sig_w_test, bkg_predicted_train[:,0], bkg_predicted_test[:,0], bkg_w_train, bkg_w_test, binning, normed=1,save=save,fileName=filenames)
     
     #TrainTestScore for cuts that are manually specified
-    plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0][X_train[:,variables.index('met')][y_train==0]>=250e3], sig_predicted_test[:,0][X_test[:,variables.index('met')][y_test==0]>=250e3], sig_w_train[X_train[:,variables.index('met')][y_train==0]>=250e3], sig_w_test[X_test[:,variables.index('met')][y_test==0]>=250e3], bkg_predicted_train[:,0][X_train[:,variables.index('met')][y_train!=0]>=250e3], bkg_predicted_test[:,0][X_test[:,variables.index('met')][y_test!=0]>=250e3], bkg_w_train[X_train[:,variables.index('met')][y_train!=0]>=250e3], bkg_w_test[X_test[:,variables.index('met')][y_test!=0]>=250e3], binning, normed=1,save=save,fileName=filenames, addStr='met250')
+    #plot_TrainTest_score.plot_TrainTest_score(sig_predicted_train[:,0][X_train[:,variables.index('met')][y_train==0]>=250e3], sig_predicted_test[:,0][X_test[:,variables.index('met')][y_test==0]>=250e3], sig_w_train[X_train[:,variables.index('met')][y_train==0]>=250e3], sig_w_test[X_test[:,variables.index('met')][y_test==0]>=250e3], bkg_predicted_train[:,0][X_train[:,variables.index('met')][y_train!=0]>=250e3], bkg_predicted_test[:,0][X_test[:,variables.index('met')][y_test!=0]>=250e3], bkg_w_train[X_train[:,variables.index('met')][y_train!=0]>=250e3], bkg_w_test[X_test[:,variables.index('met')][y_test!=0]>=250e3], binning, normed=1,save=save,fileName=filenames, addStr='met250')
     
     #CMs for cuts that are used for training
     plt.figure()
@@ -215,13 +213,13 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plot_ConfusionMatrix.plot_confusion_matrix(y_train, y_predict_train, filename=filenames, save=save, isTrain=True)
     
     #CMs for cuts that are manually specified
-    print 'Plotting the CMs for met250'
+    #print 'Plotting the CMs for met250'
     
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_test[X_test[:,variables.index('met')]>=250e3], y_predict_test[X_test[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=False, addStr='met250')
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix(y_test[X_test[:,variables.index('met')]>=250e3], y_predict_test[X_test[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=False, addStr='met250')
     
-    plt.figure()
-    plot_ConfusionMatrix.plot_confusion_matrix(y_train[X_train[:,variables.index('met')]>=250e3], y_predict_train[X_train[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=True, addStr='met250')
+    #plt.figure()
+    #plot_ConfusionMatrix.plot_confusion_matrix(y_train[X_train[:,variables.index('met')]>=250e3], y_predict_train[X_train[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=True, addStr='met250')
     
     #Classification Plots    
     plt.figure()
@@ -233,11 +231,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_Classification.plot_classification(y_train, y_predict_train, w, fileName=filenames, save=save, train=True)
     
-    plt.figure()
-    plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
+    #plt.figure()
+    #plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
     
-    plt.figure()
-    plot_Classification.plot_classification_datapoint(Signal1, model, preselection, variables, weights, lumi, save=save, fileName=filenames, multiclass=True)    
+    #plt.figure()
+    #plot_Classification.plot_classification_datapoint(Signal1, model, preselection, variables, weights, lumi, save=save, fileName=filenames, multiclass=True)    
     
     #Learning Curve
     plt.figure()
@@ -247,31 +245,31 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     plt.figure()
     plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
     
-    Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
-    plot_output_score.plot_output_score_datapoint(Signal1, model, preselection, variables, weights, lumi, binning, save=save, fileName=filenames)
+    # Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
+    #plot_output_score.plot_output_score_datapoint(Signal1, model, preselection, variables, weights, lumi, binning, save=save, fileName=filenames)
     
     #Output Score for cuts that are used in training
     plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
     plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
     
     #Output Score for cuts that are manually specified
-    print 'Plotting the output score for met250'
-    plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=True)
-    plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=False)
+    #print 'Plotting the output score for met250'
+    #plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=True)
+    #plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=False)
     
     plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
     plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
     
-    plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, y, save=save, fileName=filenames)
+    #plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, y, save=save, fileName=filenames)
     
     plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save)
-    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
+    #plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
     
-    evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
-    evaluate_signalGrid.evaluate_signalGridCuts(modelDir, save=save, fileName=filenames)
+    #evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
+    #evaluate_signalGrid.evaluate_signalGridCuts(modelDir, save=save, fileName=filenames)
     
     #end timer and print time
     t.stop()
@@ -335,20 +333,6 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     bkg_w = dataset['w'][y!=0]
     
     #Do various plots
-    
-    #plt.figure()
-    #plot_ConfusionMatrix.plot_confusion_matrix(y, y_predict, filename=filenames, save=save, isTrain=False)
-    
-    #plt.figure()
-    #plot_Classification.plot_classification(y, y_predict, fileName=filenames, save=save)
-    
-    #plt.figure()
-    #plot_Classification2.plot_classification_2(y, y_predict, fileName=filenames, save=save)
-    
-    #plt.figure()
-    #plot_piechart.plot_pie_chart(y, y_predict, fileName=filenames, save=save)
-    
-    #plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames)
     
     evaluate_signalGrid.evaluate_signalGridCut(modelDir, save=save, fileName=filenames)
     

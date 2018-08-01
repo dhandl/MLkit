@@ -142,11 +142,11 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
               class_weight=class_weight,
               sample_weight=None, validation_data=(X_test,y_test,None),
-              callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+              callbacks = [EarlyStopping(verbose=True, patience=5, monitor='acc')])
   except KeyboardInterrupt:
     print '--- Training ended early ---'
   print 'Testing...'
-  score = model.evaluate(X_test, y_test, sample_weight=w_test)
+  score = model.evaluate(X_test, y_test, sample_weight=None)
   print("\n%s: %.2f%%" % (model.metrics_names[0], score[0]*100))
   print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
   y_predicted = model.predict(X_test)

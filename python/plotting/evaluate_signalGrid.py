@@ -27,7 +27,8 @@ from collections import namedtuple
 #from collections import OrderedDict
 Sample = namedtuple('Sample', 'name' 'path')
 
-inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+inputDirSig = '/project/etp5/dhandl/samples/SUSY/Stop1L/EarlyRun2/hdf5/cut_mt30_met60_preselection/'
+inputDirBkg = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 #modelDir = 'TrainedModels/models/2018-04-12_10-21_DNN_ADAM_layer3x128_batch128_NormalInitializer_dropout0p5_l2-0p01_multiclass.h5'
 
@@ -107,7 +108,7 @@ def main():
   Signal = []
   for s in SIGNAL:
     x, y = pickBenchmark(s)
-    df, weight = loadDataFrame(os.path.join(inputDir, s+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
+    df, weight = loadDataFrame(os.path.join(inputDirSig, s+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])   # get the bin index of the output score for each event 
     outputWeighted = []
@@ -134,7 +135,7 @@ def main():
   totBkgVar = 0.
   Background = []
   for b in BACKGROUND:
-    df, weight = loadDataFrame(os.path.join(inputDir, b+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
+    df, weight = loadDataFrame(os.path.join(inputDirBkg, b+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])
     outputWeighted = []
@@ -285,7 +286,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   background=infos[9].replace('Used background files: ','').replace('; \n','').replace(' ','').split(';')
   #signal=infos[8].replace('Used signal files: ','').replace('; \n','').replace(' ','').split(';')
   
-  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
+  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_185', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_235', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_285', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_335', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_385', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_435', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_485', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
   
    
   #For Debugging
@@ -318,7 +319,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   Signal = []
   for s in signal:
     x, y = pickBenchmark(s)
-    df, weight = loadDataFrame(os.path.join(inputDir, s+'/'), preselection, variables, weights, lumi)
+    df, weight = loadDataFrame(os.path.join(inputDirSig, s+'/'), preselection, variables, weights, lumi)
     statInfoSig[s]=df.shape[0]
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])   # get the bin index of the output score for each event 
@@ -349,7 +350,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   totBkgVar = 0.
   Background = []
   for b in background:
-    df, weight = loadDataFrame(os.path.join(inputDir, b+'/'), preselection, variables, weights, lumi)
+    df, weight = loadDataFrame(os.path.join(inputDirBkg, b+'/'), preselection, variables, weights, lumi)
     statInfoBkg[b]=df.shape[0]
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])
@@ -473,6 +474,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
         plt.savefig('plots/'+fileName+'_evaluated_grid.png')
         plt.close()
   
+  diag_165 = {}
   diag_150 = {}
   diag_120 = {}
   diag_90 = {}
@@ -480,7 +482,9 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   for key, value in statInfoSig.iteritems():
       x, y = pickBenchmark(key)
       deltaM = float(x)-float(y)
-      if deltaM==150.0:
+      if deltaM==165.0:
+          diag_165[x]=value
+      elif deltaM==150.0:
           diag_150[x]=value
       elif deltaM==120.0:
           diag_120[x]=value
@@ -490,14 +494,19 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
           print 'Error: Unknown diagonal in evaluate_signalGrid'
           return 0 
   
+  sortedLabels165 = sorted(diag_165)
   sortedLabels150 = sorted(diag_150)
   sortedLabels120 = sorted(diag_120)
   sortedLabels90 = sorted(diag_90)
   
+  values_165 = []
   values_150 = []
   values_120 = []
   values_90 = []
   
+  for label in sortedLabels165:
+      values_165.append(diag_165[label])
+
   for label in sortedLabels150:
       values_150.append(diag_150[label])
       
@@ -507,26 +516,27 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
   for label in sortedLabels90:
       values_90.append(diag_90[label])
       
-  csignal = sum(values_90)+sum(values_120)+sum(values_150)
+  csignal = sum(values_90)+sum(values_120)+sum(values_150)+sum(values_165)
   trainable_count = int(np.sum([K.count_params(p) for p in set(model.trainable_weights)]))
       
   signalP = mpatches.Patch(color='None', label='signal: ' + str(csignal))
-  ttbar = mpatches.Patch(color='None', label=r'$t\overline{t}$: ' + str(statInfoBkg['powheg_ttbar']))
-  singletop = mpatches.Patch(color='None', label= 'single top: '+ str(statInfoBkg['powheg_singletop']))
-  Wjets = mpatches.Patch(color='None', label= r'$W$ + jets: '+ str(statInfoBkg['sherpa22_Wjets']))
+  ttbar = mpatches.Patch(color='None', label=r'$t\overline{t}$: ' + str(statInfoBkg['mc16d_ttbar']))
+  singletop = mpatches.Patch(color='None', label= 'single top: '+ str(statInfoBkg['mc16d_singletop']))
+  Wjets = mpatches.Patch(color='None', label= r'$W$ + jets: '+ str(statInfoBkg['mc16d_Wjets']))
   tps = mpatches.Patch(color='None', label='params(t): ' + str(trainable_count)) #Trainable parameters
   
   #print sortedLabels90, sortedLabels120, sortedLabels150
   #print values_90, values_120, values_150
   
   plt.figure('statistic')
+  d165 = plt.plot(sortedLabels165, values_165, 'b-x',label=r'$\Delta M = 165$ GeV')
   d150 = plt.plot(sortedLabels150, values_150, 'b-x',label=r'$\Delta M = 150$ GeV')
   d120 = plt.plot(sortedLabels120, values_120, 'r-x',label=r'$\Delta M = 120$ GeV')
   d90 = plt.plot(sortedLabels90, values_90, 'g-x', label=r'$\Delta M = 90$ GeV')
   plt.xlabel(r'$m_{\tilde{t}}$ [GeV]')
   plt.ylabel('Statistic')
   plt.title('Statistic of samples')
-  plt.legend(loc='best', handles=[d150[0],d120[0],d90[0],signalP,ttbar,singletop,Wjets,tps])
+  plt.legend(loc='best', handles=[d165[0],d150[0],d120[0],d90[0],signalP,ttbar,singletop,Wjets,tps])
   
   if save:
         if not os.path.exists('./plots/'):
@@ -538,6 +548,7 @@ def evaluate_signalGrid(modelDir, resolution=np.array([50,0,1], dtype=float), sa
         
         filepath = 'plots/' + fileName + '_StatisticTrainingValues.txt'
         infofile = open(filepath, 'w')
+        infofile.write('M165: ' + ';'.join(sortedLabels165) + ' ' +';'.join([str(i) for i in values_165])+'\n')
         infofile.write('M150: ' + ';'.join(sortedLabels150) + ' ' +';'.join([str(i) for i in values_150])+'\n')
         infofile.write('M120: ' + ';'.join(sortedLabels120) + ' ' + ';'.join([str(i) for i in values_120])+'\n')
         infofile.write('M90: ' + ';'.join(sortedLabels90) + ' '+ ';'.join([str(i) for i in values_90]))
@@ -566,7 +577,7 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
   
   print 'Using the following preselection to evaluate:' , preselection
   
-  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
+  signal = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_250_160', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_300_210', 'stop_bWN_350_185', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_350_260', 'stop_bWN_400_235', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_400_310', 'stop_bWN_450_285', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_450_360', 'stop_bWN_500_335', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_385', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_550_460', 'stop_bWN_600_435', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_600_510', 'stop_bWN_650_485', 'stop_bWN_650_500', 'stop_bWN_650_530', 'stop_bWN_650_560']
   
   #Get Scaler and model from modelDir
    
@@ -587,7 +598,7 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
   Signal = []
   for s in signal:
     x, y = pickBenchmark(s)
-    df, weight = loadDataFrame(os.path.join(inputDir, s+'/'), preselection, variables, weights, lumi)
+    df, weight = loadDataFrame(os.path.join(inputDirSig, s+'/'), preselection, variables, weights, lumi)
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])   # get the bin index of the output score for each event 
     outputWeighted = []
@@ -614,7 +625,7 @@ def evaluate_signalGridCuts(modelDir, resolution=np.array([50,0,1], dtype=float)
   totBkgVar = 0.
   Background = []
   for b in background:
-    df, weight = loadDataFrame(os.path.join(inputDir, b+'/'), preselection, variables, weights, lumi)
+    df, weight = loadDataFrame(os.path.join(inputDirBkg, b+'/'), preselection, variables, weights, lumi)
     y_hat = evaluate(model, df.values, scaler)
     bin_index = np.digitize(y_hat[:,0], bins[1:])
     outputWeighted = []

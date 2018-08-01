@@ -126,12 +126,12 @@ def plot_output_score_datapoint(SignalList, model, preselection, nvar, weight, l
     if not met_cut:
         print 'Using no met-preselection!'
     
-    input='/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
+    input='/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
     
     bkgList = [
-    {'name':'powheg_ttbar', 'path':input+'powheg_ttbar/'},
-    {'name':'powheg_singletop', 'path':input+'powheg_singletop/'},
-    {'name':'sherpa22_Wjets', 'path':input+'sherpa22_Wjets/'}
+    {'name':'powheg_ttbar', 'path':input+'mc16d_ttbar/'},
+    {'name':'powheg_singletop', 'path':input+'mc16d_singletop/'},
+    {'name':'sherpa22_Wjets', 'path':input+'mc16d_Wjets/'}
     ]
     
     #Loading background once
