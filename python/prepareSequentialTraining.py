@@ -118,7 +118,8 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, nvar, weight,
 
     for seq in sequence:
       seq['n_max'] = max([len(j) for j in seq['df_full'][seq['name']+'_pt']])
-      seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], range(X_train.shape[0]), range(X_test.shape[0]), seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
+      #seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], range(X_train.shape[0]), range(X_test.shape[0]), seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
+      seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], ix_train, ix_test, seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
   
     for seq in sequence:
       h5f.create_dataset('X_train_'+seq['name'], data=seq['X_train'])

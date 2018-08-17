@@ -8,6 +8,7 @@ import h5py
 
 # scikit-learn
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
