@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import timer
 from sklearn.externals import joblib
 import pickle
+import numpy as np
 
 sys.path.append('./python/plotting/')
 
