@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 import os
 
-def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False, plotEPD=True):
+def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False, multiclass=False, plotEPD=True):
     print 'Plotting correlations between variables...'
     fileDir = "plots/"+fileName
     if save:
@@ -33,22 +33,24 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
     
     s = X[y_class==0]
     b = X[y_class!=0]
-    b1 = X[y_class==1]
-    b2 = X[y_class==2]
-    b3 = X[y_class==3]
     output_score = y_predict[:,0]
     out_s = output_score[y_class==0]
     out_b = output_score[y_class!=0]
-    out_b1 = output_score[y_class==1]
-    out_b2 = output_score[y_class==2]
-    out_b3 = output_score[y_class==3]
+    if multiclass:
+      b1 = X[y_class==1]
+      b2 = X[y_class==2]
+      b3 = X[y_class==3]
+      out_b1 = output_score[y_class==1]
+      out_b2 = output_score[y_class==2]
+      out_b3 = output_score[y_class==3]
     
     if plotEPD:
         s = np.concatenate((s,np.transpose(out_s.reshape(1,len(out_s)))), axis=1)
         b = np.concatenate((b,np.transpose(out_b.reshape(1,len(out_b)))), axis=1)
-        b1 = np.concatenate((b1,np.transpose(out_b1.reshape(1,len(out_b1)))), axis=1)
-        b2 = np.concatenate((b2,np.transpose(out_b2.reshape(1,len(out_b2)))), axis=1)
-        b3 = np.concatenate((b3,np.transpose(out_b3.reshape(1,len(out_b3)))), axis=1)
+        if multiclass:
+          b1 = np.concatenate((b1,np.transpose(out_b1.reshape(1,len(out_b1)))), axis=1)
+          b2 = np.concatenate((b2,np.transpose(out_b2.reshape(1,len(out_b2)))), axis=1)
+          b3 = np.concatenate((b3,np.transpose(out_b3.reshape(1,len(out_b3)))), axis=1)
     
     print 'Not in list for training: ' + ', '.join(novars)
 
@@ -103,42 +105,43 @@ def plotCorrelation(X, y_predict, y_class, nvar_raw, fileName='Test', save=False
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_all.pdf", bbox_inches='tight')
         plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_all.png", bbox_inches='tight')
         plt.close()
-    # ttbar
-    corr_stest, ax = plt.subplots(figsize=(fig_x,fig_y))
-    df = pd.DataFrame(data=b1, columns = nvar)
-    corr = df.corr()
-    sns.set(font_scale=font_scale)
-    sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title(r"Correlation $t\overline{t}$",fontsize=fs)
-    plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
-    if save:
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_ttbar.pdf", bbox_inches='tight')
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_ttbar.png", bbox_inches='tight')
-        plt.close()
-    # single top
-    corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
-    df = pd.DataFrame(data=b2, columns = nvar)
-    corr = df.corr()
-    sns.set(font_scale=font_scale)
-    sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title("Correlation single top",fontsize=fs)
-    plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
-    if save:
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_singletop.pdf", bbox_inches='tight')
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_singletop.png", bbox_inches='tight')
-        plt.close()        
-    # w + jets
-    corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
-    df = pd.DataFrame(data=b3, columns = nvar)
-    corr = df.corr()
-    sns.set(font_scale=font_scale)
-    sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
-    plt.title(r"Correlation $W$ + jets")
-    plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
-    if save:
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_wjets.pdf", bbox_inches='tight')
-        plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_wjets.png", bbox_inches='tight')
-        plt.close()
+    if multiclass:
+      # ttbar
+      corr_stest, ax = plt.subplots(figsize=(fig_x,fig_y))
+      df = pd.DataFrame(data=b1, columns = nvar)
+      corr = df.corr()
+      sns.set(font_scale=font_scale)
+      sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
+      plt.title(r"Correlation $t\overline{t}$",fontsize=fs)
+      plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
+      if save:
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_ttbar.pdf", bbox_inches='tight')
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_ttbar.png", bbox_inches='tight')
+          plt.close()
+      # single top
+      corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
+      df = pd.DataFrame(data=b2, columns = nvar)
+      corr = df.corr()
+      sns.set(font_scale=font_scale)
+      sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
+      plt.title("Correlation single top",fontsize=fs)
+      plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
+      if save:
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_singletop.pdf", bbox_inches='tight')
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_singletop.png", bbox_inches='tight')
+          plt.close()        
+      # w + jets
+      corr_btest, ax = plt.subplots(figsize=(fig_x,fig_y))
+      df = pd.DataFrame(data=b3, columns = nvar)
+      corr = df.corr()
+      sns.set(font_scale=font_scale)
+      sns.heatmap(corr, cmap='coolwarm', vmin=-1., vmax=1., square=True, fmt=".2f", annot=True)
+      plt.title(r"Correlation $W$ + jets")
+      plt.tick_params(axis='both',which='both',bottom=False,top=False,left=False,right=False,labelbottom=True)
+      if save:
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_wjets.pdf", bbox_inches='tight')
+          plt.savefig(fileDir+"_CorrelationMatrix"+addStr+"_Background_wjets.png", bbox_inches='tight')
+          plt.close()
 
 
 #def plotCorrelation(s_train, b_train, s_test, b_test, out_s_train, out_s_test, out_b_train, out_b_test, nvar_raw, fileName='Test', save=False):

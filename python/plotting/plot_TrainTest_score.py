@@ -14,10 +14,12 @@ from scipy.stats import ks_2samp
 import matplotlib
 import matplotlib.pyplot as plt
 
+import AtlasStyle_mpl
+
 #dummy object for KS Test in legend
 import matplotlib.patches as mpatches
 
-def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName='Test', normed=False, save=False, ratio=True, addStr='', title='Discriminating power'):
+def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, sig_w_test, bkg_predicted_train, bkg_predicted_test, bkg_w_train, bkg_w_test, binning, fileName='Test', normed=False, save=False, ratio=True, addStr=''):
   print('Plotting the train/test score...')
   fig = plt.figure(figsize=(8,6))
   if ratio:
@@ -62,14 +64,12 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
 
   #print sep
   if normed:
-    ax1.set(ylabel='a. u.')
+    ax1.set_ylabel('a. u.', horizontalalignment='right', y=1.0)
   else:
-    ax1.set(ylabel='Events')
+    ax1.set_ylabel('Events', horizontalalignment='right', y=1.0)
   leg = plt.legend(loc='best', frameon=False, handles=[s_patchesTrain[0], b_patchesTrain[0], s_error, b_error, ks_patch])
   p = leg.get_window_extent()
   
-  if title is not None:
-      plt.title(title)
   #ax.annotate('KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg),(p.p0[0], p.p1[1]), (p.p0[0], p.p1[1]), xycoords='figure pixels', zorder=9)
   #ax1.text(0.65, 0.66, 'KS Test S (B): %.3f (%.3f)'%(ks_sig, ks_bkg), transform=ax1.transAxes) #Former y=0.7
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
@@ -78,7 +78,8 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
   if ratio:
     ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)
     getRatio(s_histTest, s_binsTest, s_w_test, b_histTest, b_binsTest, b_w_test, 'r')
-    ax2.set(xlabel='EPD', ylabel='S/B')
+    ax2.set_xlabel('EPD', horizontalalignment='right', x=1.0) 
+    ax2.set_ylabel('S/B')
     ax2.set_xlim((binning[1],binning[2]))
     ax2.set_ylim((0,2))
     ax2.grid()
@@ -86,7 +87,9 @@ def plot_TrainTest_score(sig_predicted_train, sig_predicted_test, sig_w_train, s
     ax2.xaxis.set_ticks_position('both')
     ax2.yaxis.set_ticks_position('both')
 
-  ax1.set(xlabel='EPD')
+  ax1.set_ylim(0., 1.5*np.maximum(s_histTest.max(), b_histTest.max()))
+  ax1.set_xlabel('EPD', horizontalalignment='right', x=1.0)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.022, 0.925, 'Work in progress')
 
   if save:
     if not os.path.exists('./plots/'):

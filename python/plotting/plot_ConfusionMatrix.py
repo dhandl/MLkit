@@ -4,6 +4,8 @@ import numpy as np
 import os
 import h5py
 
+import AtlasStyle_mpl
+
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
 
@@ -13,7 +15,6 @@ Sample = namedtuple('Sample', 'name dataframe')
 
 def draw_confusion_matrix(cm, classes,
                           normalize=False,
-                          title='Confusion matrix',
                           cmap=plt.cm.Blues,save=False,fileName='Test',isTrain=False, addStr = ''):
     '''
     This function prints and plots the confusion matrix.
@@ -30,8 +31,7 @@ def draw_confusion_matrix(cm, classes,
     
     fs=18
 
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title,fontsize=fs)
+    plt.imshow(cm, vmin=0., vmax=1., interpolation='nearest', cmap=cmap)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45,fontsize=fs)
@@ -45,8 +45,9 @@ def draw_confusion_matrix(cm, classes,
                  color='white' if cm[i, j] > thresh else 'black', fontsize=20)
 
     plt.tight_layout()
-    plt.ylabel('true label',fontsize=fs)
-    plt.xlabel('predicted label',fontsize=fs)
+    plt.ylabel('True label',fontsize=fs)
+    plt.xlabel('Predicted label',fontsize=fs)
+    #AtlasStyle_mpl.ATLASLabel(plt, 0.02, 1.05, 'Work in progress')
     
     fig = plt.gcf()
     fig.set_size_inches(9., 7.)
@@ -73,10 +74,13 @@ def plot_confusion_matrix(y_true, y_predict, filename='Test',save=False,isTrain=
     yhat_cls = np.argmax(y_predict, axis=1)
     cnf_matrix = confusion_matrix(y_true, yhat_cls)
     np.set_printoptions(precision=2)
-    
-    draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'],
-                      normalize=True,
-                      title='Normalized Confusion Matrix',save=save,fileName=filename,isTrain=isTrain, addStr=addStr)
+   
+    classes = len(np.bincount(y_true.astype(int)))
+
+    if classes>2:
+      draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'$t\overline{t}$', 'Single Top', r'$W$ + jets'], normalize=True, save=save,fileName=filename,isTrain=isTrain, addStr=addStr)
+    else:
+      draw_confusion_matrix(cnf_matrix, classes=[r'Signal', r'Background'], normalize=True, save=save,fileName=filename,isTrain=isTrain, addStr=addStr)
     
 def plot_confusion_matrix_datapoint(SignalList, model, preselection, nvar, weight, lumi, save=False, fileName='Test', multiclass=True):
     

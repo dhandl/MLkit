@@ -30,10 +30,10 @@ import plot_ROCcurves
 inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 Dir = 'TrainedModels/models/'
-#modelfile = '2018-07-31_11-18_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
-#modelfile = '2018-07-31_10-52_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
+modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
+#modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
-modelfile = '2018-07-31_14-15_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
+#modelfile = '2018-07-31_14-15_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
 
 modelDir = Dir+modelfile+'.h5'
 
@@ -286,8 +286,8 @@ def main():
   fig = plt.figure(figsize=(8,6))
   ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=4)
   ax1.set_xlim((bins[0], bins[-1]))
-  ax1.set(xlabel='Output score')
-  ax1.set_ylabel("Events", ha='left')
+  ax1.set_xlabel('Output score', horizontalalignment='right', x=1.0)
+  ax1.set_ylabel("Events", horizontalalignment='right', y=1.0)
 
   sb_ratio = Signal[0]['outputScore'].sum()/totalBkgOutput.sum()
   #if sb_ratio < 0.2:
@@ -311,9 +311,9 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI*0.001)
 
-  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.pdf")
-  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
-  plt.close()
+  #plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.pdf")
+  #plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
+  #plt.close()
 
   #plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=modelfile+'_eval-bWN-450-300')
 

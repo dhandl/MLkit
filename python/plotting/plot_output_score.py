@@ -24,7 +24,7 @@ Sample = namedtuple('Sample', 'name dataframe')
 
 from sklearn.preprocessing import StandardScaler
 
-def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileName='Test', normed=False, save=False, addStr='', ratio=True, title='Discriminating power', log=False, sample=None):
+def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileName='Test', normed=False, save=False, addStr='', ratio=True, log=False, sample=None):
   print('Plotting the binary output score...')
   fig = plt.figure(figsize=(8,6))
   if ratio:
@@ -38,8 +38,8 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   ax1.xaxis.set_ticks_position('both')
   ax1.yaxis.set_ticks_position('both')
 
-  s_hist, s_bins, s_patches = plt.hist(sig_predicted.ravel(), weights=sig_w, histtype='stepfilled', color='r', label='signal', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
-  b_hist, b_bins, b_patches = plt.hist(bkg_predicted.ravel(), weights=bkg_w, histtype='stepfilled', color='b', label='background', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  s_hist, s_bins, s_patches = plt.hist(sig_predicted.ravel(), weights=sig_w, histtype='stepfilled', color='r', label='Signal', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
+  b_hist, b_bins, b_patches = plt.hist(bkg_predicted.ravel(), weights=bkg_w, histtype='stepfilled', color='b', label='Background', alpha=0.5, bins=binning[0], range=(binning[1], binning[2]), density=normed)
   
   log_str = ''
   
@@ -55,9 +55,9 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   #print sep
 
   if normed:
-    ax1.set_ylabel('a. u.', ha='left')
+    ax1.set_ylabel('a. u.', horizontalalignment='right', x=1.0)
   else:
-    ax1.set_ylabel('Events', ha='left')
+    ax1.set_ylabel('Events', horizontalalignment='right', y=1.0)
   
   #ax1.set_ylim((0, s_hist.max()*(1+0.33)))
   
@@ -77,15 +77,12 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
   #ax1.text(0.65, 0.70, '$<S^2>$ = %.3f'%(sep), transform=ax1.transAxes)
   #ax.text(0.55, 0.7, 'KS p-value S (B): %.3f (%.3f)'%(ks_sig_p, ks_bkg_p), transform=ax.transAxes)
   
-  if title is not None:
-      plt.title(title)
-
   AtlasStyle_mpl.ATLASLabel2(ax1, 0.02, 0.9, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.8, lumi=140)
   if ratio:
     ax2 = plt.subplot2grid((4,4), (3,0), colspan=4, rowspan=1)
     r = getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w, 'r')
-    ax2.set_xlabel('EPD')
+    ax2.set_xlabel('EPD', horizontalalignment='right', x=1.0)
     ax2.set_ylabel('S/B')
     ax2.set_xlim((binning[1],binning[2]))
     ax2.set_ylim((-0.5,2.5))
@@ -94,7 +91,7 @@ def plot_output_score(sig_predicted, sig_w, bkg_predicted, bkg_w, binning, fileN
     ax2.xaxis.set_ticks_position('both')
     ax2.yaxis.set_ticks_position('both')
 
-  ax1.set(xlabel='EPD')
+  ax1.set_xlabel('EPD', horizontalalignment='right', x=1.0)
 
   if save:
     if not os.path.exists('./plots/'):
