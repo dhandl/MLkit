@@ -22,7 +22,7 @@ import plot_piechart
 import plot_ROCcurves
 import plot_Correlation
 
-def startPlot(modelDir, binning=[50,0,1.], save=False):
+def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     '''
     Plot all important things
         
@@ -41,7 +41,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     
     infofile = open(modelDir.replace('.h5','_infofile.txt'))
     infos = infofile.readlines()
-    
+   
+    analysis=infos[0].replace('Used analysis method: ','').replace('\n','')
+    parameters=infos[1].replace('Used parameters for this analysis algorithm: {','').replace('}\n','').split(',')
     variables=infos[5].replace('Used variables for training: ','').replace('\n','').split()
     weights=infos[6].replace('Used weights: ', '').replace('\n','').split()
     lumi=float(infos[8].replace('Used Lumi: ','').replace('\n',''))
@@ -126,8 +128,11 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
         pickleDir = modelDir.replace('.h5', '_history.pkl')
         model = load_model(modelDir)
         model.load_weights(modelDir.replace('.h5' , '_weights.h5').replace('models' , 'weights'))
-        print('Neuronal Network detected!')
-        print('Scaling and reading values...')
+        if analysis.lower() == 'rnn':
+          print('Recurrent Neuronal Network detected!')
+        else:
+          print('Neuronal Network detected!')
+          print('Scaling and reading values...')
     except IOError:
         model = joblib.load(modelDir)
         print('Boosted Decision Tree detected!')
@@ -143,16 +148,28 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     y_test= dataset['y_test'][:]
     y = dataset['y'][:]
     w = dataset['w'][:]
+
+    if analysis == 'rnn':
+      sequence = []
+      seq = getSequence(parameters)
+      for idx, c in enumerate(seq):
+        sequence.append({'name':c, 'X_train':dataset['X_train_'+c][:], 'X_test':dataset['X_test_'+c][:]})
     
-    scaler = joblib.load(modelDir.replace('.h5' , '_scaler.pkl'))
+    scaler = joblib.load(modelDir.replace('.h5' , '_scaler.pkl')) # RNN sequences already scaled!
 
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     X_scaled = scaler.transform(X)
     
-    y_predict_train = model.predict(X_train_scaled)
-    y_predict_test = model.predict(X_test_scaled)
-    y_predict = model.predict(X_scaled)
+    if analysis == 'rnn':
+      y_predict_train = model.predict([s['X_train'] for s in sequence] + [X_train_scaled])
+      y_predict_test = model.predict([s['X_test'] for s in sequence] + [X_test_scaled])
+      y_predict = np.concatenate((y_predict_train, y_predict_test))
+      y = np.concatenate((y_train, y_test))
+    else:
+      y_predict_train = model.predict(X_train_scaled)
+      y_predict_test = model.predict(X_test_scaled)
+      y_predict = model.predict(X_scaled)
     
     sig_predicted_train = y_predict_train[y_train==0]
     sig_predicted_test = y_predict_test[y_test==0]
@@ -167,20 +184,6 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     sig_w = dataset['w'][y==0]
     bkg_predicted= y_predict[y!=0]
     bkg_w = dataset['w'][y!=0]
-    
-    #bkg1_predicted_test = y_predict_test[y_test==1]
-    #bkg1_w_test = dataset['w_test'][y_test==1]
-    #bkg2_predicted_test = y_predict_test[y_test==2]
-    #bkg2_w_test = dataset['w_test'][y_test==2]
-    #bkg3_predicted_test = y_predict_test[y_test==3]
-    #bkg3_w_test = dataset['w_test'][y_test==3]
-    
-    bkg1_predicted = y_predict[y==1]
-    bkg1_w = dataset['w'][y==1]
-    bkg2_predicted = y_predict[y==2]
-    bkg2_w = dataset['w'][y==2]
-    bkg3_predicted = y_predict[y==3]
-    bkg3_w = dataset['w'][y==3]
     
     outputScore = y_predict[:,0]
     
@@ -221,29 +224,13 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     #plt.figure()
     #plot_ConfusionMatrix.plot_confusion_matrix(y_train[X_train[:,variables.index('met')]>=250e3], y_predict_train[X_train[:,variables.index('met')]>=250e3], filename=filenames, save=save, isTrain=True, addStr='met250')
     
-    #Classification Plots    
-    plt.figure()
-    plot_Classification.plot_classification(y_test, y_predict_test, w, fileName=filenames, save=save)
-    
-    plt.figure()
-    plot_Classification.plot_classification(y, y_predict, w, fileName=filenames, save=save, weighted=True)
-    
-    plt.figure()
-    plot_Classification.plot_classification(y_train, y_predict_train, w, fileName=filenames, save=save, train=True)
-    
-    #plt.figure()
-    #plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
-    
-    #plt.figure()
-    #plot_Classification.plot_classification_datapoint(Signal1, model, preselection, variables, weights, lumi, save=save, fileName=filenames, multiclass=True)    
-    
     #Learning Curve
     plt.figure()
     plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
     
     #Pie Charts
-    plt.figure()
-    plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
+    #plt.figure()
+    #plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
     
     # Output Score for cuts that are used in training for certain datapoints and additionally specified cuts
     #plot_output_score.plot_output_score_datapoint(Signal1, model, preselection, variables, weights, lumi, binning, save=save, fileName=filenames)
@@ -256,17 +243,47 @@ def startPlot(modelDir, binning=[50,0,1.], save=False):
     #print 'Plotting the output score for met250'
     #plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=True)
     #plot_output_score.plot_output_score(sig_predicted[:,0][X[:,variables.index('met')][y==0]>=250e3], sig_w[X[:,variables.index('met')][y==0]>=250e3], bkg_predicted[:,0][X[:,variables.index('met')][y!=0]>=250e3], bkg_w[X[:,variables.index('met')][y!=0]>=250e3], binning, save=save, fileName=filenames, addStr='_met250',log=False)
-    
-    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
-    plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
-    
+   
     #plot_output_score2D.plot_output_score2D(variables, vars_2D, outputScore, X, y, save=save, fileName=filenames)
     
-    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save)
+    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, multiclass=multiclass)
     #plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
+ 
+    if multiclass:    
+      #Classification Plots    
+      plt.figure()
+      plot_Classification.plot_classification(y_test, y_predict_test, w, fileName=filenames, save=save)
+      
+      plt.figure()
+      plot_Classification.plot_classification(y, y_predict, w, fileName=filenames, save=save, weighted=True)
+      
+      plt.figure()
+      plot_Classification.plot_classification(y_train, y_predict_train, w, fileName=filenames, save=save, train=True)
+      
+      #plt.figure()
+      #plot_Classification2.plot_classification_2(y_test, y_predict_test, fileName=filenames, save=save)
+      
+      #plt.figure()
+      #plot_Classification.plot_classification_datapoint(Signal1, model, preselection, variables, weights, lumi, save=save, fileName=filenames, multiclass=True)    
+    
+      #bkg1_predicted_test = y_predict_test[y_test==1]
+      #bkg1_w_test = dataset['w_test'][y_test==1]
+      #bkg2_predicted_test = y_predict_test[y_test==2]
+      #bkg2_w_test = dataset['w_test'][y_test==2]
+      #bkg3_predicted_test = y_predict_test[y_test==3]
+      #bkg3_w_test = dataset['w_test'][y_test==3]
+      bkg1_predicted = y_predict[y==1]
+      bkg1_w = dataset['w'][y==1]
+      bkg2_predicted = y_predict[y==2]
+      bkg2_w = dataset['w'][y==2]
+      bkg3_predicted = y_predict[y==3]
+      bkg3_w = dataset['w'][y==3]
+
+      plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
+      plot_output_score_multiclass.plot_output_score_multiclass(sig_predicted[:,0], sig_w, bkg1_predicted[:,0], bkg1_w, bkg2_predicted[:,0], bkg2_w, bkg3_predicted[:,0], bkg3_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
     
     #evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
     #evaluate_signalGrid.evaluate_signalGridCuts(modelDir, save=save, fileName=filenames)
@@ -412,3 +429,26 @@ def runtimeSummary(t0):
   print '-----Runtime Summary -----'
   print 'Job ran %d h:%d min:%d sec' % ( hour, minutes, seconds)
   print '--------------------------'
+
+def getSequence(par):
+  '''
+    Creates a list of the trained sequences of an RNN
+    from a string of parameters from the infofile
+
+    Parameters
+    ----------
+    par : string that includes all the hyperparameters
+
+    Returns
+    -------
+    seq : list of strings, which represents the trained sequences in an RNN e.g. ['jet','lep','bjet']
+  '''
+
+  match = [p for p in par if 'collection' in p][0]
+  seq_str = match.replace('\" \'collection\': [','').replace(']\"','').split()[1]
+  seq = seq_str.split('\'')
+  seq.remove(seq[0])
+  seq.remove(seq[-1])
+  seq = filter(lambda x: x != ',', seq)
+
+  return seq
