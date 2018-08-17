@@ -5,22 +5,22 @@ Algorithm = namedtuple("Algorithm", "name modelname options")
 # define your ML algorithm here
 analysis = [
 Algorithm('NN',
-          'DNN_ADAM_layer1x80_batch40_NormalInitializer_dropout0p5_l2-0p01_multiclass',
+          'DNN_ADAM_leakyReLU_layer128_batch32_NormalInitializer_l1-0p01',
           {
-          'layers':[80],
+          'layers':[128],
           'ncycles':50,
-          'batchSize':40,
+          'batchSize':32,
           'dropout':0.5,
           'optimizer':'adam',
-          'activation':'relu',
+          'activation':'linear',
           'initializer':'normal',
           'regularizer':0.01,
-          'classWeight':'balanced',
-          'learningRate':0.01,
+          'classWeight':'sumofweights',
+          'learningRate':0.05,
           'decay':0.0,
           'momentum':0.0,
           'nesterov':False,
-          'multiclassification':True
+          'multiclassification':False
           }
 ),
 Algorithm('BDT',
@@ -34,25 +34,26 @@ Algorithm('BDT',
           }
 ),
 Algorithm('RNN',
-          'RNN_jetOnly_ADAM_LSTM25_3x25NNlayer_batch100_NormalInitializer_dropout0p5',
+          'RNN_jetOnly_ADAM_leakyReLU_GRU32_128NNlayer_batch32_NormalInitializer_l1-0p01',
           {
           'collection':['jet'],
-          'unit_type':'LSTM',
-          'n_units':25,
-          'combinedDim':[25,25,25],
+          'unit_type':'GRU',
+          'n_units':32,
+          'combinedDim':[128,64],
           'epochs':50,
-          'batchSize':100,
+          'batchSize':32,
           'dropout':0.5, 
           'optimizer':'ADAM',
-          'activation':'relu',
+          'activation':'linear',
           'initializer':'normal',
-          'regularizer':0.001, 
+          'regularizer':0.01, 
           'learningRate':0.01,
           'decay':0.0, 
           'momentum':0.0,
           'nesterov':False,
           'mergeModels':True, 
-          'multiclassification':False
+          'multiclassification':False,
+          'classWeight':'sumofweights'
           }
 ),
 ]
