@@ -15,7 +15,7 @@ from prepareSequentialTraining import prepareSequentialTraining
 from models import trainBDT, trainNN, trainRNN, trainOptNN
 
 from sklearn.externals import joblib
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
 
 from startPlot import startPlot
 
@@ -272,7 +272,7 @@ def main():
                                       alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], 
                                       alg.options['learningRate'], alg.options['decay'], 
                                       alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
-                                      alg.options['multiclassification'])
+                                      alg.options['multiclassification'], alg.options['classWeight'])
 
     with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
       pickle.dump(history.history, hist_pi)
@@ -295,7 +295,7 @@ def main():
   
   if opts.plot:
     print('Start Plotting...')
-    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True)
+    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True, multiclass=opts.multiclass)
     
     
 def trainextern():
@@ -393,7 +393,7 @@ def trainextern():
   
   if opts.plot:
     print('Start Plotting...')
-    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True)    
+    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True, multiclass=opts.multiclass)    
 
   
 if __name__ == '__main__':
