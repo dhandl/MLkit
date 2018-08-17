@@ -109,16 +109,19 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   first = True
   if first:
     model.add(Dense(netDim[0], input_dim=X_train.shape[1], activation=activation, kernel_initializer=initializer))
+    model.add(LeakyReLU(alpha=0.1))
     model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)]:
     model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
-    model.add(Dropout(dropout))
+    model.add(LeakyReLU(alpha=0.1))
+    #model.add(Dropout(dropout))
     model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(classes, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
   else:
+    model.add(LeakyReLU(alpha=0.1))
     model.add(Dense(2, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
 
@@ -270,7 +273,7 @@ def create_model(X_train, y_train, X_test, y_test, class_weight):
     return {'loss': -acc, 'status': STATUS_OK, 'model': model, 'history': history}
 
 
-def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False):
+def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collection, unit_type, n_units, combinedDim, epochs, batchSize, dropout, optimizer, activation, initializer, regularizer, learningRate=0.01, decay=0.0, momentum=0.0, nesterov=False, mergeModels=False, multiclass=False, classWeight='SumOfWeihts'):
   print "Performing a Deep Recurrent Neural Net!"
 
   if type(sequence) == list:
@@ -283,17 +286,14 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
         seq['channel'] = LSTM(n_units, name=seq['name']+'_lstm')(seq['channel'])
       if unit_type.lower() == 'gru':
         seq['channel'] = GRU(n_units, name=seq['name']+'_gru')(seq['channel'])
-      seq['channel'] = Dropout(dropout, name=seq['name']+'_dropout')(seq['channel'])
+      #seq['channel'] = Dropout(dropout, name=seq['name']+'_dropout')(seq['channel'])
 
   if mergeModels:
     print 'Going to merge sequence model with common NN!'
-    #print 'Standardize training set...'
-    #scaler = StandardScaler()
-    #X_train = scaler.fit_transform(X_train)
-    #X_test = scaler.transform(X_test)
 
     model_inputs = Input(shape=(X_train.shape[1], ))
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
+    layer = LeakyReLU(alpha=0.1)(layer)
     layer = BatchNormalization()(layer)
     #layer = Dropout(dropout)(layer)
     
@@ -307,8 +307,9 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
 
   for l in combinedDim:
     combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer))(combined)
+    combined = LeakyReLU(alpha=0.1)(combined)
     combined = BatchNormalization()(combined)
-    combined = Dropout(dropout)(combined)
+    #combined = Dropout(dropout)(combined)
 
   if multiclass:
     combined_output = Dense(len(np.bincount(y_train.astype(int))), activation='softmax')(combined)
@@ -328,17 +329,29 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   combined_rnn.summary()
   combined_rnn.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
   print 'Training...'
-  class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
+  classes = len(np.bincount(y_train.astype(int)))
+  if classWeight.lower() == 'balanced':
+    print 'Using method balanced for class weights'
+    w = compute_class_weight('balanced', np.unique(y_train), y_train)
+    class_weight={i:w[i] for i in range(len(w))}
+  elif classWeight.lower() == 'sumofweights':
+    print 'Using method SumOfWeights for class weights'
+    sumofweights = w_train.sum()
+    w = sumofweights / (classes * np.bincount(y_train.astype(int)))
+    class_weight={i:w[i] for i in range(len(w))}
+  else:
+    print 'Using no class weights'
+    class_weight = None
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
                 class_weight=class_weight, epochs=epochs, batch_size=batchSize,
-                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+                callbacks = [EarlyStopping(verbose=True, patience=5, monitor='loss')])
                 #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
     else:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence], y_train,
                 class_weight=class_weight, epochs=epochs, batch_size=batchSize,
-                callbacks = [EarlyStopping(verbose=True, patience=10, monitor='loss')])
+                callbacks = [EarlyStopping(verbose=True, patience=5, monitor='loss')])
   except KeyboardInterrupt:
       print 'Training ended early.'
 
