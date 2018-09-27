@@ -111,6 +111,7 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
   plt.plot(history['val_acc'])
   plt.title('model accuracy')
   plt.ylabel('accuracy')
+  plt.ylim(0.,1.)
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
   if save:
@@ -126,6 +127,7 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
   plt.plot(history['val_loss'])
   plt.title('model loss')
   plt.ylabel('loss')
+  plt.ylim(0.,1.)
   plt.xlabel('epoch')
   plt.legend(['train', 'test'], loc='upper left')
   if save:

@@ -8,10 +8,10 @@ import pandas as pd
 import h5py
 from root2pandas import root2pandas
 
-#CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (n_jet>=4) && (n_bjet>0) && (jet_pt[0]>25e3) && (jet_pt[1]>25e3) && (jet_pt[2]>25e3) && (jet_pt[3]>25e3) && (mt>30e3) && (met>60e3)"
+#CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mT2tauLooseTau_GeV > -0.5) && (mT2tauLooseTau_GeV < 80)) && (n_jet>=2) && (n_bjet>=0) && (jet_pt[0]>25e3) && (jet_pt[1]>25e3) && (mt>30e3) && (met>60e3)"
 
 # cut for truth sample
-CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mt2_tau > -0.5) && (mt2_tau < 80)) && (n_jet>=4) && (n_bjet>=1) && (n_lep_hard==1) && (lep_pt>25) && (jet0_pt>25) && (jet1_pt>25) && (jet2_pt>25) && (jet3_pt>25) && (mt>30) && (met>60)"
+CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mt2_tau > -0.5) && (mt2_tau < 80)) && (n_jet>=2) && (n_bjet>=0) && (n_lep==1) && (jet0_pt>25) && (jet1_pt>25) && (mt>30) && (met>60)"
 #CUT ="(1)"
 
 # variable list in SUSY5 tuples
@@ -39,7 +39,7 @@ CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mt2_tau > -0.5
 #              "weight",
 #              "xs_weight",
 #              "sf_total",
-#              "weight_sherpa22_njets",
+#              "weight_sherpa22_njets"
 #              #"Event",
 #              #"eventWeight"
 #]
@@ -47,10 +47,12 @@ CUT = "(dphi_jet0_ptmiss > 0.4) && (dphi_jet1_ptmiss > 0.4) && !((mt2_tau > -0.5
 # variable list in TRUTH3 tuple
 variables = [
               "n_jet", "jet0_pt", "jet0_eta", "jet0_phi", "jet0_e",
+              "jet_pt", "jet_eta", "jet_phi", "jet_m", "jet_id",
               "jet1_pt", "jet1_eta", "jet1_phi", "jet1_e",
-              "jet2_pt", "jet2_eta", "jet2_phi", "jet2_e",
-              "jet3_pt", "jet3_eta", "jet3_phi", "jet3_e",
+              #"jet2_pt", "jet2_eta", "jet2_phi", "jet2_e",
+              #"jet3_pt", "jet3_eta", "jet3_phi", "jet3_e",
               "n_bjet", "bjet_pt0", "bjet_eta0", "bjet_phi0", "bjet_e0",
+              "bjet_pt1", "bjet_eta1", "bjet_phi1", "bjet_e1",
               "n_lep", "n_lep_hard", "n_lep_soft", "lep_pt", "lep_eta", "lep_phi", "lep_e",
               #"n_hadtop_cand", "hadtop_cand_pt", "hadtop_cand_eta", "hadtop_cand_phi", "hadtop_cand_m",
               #"n_hadw_cand", "hadw_cand_pt", "hadw_cand_eta", "hadw_cand_phi", "hadw_cand_m",
@@ -132,6 +134,10 @@ def main():
     for name in set([k.GetName() for k in f.GetListOfKeys() if k.GetClassName() == "TTree"]):
       print "\nDEBUG: Processing " + name
       t = f.Get(name)
+
+      #variables = []
+      #for variable in set([k.GetName() for k in t.GetListOfBranches()]):
+      #  variables.append(variable)
 
       # Resetting all branches and only set the variables from list variables
       t.SetBranchStatus("*", 0)

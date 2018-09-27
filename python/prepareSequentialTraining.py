@@ -13,7 +13,7 @@ from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 
-def prepareSequentialTraining(sigList, bkgList, preselection, col, nvar, weight, output, lumi=100e3, trainSize=None, testSize=None, reproduce=False, multiclass=False):
+def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nvar, weight, output, lumi=100e3, trainSize=None, testSize=None, reproduce=False, multiclass=False):
   if os.path.isfile(output) and output.endswith('.h5'):
     print 'Loading existing dataset from: {}'.format(output)
     h5f = h5py.File(output, 'r')
@@ -55,11 +55,11 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, nvar, weight,
     Background = []
     for s in sigList:
       print 'Loading signal {} from {}...'.format(s['name'], s['path'])
-      Signal.append(Sample(s['name'], loadDataFrame(s['path'], preselection, col, nvar, weight, lumi)))
+      Signal.append(Sample(s['name'], loadDataFrame(s['path'], preselection, col, removeVar, nvar, weight, lumi)))
       
     for b in bkgList:
       print 'Loading background {} from {}...'.format(b['name'], b['path'])
-      Background.append(Sample(b['name'], loadDataFrame(b['path'], preselection, col, nvar, weight, lumi)))
+      Background.append(Sample(b['name'], loadDataFrame(b['path'], preselection, col, removeVar, nvar, weight, lumi)))
   
     sig = np.empty([0, Signal[0].dataframe[0].shape[1]])
     sig_w = np.empty(0)
@@ -128,7 +128,7 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, nvar, weight,
   return (X_train, X_test, y_train, y_test, w_train, w_test, sequence)
 
 
-def loadDataFrame(path, cut=None, col=None, nvar=None, weights=[], lumi=100e3):
+def loadDataFrame(path, cut=None, col=None, rm=None, nvar=None, weights=[], lumi=100e3):
   files = os.listdir(path)
   collection = []
   for c in col:
@@ -141,6 +141,11 @@ def loadDataFrame(path, cut=None, col=None, nvar=None, weights=[], lumi=100e3):
       sequence = []
       for c in collection:
         c['vars'] = [key for key in _df.keys() if key.startswith(c['name'])]
+        for r in rm:
+          try:
+            c['vars'].remove(c['name']+r)
+          except ValueError:
+            continue
         sequence += c['vars']
       df = applyCut(_df, cut)
       df = selectVarList(df, nvar+weights+sequence)
@@ -155,6 +160,11 @@ def loadDataFrame(path, cut=None, col=None, nvar=None, weights=[], lumi=100e3):
           sequence = []
           for c in collection:
             c['vars'] = [key for key in _df.keys() if key.startswith(c['name'])]
+            for r in rm:
+              try:
+                c['vars'].remove(c['name']+r)
+              except ValueError:
+                continue
             sequence += c['vars']
           df = applyCut(_df, cut)
           df = selectVarList(df, nvar+weights+sequence)
@@ -165,6 +175,11 @@ def loadDataFrame(path, cut=None, col=None, nvar=None, weights=[], lumi=100e3):
           sequence = []
           for c in collection:
             c['vars'] = [key for key in _df.keys() if key.startswith(c['name'])]
+            for r in rm:
+              try:
+                c['vars'].remove(c['name']+r)
+              except ValueError:
+                continue
             sequence += c['vars']
           df_slice = applyCut(_df, cut)
           df_slice = selectVarList(df_slice, nvar+weights+sequence)
@@ -205,7 +220,11 @@ def selectVarList(df, nvar=None):
   if type(nvar)==list:
     first = True
     for v in nvar:
-      _df = df[v]
+      if varHasIndex(v):
+        index, name = pickIndex(v)
+        _df = df[name].str[int(index)]
+      else:  
+        _df = df[v]
       if first:
         first = False
         new_df = _df
@@ -232,6 +251,22 @@ def applyCut(df, cut=None):
         df = df[ df[c['name']] != c['threshold'] ]
   return df
 
+def varHasIndex(var):
+  if ('[' in var) and (']' in var):
+    return True 
+  else:
+    return False
+
+
+def pickIndex(var):
+  if ('[' in var) and (']' in var):
+    name = var.split('[')
+    start = var.index('[')
+    stop = var.index(']')
+    index = ''
+    for i in range(start+1, stop):
+      index = index + var[i]
+  return index, name[0]
 
 def create_stream(df, ix_train, ix_test, num_obj, sort_col, VAR_FILE_NAME):
   n_variables = df.shape[1]
@@ -268,8 +303,9 @@ def sort_objects(df, data, SORT_COL, max_nobj):
   # i = event number, event = all the variables for that event 
   for i, event in tqdm.tqdm(df.iterrows(), total=df.shape[0]): 
     # objs = [[pt's], [eta's], ...] of particles for each event
-     
-    objs = np.array([v.tolist() for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
+
+    #objs = np.array([v.tolist() for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
+    objs = np.array([v for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
     # total number of tracks per jet      
     nobjs = objs.shape[1] 
     # take all tracks unless there are more than n_tracks 

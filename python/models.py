@@ -109,19 +109,20 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   first = True
   if first:
     model.add(Dense(netDim[0], input_dim=X_train.shape[1], activation=activation, kernel_initializer=initializer))
-    model.add(LeakyReLU(alpha=0.1))
+    if activation.lower() == 'linear':
+      model.add(LeakyReLU(alpha=0.1))
     model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)]:
     model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
-    model.add(LeakyReLU(alpha=0.1))
+    if activation.lower() == 'linear':
+      model.add(LeakyReLU(alpha=0.1))
     #model.add(Dropout(dropout))
     model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(classes, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
   else:
-    model.add(LeakyReLU(alpha=0.1))
     model.add(Dense(2, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
 
@@ -145,7 +146,7 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batchSize, shuffle=True,
               class_weight=class_weight,
               sample_weight=None, validation_data=(X_test,y_test,None),
-              callbacks = [EarlyStopping(verbose=True, patience=5, monitor='acc')])
+              callbacks = [EarlyStopping(verbose=True, patience=5, monitor='loss')])
   except KeyboardInterrupt:
     print '--- Training ended early ---'
   print 'Testing...'
@@ -293,7 +294,8 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
 
     model_inputs = Input(shape=(X_train.shape[1], ))
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
-    layer = LeakyReLU(alpha=0.1)(layer)
+    if activation.lower() == 'linear':
+      layer = LeakyReLU(alpha=0.1)(layer)
     layer = BatchNormalization()(layer)
     #layer = Dropout(dropout)(layer)
     
@@ -306,8 +308,9 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
       combined = sequence[0]['channel']
 
   for l in combinedDim:
-    combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer))(combined)
-    combined = LeakyReLU(alpha=0.1)(combined)
+    combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer))(combined)
+    if activation.lower() == 'linear':
+      combined = LeakyReLU(alpha=0.1)(combined)
     combined = BatchNormalization()(combined)
     #combined = Dropout(dropout)(combined)
 
@@ -345,7 +348,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
-                class_weight=class_weight, epochs=epochs, batch_size=batchSize,
+                class_weight=class_weight, epochs=epochs, batch_size=batchSize, validation_data=([seq['X_test'] for seq in sequence]+[X_test],y_test,None),
                 callbacks = [EarlyStopping(verbose=True, patience=5, monitor='loss')])
                 #ModelCheckpoint('./models/combinedrnn_tutorial-progress', monitor='val_loss', verbose=True, save_best_only=True)
     else:
