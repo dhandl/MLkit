@@ -33,7 +33,7 @@ inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met6
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-09-26_23-51_RNN_jetOnly_ADAM_ELU_GRU32_10-10-10-10-10NNlayer_batch32_NormalInitializer_l2-0p01'
+modelfile = '2018-10-02_17-06_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
@@ -51,7 +51,7 @@ PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
                 {'name':'met',    'threshold':230e3,  'type':'geq'},
-                {'name':'mt',    'threshold':110e3,  'type':'geq'},
+                {'name':'mt',    'threshold':60e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'},
                 {'name':'lep_pt',  'threshold':25e3,      'type':'geq'}
                ]
@@ -63,15 +63,17 @@ VAR = [
 #        'mt',
 #        'met',
 #        'dphi_met_lep',
-#        #'dphi_b_lep_max',
-#        #'dphi_jet0_ptmiss',
-#        #'met_proj_lep',
+#        #'met_phi',
+##        #'dphi_b_lep_max',
+##        #'dphi_jet0_ptmiss',
+#        'met_proj_lep',
 #        'ht_sig',
-#        #'m_bl',
+#        'm_bl',
+#        'lepPt_over_met'
 #        #'dr_bjet_lep',
 #        #'mT_blMET', #15vars
-#        'n_jet'
-        #'n_bjet'
+        #'n_jet',
+        #'n_bjet',
          #'bjet_pt[0]', 'amt2', 'mt', 'met', 'dphi_met_lep', 'ht_sig', 'dr_bjet_lep'
         #'met',
         #'mt',
@@ -81,6 +83,8 @@ VAR = [
         #'m3'
         'met',
         'met_phi',
+        'dphi_met_lep',
+        'mt',
         'n_jet',
         'n_bjet',
         #'jet_pt[0]',
@@ -102,7 +106,7 @@ VAR = [
         #'jet_eta[3]',
         #'jet_phi[3]',
         #'jet_e[3]',
-        #'jet_bweight[3]'
+        ##'jet_bweight[3]'
         'lep_pt[0]',
         'lep_eta[0]',
         'lep_phi[0]',
@@ -121,7 +125,6 @@ LUMI = 140e3
 RESOLUTION = np.array([50,0,1], dtype=float)
 
 SCALING = Dir+modelfile+'_scaler.pkl'
-SEQ_SCALING = Dir+modelfile+'_scaling.json'
 COLLECTION = ['jet'] 
 REMOVE_VAR = ['_m', '_mv2c10', '_id', '0_pt', '0_eta', '0_phi', '0_e', '1_pt', '1_eta', '1_phi', '1_e']
 
@@ -143,7 +146,7 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
   if rnn:  
     for idx, c in enumerate(col):
       #c['n_max'] = max([len(j) for j in c['df'][c['name']+'_pt']])
-      c['n_max'] = 15
+      c['n_max'] = 18
       c['Xobj'] = create_scale_stream(c['df'], c['n_max'], sort_col=c['name']+'_pt', VAR_FILE_NAME=seq_scaler) 
 
     y_hat = model.predict([c['Xobj'] for c in col]+[dataset])
@@ -238,6 +241,9 @@ def main():
   db = (RESOLUTION[2] - RESOLUTION[1]) / RESOLUTION[0]    # bin width in discriminator distribution
   bins = np.arange(RESOLUTION[1], RESOLUTION[2]+db, db)   # bin edges in discriminator distribution
   center = (bins[:-1] + bins[1:]) / 2
+
+  print '#----MODEL----#'
+  print modelDir
 
   ###########################
   # Read and evaluate signals
@@ -412,7 +418,9 @@ def main():
   scaled_var = Signal[0]['output_var']
   scaled_label = 'Signal'
 
-  plt.bar(center, totalBkgOutput, width=db, yerr=np.sqrt(totalBkgVar), color='b', alpha=0.5, error_kw=dict(ecolor='b', lw=1.5), label='Background')  
+  w = plt.bar(center, Background[2]['outputScore'], width=db, yerr=np.sqrt(Background[2]['output_var']), color='gold', alpha=0.5, error_kw=dict(ecolor='gold', lw=1.5), label='W+jets')  
+  st = plt.bar(center, Background[1]['outputScore'], width=db, yerr=np.sqrt(Background[1]['output_var']), color='limegreen', alpha=0.5, error_kw=dict(ecolor='limegreen', lw=1.5), label='singletop', bottom=Background[2]['outputScore'])  
+  tt = plt.bar(center, Background[0]['outputScore'], width=db, yerr=np.sqrt(Background[0]['output_var']), color='dodgerblue', alpha=0.5, error_kw=dict(ecolor='dodgerblue', lw=1.5), label='ttbar', bottom=Background[2]['outputScore']+Background[1]['outputScore'])  
   plt.bar(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label=Signal[0]['name'], color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5))  
 
   ax1.set_ylim((0.1, totalBkgOutput.max()*(15.)))
