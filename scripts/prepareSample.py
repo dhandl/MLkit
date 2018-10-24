@@ -109,12 +109,12 @@ def main():
   print "Going to preprocess following files\nfrom\n\t{src}\nto\n\t{dest}\n(without overwriting existing files)\n\n- {files}" \
     .format(src=src, dest=dest, files="\n- ".join(inFiles))
 
-  while True:
-    i = raw_input("Are you okay with that? (y|n) ").strip().lower()
-    if i == "y":
-      break
-    elif i == "n":
-      return
+  #while True:
+  #  i = raw_input("Are you okay with that? (y|n) ").strip().lower()
+  #  if i == "y":
+  #    break
+  #  elif i == "n":
+  #    return
 
   for infile in inFiles:
     fSrc, fDest = os.path.join(src, infile), os.path.join(dest, infile)
