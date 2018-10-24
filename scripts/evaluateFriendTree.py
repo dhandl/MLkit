@@ -3,6 +3,7 @@
 import os, sys
 import numpy as np
 import pandas as pd
+import root_pandas as rp
 
 from array import array
 from keras.models import load_model
@@ -278,7 +279,6 @@ def main():
           jets = getJets(t)
           collection.append(transformCollection(jets, 'jet'))
           y_predict = evaluate(model, eventvars, scaler, SEQ_SCALER, rnn=True, col=collection)
-          
         else:
           y_predict = evaluate(model, eventvars, scaler)
         #print y_predict[0,0], type(y_predict[0,0])
