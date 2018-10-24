@@ -33,7 +33,7 @@ inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met6
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-10-02_17-06_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01'
+modelfile = '2018-10-17_15-16_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_UniformInitializer_l2-0p01'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
@@ -51,7 +51,7 @@ PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
                 {'name':'met',    'threshold':230e3,  'type':'geq'},
-                {'name':'mt',    'threshold':60e3,  'type':'geq'},
+                {'name':'mt',    'threshold':110e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'},
                 {'name':'lep_pt',  'threshold':25e3,      'type':'geq'}
                ]
@@ -128,6 +128,7 @@ SCALING = Dir+modelfile+'_scaler.pkl'
 COLLECTION = ['jet'] 
 REMOVE_VAR = ['_m', '_mv2c10', '_id', '0_pt', '0_eta', '0_phi', '0_e', '1_pt', '1_eta', '1_phi', '1_e']
 
+
 def asimovZ(s, b, b_err, syst=False):
   tot = s + b
   b2 = b*b
@@ -139,6 +140,7 @@ def asimovZ(s, b, b_err, syst=False):
   Z = np.sqrt(2 * ((tot)*np.log(tot * b_plus_err2 / (b2 + tot * b_err2)) - b2 / b_err2 * np.log(1 + b_err2 * s / (b * b_plus_err2))))
   return Z
 
+
 def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
 
   dataset = scaler.transform(dataset)
@@ -146,7 +148,7 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
   if rnn:  
     for idx, c in enumerate(col):
       #c['n_max'] = max([len(j) for j in c['df'][c['name']+'_pt']])
-      c['n_max'] = 18
+      c['n_max'] = 15
       c['Xobj'] = create_scale_stream(c['df'], c['n_max'], sort_col=c['name']+'_pt', VAR_FILE_NAME=seq_scaler) 
 
     y_hat = model.predict([c['Xobj'] for c in col]+[dataset])
@@ -155,6 +157,7 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
     y_hat = model.predict(dataset)
 
   return y_hat
+
 
 def pickBenchmark(signal, delimiter='_'):
   try:
@@ -165,6 +168,7 @@ def pickBenchmark(signal, delimiter='_'):
   except Exception:
     print 'ERROR: No matching pattern for benchmark {}'.format(signal)
     return 0
+
 
 def create_scale_stream(df, num_obj, sort_col, VAR_FILE_NAME):
   n_variables = df.shape[1]
@@ -177,6 +181,7 @@ def create_scale_stream(df, num_obj, sort_col, VAR_FILE_NAME):
   
   scale(Xobj, var_names, VAR_FILE_NAME=VAR_FILE_NAME.replace('.h5','_scaling.json')) # apply scaling
   return Xobj
+
 
 def sort_objects(df, data, SORT_COL, max_nobj):
   ''' 
@@ -207,6 +212,7 @@ def sort_objects(df, data, SORT_COL, max_nobj):
     # default value for missing tracks 
     data[i, (min(nobjs, max_nobj)):, :  ] = -999
 
+
 def scale(data, var_names, VAR_FILE_NAME):
   import json
   scale = {}
@@ -222,6 +228,7 @@ def scale(data, var_names, VAR_FILE_NAME):
     slc -= m
     slc /= s
     data[:, :, v][f != -999] = slc.astype('float32')
+
 
 def main():
   
