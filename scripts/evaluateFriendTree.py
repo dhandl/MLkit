@@ -281,6 +281,8 @@ def main():
           y_predict = evaluate(model, eventvars, scaler, SEQ_SCALER, rnn=True, col=collection)
         else:
           y_predict = evaluate(model, eventvars, scaler)
+        
+        print i, y_predict
         #print y_predict[0,0], type(y_predict[0,0])
         output[0] = y_predict[:,0]
 
