@@ -3,7 +3,6 @@ from sklearn.preprocessing import StandardScaler
 import h5py
 from keras.models import load_model
 import matplotlib.pyplot as plt
-import timer
 from sklearn.externals import joblib
 import pickle
 import numpy as np
@@ -33,9 +32,6 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     
     - save: Save Files in ./plots/ (True/False)
     '''
-    t = timer.Timer()
-    t.start()
-    
     #Load models
     
     print 'Loading infos from infofile...'
@@ -289,12 +285,6 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     #evaluate_signalGrid.evaluate_signalGrid(modelDir, save=save, fileName=filenames)
     #evaluate_signalGrid.evaluate_signalGridCuts(modelDir, save=save, fileName=filenames)
     
-    #end timer and print time
-    t.stop()
-    t0 = t.elapsed
-    t.reset()
-    runtimeSummary(t0)
-    
 def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     '''
     Plot all important things for specific dataset, which is not the one used for training
@@ -307,9 +297,6 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     
     - save: Save Files in ./plots/ (True/False)
     '''
-    t = timer.Timer()
-    t.start()
-    
     #Load models
     
     print('Loading dataset...')
@@ -353,12 +340,6 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
     #Do various plots
     
     evaluate_signalGrid.evaluate_signalGridCut(modelDir, save=save, fileName=filenames)
-    
-    # end timer and print time
-    t.stop()
-    t0 = t.elapsed
-    t.reset()
-    runtimeSummary(t0)
     
 def main():
     print '---------- Warning: startPlot in main ----------'

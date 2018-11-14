@@ -76,7 +76,6 @@ def checkDataset(y_train, y_test, w_train, w_test, multiclass=False):
 
   print 'Total unweighted events (sig/bkg): %0.2f / %0.2f'%(ns, nb)
   print 'Total weighted events (sig/bkg): %0.2f / %0.2f'%(ns_w, nb_w)
-  print 'Ratio of training-to-testing samples (sig/bkg): %0.2f / %0.2f'%(ns_train/ns, nb_train/nb)
 
 def saveModel(model, modelDir, weightDir, modelName, alg):
   print 'Saving model {} and weights...'.format(alg)
@@ -165,6 +164,7 @@ def parse_options():
   parser.add_argument('-n', '--name', help='Name of the output files')
   parser.add_argument('-o', '--output', help='Directory for output files' , default=output)
   parser.add_argument('-r', '--reproduce', help='Constant seed for reproducabilty', default=False, type=bool)
+  parser.add_argument('-k', '--kfold', help='Use k-fold cross-validation', default=None)
   parser.add_argument('-t', '--trainsize', help='Size of training data. Both (float/int) possible', default=None)
   parser.add_argument('-u', '--testsize', help='Size of test data. Both (float/int) possible', default=None)
   parser.add_argument('-p', '--plot', help='Plotting the output (True/False)', default=False,type=bool)
@@ -186,12 +186,14 @@ def parse_options():
   if not opts.name:
     opts.name = datetime.now().strftime('%Y-%m-%d_%H-%M_')
 
-  if type(opts.trainsize) is str: 
+  if type(opts.kfold) is str:
+    opts.kfold = int(opts.kfold)
+  elif (type(opts.trainsize) is str) and (type(opts.kfold) is None): 
     if '.' in opts.trainsize:
       opts.trainsize = float(opts.trainsize)
     else:
       opts.trainsize = int(opts.trainsize)
-  if type(opts.testsize) is str: 
+  elif (type(opts.testsize) is str) and (type(opts.kfold) is None): 
       if '.' in opts.testsize:
         opts.testsize = float(opts.testsize)
       else:
@@ -220,12 +222,17 @@ def main():
   
   print 'Creating training and test set!'
   if (opts.analysis.lower() == 'rnn'):
-    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], alg.options['removeVar'], nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], alg.options['removeVar'], nvar, weight, dataset, lumi, opts.kfold, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
     
   else:
     X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
 
-  checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
+  if opts.kfold:
+    for i in range(opts.kfold):
+      print 'Summary of kfold cross-validation datasets!'
+      checkDataset(y_train[i], y_test[i], w_train[i], w_test[i], multiclass=opts.multiclass)
+  else:
+    checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
     model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'],                opts.reproduce)
@@ -260,44 +267,101 @@ def main():
 
   elif (opts.analysis.lower() == 'rnn'):
       
-    if alg.options['mergeModels']:
-        print 'Standardize training set...'
-        scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
+    if opts.kfold:
+      model = []
+      history = []
+      y_pred = []
+      scaler = []
+      score = []
+     
+      for i in range(opts.kfold):
+        print 'k-fold cross-validation! Iteration:{}'.format(i)
+
+        if alg.options['mergeModels']:
+          print 'Standardize training set...'
+          scale = StandardScaler()
+          _X_train = scale.fit_transform(X_train[i])
+          _X_test = scale.transform(X_test[i])
+        
+        scaler.append(scale) 
+
+        m, h, y_hat = trainRNN(_X_train, _X_test, y_train[i], y_test[i], w_train[i], w_test[i], sequence[i], alg.options['collection'],
+                                        alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
+                                        alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
+                                        alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], 
+                                        alg.options['learningRate'], alg.options['decay'], 
+                                        alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
+                                        alg.options['multiclassification'], alg.options['classWeight'])
+        model.append(m)
+        history.append(h)
+        y_pred.append(y_hat)
+        score.append(m.evaluate([seq['X_test'] for seq in sequence[i]]+[X_test[i]], y_test[i]))
+
+        with open(os.path.join(opts.modelDir,opts.name+'_kFoldCV'+str(i)+'_history.pkl'), 'w') as hist_pi:
+          pickle.dump(h.history, hist_pi)
+
+    else:
+      if alg.options['mergeModels']:
+          print 'Standardize training set...'
+          scaler = StandardScaler()
+          X_train = scaler.fit_transform(X_train)
+          X_test = scaler.transform(X_test)
     
-    model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
+      model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
                                       alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
                                       alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
-                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], 
+                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'],
                                       alg.options['learningRate'], alg.options['decay'], 
                                       alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
                                       alg.options['multiclassification'], alg.options['classWeight'])
 
-    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
-      pickle.dump(history.history, hist_pi)
+      with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
+        pickle.dump(history.history, hist_pi)
 
-  saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
+  if opts.kfold:
+    s = np.array(score, dtype=float)
+    print 'Evaluating k-fold cross validation!'
+    print 'Score: ', s
+    print("\nMean %s: %.2f +/- %.2f" % (model[i].metrics_names[0], np.mean(s[:,0]), np.std(s[:,0])))
+    print("\nMean %s: %.2f +/- %.2f" % (model[i].metrics_names[1], np.mean(s[:,1]), np.std(s[:,1])))
+    for i in range(opts.kfold):
+      saveModel(model[i], opts.modelDir, opts.weightDir, opts.name+'_kFoldCV'+str(i), opts.analysis)
+    
+      try:
+        print('Saving Scaler to file...')
+        joblib.dump(scaler[i], os.path.join(opts.modelDir,opts.name+'_kFoldCV'+str(i)+'_scaler.pkl'))
+      except NameError:
+          print('No Scaler found')
+     
+      saveInfos(opts.name+'_kFoldCV'+str(i), opts.analysis.lower(), opts.dataset+'_kFoldCV'+str(i), ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
+      
+      if opts.plot:
+        print('Start Plotting...')
+        startPlot(os.path.join('TrainedModels/models',opts.name+'_kFoldCV'+str(i)+'.h5'),save=True, multiclass=opts.multiclass)
+    
 
-  try:
-    print('Saving Scaler to file...')
-    joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
-  except NameError:
-      print('No Scaler found')
- 
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
+  else:
+    saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
   
+    try:
+      print('Saving Scaler to file...')
+      joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
+    except NameError:
+        print('No Scaler found')
+   
+    saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
+    
+    if opts.plot:
+      print('Start Plotting...')
+      startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True, multiclass=opts.multiclass)
+    
   # end timer and print time
   t.stop()
   t0 = t.elapsed
   t.reset()
   runtimeSummary(t0)
-  
-  if opts.plot:
-    print('Start Plotting...')
-    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True, multiclass=opts.multiclass)
-    
-    
+      
+
 def trainextern():
     
   """

@@ -7,33 +7,67 @@ import numpy as np
 import h5py
 
 # scikit-learn
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 
-def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nvar, weight, output, lumi=100e3, trainSize=None, testSize=None, reproduce=False, multiclass=False):
-  if os.path.isfile(output) and output.endswith('.h5'):
-    print 'Loading existing dataset from: {}'.format(output)
-    h5f = h5py.File(output, 'r')
-    split = h5f['train_test_frac'][:]
-    ix = h5f['ix'][:]
-    X = h5f['X'][:]
-    y = h5f['y'][:]
-    w = h5f['w'][:]
-    X_train = h5f['X_train'][:]
-    X_test = h5f['X_test'][:]
-    y_train = h5f['y_train'][:]
-    y_test = h5f['y_test'][:]
-    w_train = h5f['w_train'][:]
-    w_test = h5f['w_test'][:]
-    ix_train = h5f['ix_train'][:]
-    ix_test = h5f['ix_test'][:]
-    sequence = []
-    for idx, c in enumerate(col):
-      sequence.append({'name':c, 'X_train':h5f['X_train_'+c][:], 'X_test':h5f['X_test_'+c][:]})
-    h5f.close() 
+def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nvar, weight, output, lumi=100e3, kFold = None, trainSize=None, testSize=None, reproduce=False, multiclass=False):
+  if kFold:
+    X_train = []
+    X_test = []
+    y_train = []
+    y_test = []
+    w_train = []
+    w_test = []
+    ix_train = []
+    ix_test = []
+    collection = []
+
+    for i in range(kFold):
+      if os.path.isfile(output.replace('.h5','_kFoldCV'+str(i)+'.h5')) and output.endswith('.h5'):
+        print 'Loading existing dataset from: {}'.format(output.replace('.h5','_kFoldCV'+str(i)+'.h5'))
+        h5f = h5py.File(output.replace('.h5','_kFoldCV'+str(i)+'.h5'), 'r')
+        X_train.append(h5f['X_train'][:])
+        X_test.append(h5f['X_test'][:])
+        y_train.append(h5f['y_train'][:])
+        y_test.append(h5f['y_test'][:])
+        w_train.append(h5f['w_train'][:])
+        w_test.append(h5f['w_test'][:])
+        ix_train.append(h5f['ix_train'][:])
+        ix_test.append(h5f['ix_test'][:])
+        sequence = []
+        for idx, c in enumerate(col):
+          sequence.append({'name':c, 'X_train':h5f['X_train_'+c][:], 'X_test':h5f['X_test_'+c][:]})
+        h5f.close()
+        collection.append(sequence) 
+  
+    return (X_train, X_test, y_train, y_test, w_train, w_test, collection) 
+        
+     
+  else:
+    if os.path.isfile(output) and output.endswith('.h5'):
+      print 'Loading existing dataset from: {}'.format(output)
+      h5f = h5py.File(output, 'r')
+      split = h5f['train_test_frac'][:]
+      ix = h5f['ix'][:]
+      X = h5f['X'][:]
+      y = h5f['y'][:]
+      w = h5f['w'][:]
+      X_train = h5f['X_train'][:]
+      X_test = h5f['X_test'][:]
+      y_train = h5f['y_train'][:]
+      y_test = h5f['y_test'][:]
+      w_train = h5f['w_train'][:]
+      w_test = h5f['w_test'][:]
+      ix_train = h5f['ix_train'][:]
+      ix_test = h5f['ix_test'][:]
+      sequence = []
+      for idx, c in enumerate(col):
+        sequence.append({'name':c, 'X_train':h5f['X_train_'+c][:], 'X_test':h5f['X_test_'+c][:]})
+      h5f.close() 
+      return (X_train, X_test, y_train, y_test, w_train, w_test, sequence)
 
   if not os.path.exists(output):
     if reproduce:
@@ -42,7 +76,10 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nv
       np.random.seed(random_state)
     else: 
       random_state = None
-    if trainSize is None:
+    if kFold:
+      print '{}-fold cross-validation applied'.format(kFold)
+      print 'Given train and test size is omitted!'
+    elif (trainSize is None) and (kFold is None):
       print 'Warning! Size of training set not specified. Set training data to 0.5 of complete dataset.'
       trainSize = 0.5
       if testSize is None:
@@ -97,35 +134,95 @@ def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nv
         y.extend([ID] * _df.shape[0])
       y = np.array(y)
    
-    ix = range(X.shape[0])
-    X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=trainSize, test_size=testSize, random_state=random_state)  
+    if kFold:
+      X_train = []
+      X_test = []
+      y_train = []
+      y_test = []
+      w_train = []
+      w_test = []
+      ix_train = []
+      ix_test = []
+      collection = []
 
-    split = np.array([X_train.shape[0]/X.shape[0], X_test.shape[0]/X.shape[0]])
-    h5f = h5py.File(output, 'w')
-    h5f.create_dataset('train_test_frac', data=split)
-    h5f.create_dataset('ix', data=ix)
-    h5f.create_dataset('X', data=X.astype(float))
-    h5f.create_dataset('y', data=y.astype(float))
-    h5f.create_dataset('w', data=w.astype(float))
-    h5f.create_dataset('X_train', data=X_train.astype(float))
-    h5f.create_dataset('X_test', data=X_test.astype(float))
-    h5f.create_dataset('y_train', data=y_train.astype(float))
-    h5f.create_dataset('y_test', data=y_test.astype(float))
-    h5f.create_dataset('w_train', data=w_train.astype(float))
-    h5f.create_dataset('w_test', data=w_test.astype(float))
-    h5f.create_dataset('ix_train', data=ix_train)
-    h5f.create_dataset('ix_test', data=ix_test)
+      sss = StratifiedShuffleSplit(n_splits=kFold, test_size=(1./kFold), random_state=random_state)
+      cv = 0
+      ix = range(X.shape[0])
 
-    for seq in sequence:
-      seq['n_max'] = max([len(j) for j in seq['df_full'][seq['name']+'_pt']])
-      #seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], range(X_train.shape[0]), range(X_test.shape[0]), seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
-      seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], ix_train, ix_test, seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
+      for train_index, test_index in sss.split(X, y):
+        X_tr, X_te = X[train_index], X[test_index]
+        y_tr, y_te = y[train_index], y[test_index]
+        w_tr, w_te = w[train_index], w[test_index]
+
+        X_train.append(X_tr)
+        X_test.append(X_te)
+        y_train.append(y_tr)
+        y_test.append(y_te)
+        w_train.append(w_tr)
+        w_test.append(w_te)
+        ix_train.append(train_index)
+        ix_test.append(test_index)
+
+        split = np.array([X_tr.shape[0]/X.shape[0], X_te.shape[0]/X.shape[0]])
+        outfile = output.replace(".h5", "_kFoldCV"+str(cv)+".h5")
+        h5f = h5py.File(outfile, 'w')
+        h5f.create_dataset('train_test_frac', data=split)
+        h5f.create_dataset('ix', data=ix)
+        h5f.create_dataset('X', data=X.astype(float))
+        h5f.create_dataset('y', data=y.astype(float))
+        h5f.create_dataset('w', data=w.astype(float))
+        h5f.create_dataset('X_train', data=X_tr.astype(float))
+        h5f.create_dataset('X_test', data=X_te.astype(float))
+        h5f.create_dataset('y_train', data=y_tr.astype(float))
+        h5f.create_dataset('y_test', data=y_te.astype(float))
+        h5f.create_dataset('w_train', data=w_tr.astype(float))
+        h5f.create_dataset('w_test', data=w_te.astype(float))
+        h5f.create_dataset('ix_train', data=train_index)
+        h5f.create_dataset('ix_test', data=test_index)
+        
+        for seq in sequence:
+          seq['n_max'] = max([len(j) for j in seq['df_full'][seq['name']+'_pt']])
+          seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], train_index, test_index, seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=outfile) 
+        collection.append(sequence)
+
+        for seq in sequence:
+          h5f.create_dataset('X_train_'+seq['name'], data=seq['X_train'])
+          h5f.create_dataset('X_test_'+seq['name'], data=seq['X_test'])
+        h5f.close()       
+        cv = cv+1
   
-    for seq in sequence:
-      h5f.create_dataset('X_train_'+seq['name'], data=seq['X_train'])
-      h5f.create_dataset('X_test_'+seq['name'], data=seq['X_test'])
-    h5f.close()  
-  return (X_train, X_test, y_train, y_test, w_train, w_test, sequence)
+      return (X_train, X_test, y_train, y_test, w_train, w_test, collection) 
+
+    else:
+      ix = range(X.shape[0])
+      X_train, X_test, y_train, y_test, w_train, w_test, ix_train, ix_test = train_test_split(X, y, w, ix, train_size=trainSize, test_size=testSize, random_state=random_state)  
+  
+      split = np.array([X_train.shape[0]/X.shape[0], X_test.shape[0]/X.shape[0]])
+      h5f = h5py.File(output, 'w')
+      h5f.create_dataset('train_test_frac', data=split)
+      h5f.create_dataset('ix', data=ix)
+      h5f.create_dataset('X', data=X.astype(float))
+      h5f.create_dataset('y', data=y.astype(float))
+      h5f.create_dataset('w', data=w.astype(float))
+      h5f.create_dataset('X_train', data=X_train.astype(float))
+      h5f.create_dataset('X_test', data=X_test.astype(float))
+      h5f.create_dataset('y_train', data=y_train.astype(float))
+      h5f.create_dataset('y_test', data=y_test.astype(float))
+      h5f.create_dataset('w_train', data=w_train.astype(float))
+      h5f.create_dataset('w_test', data=w_test.astype(float))
+      h5f.create_dataset('ix_train', data=ix_train)
+      h5f.create_dataset('ix_test', data=ix_test)
+  
+      for seq in sequence:
+        seq['n_max'] = max([len(j) for j in seq['df_full'][seq['name']+'_pt']])
+        #seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], range(X_train.shape[0]), range(X_test.shape[0]), seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
+        seq['X_train'], seq['X_test'] = create_stream(seq['df_full'], ix_train, ix_test, seq['n_max'], sort_col=seq['name']+'_pt', VAR_FILE_NAME=output) 
+    
+      for seq in sequence:
+        h5f.create_dataset('X_train_'+seq['name'], data=seq['X_train'])
+        h5f.create_dataset('X_test_'+seq['name'], data=seq['X_test'])
+      h5f.close()  
+      return (X_train, X_test, y_train, y_test, w_train, w_test, sequence)
 
 
 def loadDataFrame(path, cut=None, col=None, rm=None, nvar=None, weights=[], lumi=100e3):
