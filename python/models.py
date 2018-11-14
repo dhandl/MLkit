@@ -296,7 +296,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
     if activation.lower() == 'linear':
       layer = LeakyReLU(alpha=0.1)(layer)
-    layer = BatchNormalization()(layer)
+    #layer = BatchNormalization()(layer)
     #layer = Dropout(dropout)(layer)
     
   if mergeModels:
@@ -311,7 +311,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer))(combined)
     if activation.lower() == 'linear':
       combined = LeakyReLU(alpha=0.1)(combined)
-    combined = BatchNormalization()(combined)
+    #combined = BatchNormalization()(combined)
     #combined = Dropout(dropout)(combined)
 
   if multiclass:
@@ -345,6 +345,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
   else:
     print 'Using no class weights'
     class_weight = None
+
   try:
     if mergeModels:
       history = combined_rnn.fit([seq['X_train'] for seq in sequence]+[X_train], y_train,
