@@ -5,11 +5,11 @@ import numpy as np
 from keras.models import Sequential, Model, load_model
 from keras.layers.core import Dense, Activation, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Merge, Dense, Dropout, Input, concatenate, Flatten, LeakyReLU
+from keras.layers import Conv2D, MaxPooling2D, Masking, GRU, LSTM, Dense, Dropout, Input, concatenate, Flatten, LeakyReLU
 from keras.regularizers import l2, l1
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras import initializers
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 
 # scikit-learn
@@ -130,10 +130,13 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
   if optimizer.lower() == 'sgd':
     print 'Going to use stochastic gradient descent method for learning!'
     optimizer = SGD(lr=learningRate, decay=decay, momentum=momentum , nesterov=True)
-    model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
+  elif optimizer.lower() == 'adam':
+    print 'Going to use Adam optimizer for learning!'
+    optimizer = Adam(lr=learningRate, decay=decay)
   else:
     print 'Going to use %s as optimizer. Learning rate, decay and momentum will not be used during training!'%(optimizer)
-    model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
+
+  model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
 
   print model.summary()
   print "Training..."
@@ -296,7 +299,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
     if activation.lower() == 'linear':
       layer = LeakyReLU(alpha=0.1)(layer)
-    #layer = BatchNormalization()(layer)
+    layer = BatchNormalization()(layer)
     #layer = Dropout(dropout)(layer)
     
   if mergeModels:
@@ -311,7 +314,7 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
     combined = Dense(l, activation = activation, kernel_initializer=initializer, kernel_regularizer=l2(regularizer))(combined)
     if activation.lower() == 'linear':
       combined = LeakyReLU(alpha=0.1)(combined)
-    #combined = BatchNormalization()(combined)
+    combined = BatchNormalization()(combined)
     #combined = Dropout(dropout)(combined)
 
   if multiclass:
@@ -330,6 +333,17 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
       combined_rnn = Model(inputs=sequence[0]['input'], outputs=combined_output)
 
   combined_rnn.summary()
+
+  # Set loss and optimizer
+  if optimizer.lower() == 'sgd':
+    print 'Going to use stochastic gradient descent method for learning!'
+    optimizer = SGD(lr=learningRate, decay=decay, momentum=momentum , nesterov=True)
+  elif optimizer.lower() == 'adam':
+    print 'Going to use Adam optimizer for learning!'
+    optimizer = Adam(lr=learningRate, decay=decay)
+  else:
+    print 'Going to use %s as optimizer. Learning rate, decay and momentum will not be used during training!'%(optimizer)
+
   combined_rnn.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
   print 'Training...'
   classes = len(np.bincount(y_train.astype(int)))
