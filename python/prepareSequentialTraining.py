@@ -7,14 +7,14 @@ import numpy as np
 import h5py
 
 # scikit-learn
-from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, ShuffleSplit
 
 from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 
 def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nvar, weight, output, lumi=100e3, kFold = None, trainSize=None, testSize=None, reproduce=False, multiclass=False):
-  if kFold:
+  if (kFold) and (os.path.isfile(output.replace('.h5','_kFoldCV0.h5'))):
     X_train = []
     X_test = []
     y_train = []
