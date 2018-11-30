@@ -154,9 +154,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     
     scaler = joblib.load(modelDir.replace('.h5' , '_scaler.pkl')) # RNN sequences already scaled!
 
-    X_train_scaled = scaler.transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    X_scaled = scaler.transform(X)
+    X_train_scaled = scaler.transform(np.nan_to_num(X_train))
+    X_test_scaled = scaler.transform(np.nan_to_num(X_test))
+    X_scaled = scaler.transform(np.nan_to_num(X))
     
     if analysis == 'rnn':
       y_predict_train = model.predict([s['X_train'] for s in sequence] + [X_train_scaled])

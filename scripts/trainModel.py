@@ -188,12 +188,12 @@ def parse_options():
 
   if type(opts.kfold) is str:
     opts.kfold = int(opts.kfold)
-  elif (type(opts.trainsize) is str) and (type(opts.kfold) is None): 
+  elif (type(opts.trainsize) is str) and not opts.kfold: 
     if '.' in opts.trainsize:
       opts.trainsize = float(opts.trainsize)
     else:
       opts.trainsize = int(opts.trainsize)
-  elif (type(opts.testsize) is str) and (type(opts.kfold) is None): 
+  elif (type(opts.testsize) is str) and not opts.kfold: 
       if '.' in opts.testsize:
         opts.testsize = float(opts.testsize)
       else:
@@ -241,8 +241,8 @@ def main():
       
     print 'Standardize training and test set...'
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    X_train = scaler.fit_transform(np.nan_to_num(X_train))
+    X_test = scaler.transform(np.nan_to_num(X_test))
     
     if opts.hyperoptimization:
         print 'Using hyperas for hyperparameter optimization'
