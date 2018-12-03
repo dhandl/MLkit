@@ -33,7 +33,7 @@ inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met6
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-10-17_15-16_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_UniformInitializer_l2-0p01'
+modelfile = '2018-11-22_08-19_RNN_jetOnly_ADAM_leakyReLU_LSTM20_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01_kFoldCV2'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
@@ -51,7 +51,7 @@ PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
                 {'name':'n_bjet',  'threshold':1,      'type':'geq'},
                 {'name':'met',    'threshold':230e3,  'type':'geq'},
-                {'name':'mt',    'threshold':110e3,  'type':'geq'},
+                {'name':'mt',    'threshold':90e3,  'type':'geq'},
                 {'name':'n_lep',  'threshold':1,      'type':'exact'},
                 {'name':'lep_pt',  'threshold':25e3,      'type':'geq'}
                ]
@@ -328,6 +328,8 @@ def main():
     significance = []
     significance_err = []
     asimov = []
+    asimov_err = []
+
     tot_rel = np.sqrt(np.sum(s['output_var'])) / s['nEvents']
     for i in range(len(bins[1:])):
       #eff_sig = s['outputScore'][:i+1].sum() / s['nEvents']
@@ -369,6 +371,11 @@ def main():
         Z = ROOT.RooStats.NumberCountingUtils.BinomialExpZ(s['outputScore'][i:].sum(), totalBkgOutput[i:].sum(), total_rel_err)
         ams = asimovZ( s['outputScore'][i:].sum(), totalBkgOutput[i:].sum(), np.sqrt(totalBkgVar[i:].sum()))
 
+        ams_plus_sig = asimovZ((s['outputScore'][i:].sum() + np.sqrt(np.sum(s['output_var'][i:]))), totalBkgOutput[i:].sum(), np.sqrt(totalBkgVar[i:].sum()))
+        ams_mins_sig = asimovZ((s['outputScore'][i:].sum() - np.sqrt(np.sum(s['output_var'][i:]))), totalBkgOutput[i:].sum(), np.sqrt(totalBkgVar[i:].sum()))
+        ams_plus_bkg = asimovZ(s['outputScore'][i:].sum(), (totalBkgOutput[i:].sum() + np.sqrt(np.sum(totalBkgVar[i:]))), np.sqrt(totalBkgVar[i:].sum()))
+        ams_mins_bkg = asimovZ(s['outputScore'][i:].sum(), (totalBkgOutput[i:].sum() - np.sqrt(np.sum(totalBkgVar[i:]))), np.sqrt(totalBkgVar[i:].sum()))
+
         Zplus_sig = ROOT.RooStats.NumberCountingUtils.BinomialExpZ((eff_sig + err_sig) * s['nEvents'], eff_bkg * totalBkgOutput.sum(), total_rel_err)
         Zmins_sig = ROOT.RooStats.NumberCountingUtils.BinomialExpZ((eff_sig - err_sig) * s['nEvents'], eff_bkg * totalBkgOutput.sum(), total_rel_err)
         Zplus_bkg = ROOT.RooStats.NumberCountingUtils.BinomialExpZ(eff_sig * s['nEvents'], (eff_bkg + err_bkg) * totalBkgOutput.sum(), total_rel_err)
@@ -378,20 +385,29 @@ def main():
       Z_err_bkg = abs(Zplus_bkg - Zmins_bkg) / 2
       Z_err = np.sqrt(Z_err_sig**2 + Z_err_bkg**2)
 
+      ams_err_sig = abs(ams_plus_sig - ams_mins_sig)/2.
+      ams_err_bkg = abs(ams_plus_bkg - ams_mins_bkg)/2.
+      ams_err = np.sqrt(ams_err_sig**2 + ams_err_bkg**2)
+
       significance.append(Z)
       significance_err.append(Z_err)
       asimov.append(ams)
+      asimov_err.append(ams_err)
 
     s['sig'] = np.array(significance)
     s['sig_max'] = s['sig'].max()
     s['sig_err'] = np.array(significance_err)
     s['ams'] = np.array(asimov)
+    s['ams_err'] = np.array(asimov_err)
+
     print s['sig']
     print s['ams']
     sigMax_index = bins[np.where(s['sig'] == s['sig'].max())][0]
+    amsMax_index = bins[np.where(s['ams'] == s['ams'].max())][0]
     Z = asimovZ(Signal[0]['outputScore'][np.where(bins[:-1] == sigMax_index)], totalBkgOutput[np.where(bins[:-1] == sigMax_index)], np.sqrt(totalBkgVar[np.where(bins[:-1] == sigMax_index)]), syst=False)
     Z_syst = asimovZ(Signal[0]['outputScore'][np.where(bins[:-1] == sigMax_index)], totalBkgOutput[np.where(bins[:-1] == sigMax_index)], np.sqrt(totalBkgVar[np.where(bins[:-1] == sigMax_index)]), syst=True)
-    print s['sig'].max(), sigMax_index, Z, Z_syst
+    print 'RooStats: ',s['sig'].max(), sigMax_index, Z, Z_syst
+    print 'asmiov : ', s['ams'].max(), amsMax_index
 
   x = np.array([s['m_stop'] for s in Signal], dtype=float)
   y = np.array([s['m_X'] for s in Signal], dtype=float)
@@ -402,8 +418,8 @@ def main():
   print Signal[0]['outputScore'][np.where(bins[:-1] >= sigMax_index)], Signal[0]['output_var'][np.where(bins[:-1] >= sigMax_index)]
   print totalBkgOutput[np.where(bins[:-1] >= sigMax_index)], totalBkgVar[np.where(bins[:-1] >= sigMax_index)]
 
-  print Signal[0]['outputScore'], Signal[0]['output_var']
-  print totalBkgOutput, totalBkgVar
+  #print Signal[0]['outputScore'], Signal[0]['output_var']
+  #print totalBkgOutput, totalBkgVar
   # Set up a regular grid of interpolation points
 
   print('Plotting the output score...')
@@ -441,7 +457,27 @@ def main():
   plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
   plt.close()
 
-  #plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=modelfile+'_eval-bWN-450-300')
+  print('Plotting significance...')
+  fig = plt.figure(figsize=(8,6))
+  ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=4)
+  ax1.set_xlim((bins[0], bins[-1]))
+  ax1.set_xlabel('Output score', horizontalalignment='right', x=1.0)
+  ax1.set_ylabel("Z", horizontalalignment='right', y=1.0)
+
+  plt.plot(center, Signal[0]['ams'], 'k-', color='cornflowerblue')
+  plt.fill_between(center, Signal[0]['ams']-Signal[0]['ams_err'], Signal[0]['ams']+Signal[0]['ams_err'], alpha=0.2, edgecolor='cornflowerblue', facecolor='cornflowerblue', linewidth=0)
+  plt.plot(center, len(center)*[3.], '--', color='grey', alpha=0.5)
+  plt.plot(center, len(center)*[5.], '--', color='red', alpha=0.5)
+  ax1.set_ylim((0., Signal[0]['ams'].max()*(1.5)))
+  leg = plt.legend(loc="best", frameon=False)
+
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.925, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.875, lumi=LUMI*0.001)
+
+  plt.savefig("plots/"+modelfile+"_AsimovZ_bWN-450-300.pdf")
+  plt.savefig("plots/"+modelfile+"_AsimovZ_bWN-450-300.png")
+  plt.close()
+
 
 if __name__ == "__main__":
     main()
