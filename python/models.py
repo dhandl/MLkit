@@ -292,18 +292,20 @@ def trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, collec
         seq['channel'] = GRU(n_units, name=seq['name']+'_gru')(seq['channel'])
       #seq['channel'] = Dropout(dropout, name=seq['name']+'_dropout')(seq['channel'])
 
-  if mergeModels:
-    print 'Going to merge sequence model with common NN!'
+  #if mergeModels:
+  #  print 'Going to merge sequence model with common NN!'
 
-    model_inputs = Input(shape=(X_train.shape[1], ))
-    layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
-    if activation.lower() == 'linear':
-      layer = LeakyReLU(alpha=0.1)(layer)
-    layer = BatchNormalization()(layer)
-    #layer = Dropout(dropout)(layer)
+  #  model_inputs = Input(shape=(X_train.shape[1], ))
+  #  layer = Dense(n_units, activation=activation, kernel_initializer=initializer)(model_inputs)
+  #  if activation.lower() == 'linear':
+  #    layer = LeakyReLU(alpha=0.1)(layer)
+  #  layer = BatchNormalization()(layer)
+  #  #layer = Dropout(dropout)(layer)
     
   if mergeModels:
-    combined = concatenate([c['channel'] for c in sequence]+[layer])
+    print 'Going to merge sequence model with common NN!'
+    model_inputs = Input(shape=(X_train.shape[1], ))
+    combined = concatenate([c['channel'] for c in sequence]+[model_inputs])
   else:
     if len(sequence)>1:
       combined = concatenate([c['channel'] for c in sequence])
