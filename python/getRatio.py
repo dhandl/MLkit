@@ -15,8 +15,8 @@ def getRatio(s_hist, s_bins, s_w, b_hist, b_bins, b_w, color):
     print "Smax(" + str(s_bins.max()) + ")  Bmax(" + str(b_bins.max()) + ")"
     return 0
   
-  ratio = S/B
-  err = ratio * np.sqrt((s_w/S)**2 + (b_w/B)**2)
+  ratio = np.ma.masked_invalid(S/B)
+  err = np.ma.masked_invalid(ratio * np.sqrt((s_w/S)**2 + (b_w/B)**2))
   width = (s_bins[1] - s_bins[0])
   center = (s_bins[:-1] + s_bins[1:]) / 2
   plt.errorbar(center, ratio, yerr=err, fmt='o', color=color)
