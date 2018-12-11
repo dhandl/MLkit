@@ -13,7 +13,7 @@ from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 
-def prepareSequentialTraining(sigList, bkgList, preselection, col, removeVar, nvar, weight, output, lumi=100e3, kFold = None, trainSize=None, testSize=None, reproduce=False, multiclass=False):
+def prepareSequentialTraining(output, sigList=None, bkgList=None, preselection=None, col=None, removeVar=None, nvar=None, weight=None, lumi=100e3, kFold = None, trainSize=None, testSize=None, reproduce=False, multiclass=False):
   if (kFold) and (os.path.isfile(output.replace('.h5','_kFoldCV0.h5'))):
     X_train = []
     X_test = []

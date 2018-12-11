@@ -222,10 +222,10 @@ def main():
   
   print 'Creating training and test set!'
   if (opts.analysis.lower() == 'rnn'):
-    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], alg.options['removeVar'], nvar, weight, dataset, lumi, opts.kfold, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(dataset, Signal, Background, preselection, alg.options['collection'], alg.options['removeVar'], nvar, weight, lumi, opts.kfold, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
     
   else:
-    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(dataset, Signal, Background, preselection, nvar, weight, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
 
   if opts.kfold:
     for i in range(opts.kfold):
@@ -241,9 +241,14 @@ def main():
       
     print 'Standardize training and test set...'
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(np.nan_to_num(X_train))
-    X_test = scaler.transform(np.nan_to_num(X_test))
-    
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    where_nan_train = np.isnan(X_train)
+    where_nan_test = np.isnan(X_test)
+    X_train[where_nan_train] = 0. 
+    X_test[where_nan_test] = 0. 
+   
     if opts.hyperoptimization:
         print 'Using hyperas for hyperparameter optimization'
         
@@ -393,10 +398,10 @@ def trainextern():
   
   print 'Creating training and test set!'
   if (opts.analysis.lower() == 'rnn'):
-    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(Signal, Background, preselection, alg.options['collection'], nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(dataset, Signal, Background, preselection, alg.options['collection'], nvar, weight, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
     
   else:
-    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(Signal, Background, preselection, nvar, weight, dataset, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
+    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(dataset, Signal, Background, preselection, nvar, weight, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
 
   checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   

@@ -14,7 +14,7 @@ from collections import namedtuple
 Sample = namedtuple('Sample', 'name dataframe')
 
 
-def prepareTraining(sigList, bkgList, preselection, nvar, weight, output, lumi=100e3, trainSize=None, testSize=None, reproduce=False, multiclass=False):
+def prepareTraining(output, sigList=None, bkgList=None, preselection=None, nvar=None, weight=None, lumi=100e3, trainSize=None, testSize=None, reproduce=False, multiclass=False):
   if os.path.isfile(output) and output.endswith('.h5'):
     print 'Loading existing dataset from: {}'.format(output)
     h5f = h5py.File(output, 'r')
