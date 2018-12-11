@@ -33,7 +33,7 @@ inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met6
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-11-30_11-28_DNN_ADAM_tanh_layer128_batch32_NormalInitializer_l1-0p01_lr0p001_decay0'
+modelfile = '2018-12-10_11-09_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
@@ -87,50 +87,50 @@ VAR = [
         'mt',
         'n_jet',
         'n_bjet',
-        'jet_pt[0]',
-        'jet_eta[0]',
-        'jet_phi[0]',
-        'jet_e[0]',
-        ##'jet_bweight[0]',
-        'jet_pt[1]',
-        'jet_eta[1]',
-        'jet_phi[1]',
-        'jet_e[1]',
-        ##'jet_bweight[1]',
-        'jet_pt[2]',
-        'jet_eta[2]',
-        'jet_phi[2]',
-        'jet_e[2]',
-        ##'jet_bweight[2]',
-        'jet_pt[3]',
-        'jet_eta[3]',
-        'jet_phi[3]',
-        'jet_e[3]',
-        ##'jet_bweight[3]'
-        'jet_pt[4]',
-        'jet_eta[4]',
-        'jet_phi[4]',
-        'jet_e[4]',
-        'jet_pt[5]',
-        'jet_eta[5]',
-        'jet_phi[5]',
-        'jet_e[5]',
-        'jet_pt[6]',
-        'jet_eta[6]',
-        'jet_phi[6]',
-        'jet_e[6]',
-        'jet_pt[7]',
-        'jet_eta[7]',
-        'jet_phi[7]',
-        'jet_e[7]',
-        'jet_pt[8]',
-        'jet_eta[8]',
-        'jet_phi[8]',
-        'jet_e[8]',
-        'jet_pt[9]',
-        'jet_eta[9]',
-        'jet_phi[9]',
-        'jet_e[9]',
+        #'jet_pt[0]',
+        #'jet_eta[0]',
+        #'jet_phi[0]',
+        #'jet_e[0]',
+        ###'jet_bweight[0]',
+        #'jet_pt[1]',
+        #'jet_eta[1]',
+        #'jet_phi[1]',
+        #'jet_e[1]',
+        ###'jet_bweight[1]',
+        #'jet_pt[2]',
+        #'jet_eta[2]',
+        #'jet_phi[2]',
+        #'jet_e[2]',
+        ###'jet_bweight[2]',
+        #'jet_pt[3]',
+        #'jet_eta[3]',
+        #'jet_phi[3]',
+        #'jet_e[3]',
+        ###'jet_bweight[3]'
+        #'jet_pt[4]',
+        #'jet_eta[4]',
+        #'jet_phi[4]',
+        #'jet_e[4]',
+        #'jet_pt[5]',
+        #'jet_eta[5]',
+        #'jet_phi[5]',
+        #'jet_e[5]',
+        #'jet_pt[6]',
+        #'jet_eta[6]',
+        #'jet_phi[6]',
+        #'jet_e[6]',
+        #'jet_pt[7]',
+        #'jet_eta[7]',
+        #'jet_phi[7]',
+        #'jet_e[7]',
+        #'jet_pt[8]',
+        #'jet_eta[8]',
+        #'jet_phi[8]',
+        #'jet_e[8]',
+        #'jet_pt[9]',
+        #'jet_eta[9]',
+        #'jet_phi[9]',
+        #'jet_e[9]',
         'lep_pt[0]',
         'lep_eta[0]',
         'lep_phi[0]',
@@ -167,8 +167,8 @@ def asimovZ(s, b, b_err, syst=False):
 
 def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
 
-  where_nan = np.isnan(dataset)
-  dataset[where_nan] = -999. 
+  #where_nan = np.isnan(dataset)
+  #dataset[where_nan] = -999. 
   dataset = scaler.transform(dataset)
 
   if rnn:  
@@ -525,7 +525,7 @@ def main():
   auc = np.trapz(s['roc'][:,0], s['roc'][:,1], dx=db)
   print 'Area under ROC?!: ',auc
 
-  plt.plot(s['roc'][:,0], s['roc'][:,1], 'k-', color='cornflowerblue', label='ROC (AUC = %0.2f)'%(auc))
+  plt.plot(s['roc'][:,0], s['roc'][:,1], 'k-', color='cornflowerblue', label='ROC (AUC = %0.4f)'%(auc))
   #plt.fill_between(center, Signal[0]['ams']-Signal[0]['ams_err'], Signal[0]['ams']+Signal[0]['ams_err'], alpha=0.2, edgecolor='cornflowerblue', facecolor='cornflowerblue', linewidth=0)
   plt.plot([0, 1], [1, 0], '--', color=(0.6, 0.6, 0.6), label='Luck')
   leg = plt.legend(loc="best", frameon=False)
