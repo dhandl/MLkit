@@ -209,9 +209,9 @@ def main():
       plt.plot(roc[i][1], 1- roc[i][0], '-', label='Default (AUC = %0.4f)'%(auc[i]))
     
   plt.plot([0, 1], [1, 0], '--', color=(0.6, 0.6, 0.6), label='Luck')
-  leg = plt.legend(loc="best", frameon=False)
+  leg = plt.legend(loc="lower left", frameon=False)
 
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.02, 0.35, 'Work in progress')
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.13, 0.9, 'Work in progress')
   #AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.3, lumi=LUMI*0.001)
 
   plt.savefig("plots/"+modelfile+"_ROC_n-1.pdf")
