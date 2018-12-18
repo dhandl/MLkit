@@ -3,10 +3,8 @@
 import os, sys
 import numpy as np
 import pandas as pd
-import root_pandas as rp
+import root_numpy as rn
 
-from root_numpy import array2root
-from root_pandas import to_root
 from array import array
 from keras.models import load_model
 from sklearn.externals import joblib
@@ -57,6 +55,8 @@ VAR = [
         #'dphi_b_ptmiss_max'
 ]
 
+VAR_TRANSFORM = ['met', 'mt', 'lep_pt', 'lep_e']
+
 # *
 # Index '[0]' not needed anymore, since array pollution is removed by function 'remove_array_pollution'.
 # It is cleaner coding style to delete the index '[0]' ('lep_pt' instead of 'lep_pt[0]').
@@ -67,7 +67,7 @@ MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_je
 
 SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01_scaler.pkl'
 
-CHUNKSIZE = 7000
+CHUNKSIZE = 5000
 
 # Set unit used for energy in given framework
 # Standardly the unit MeV is used for energy, so standardly this boolean shall be set to False
@@ -78,7 +78,8 @@ USE_GEV = True
 rnn = True
 SEQ_SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/20180927_stop_bWN_450_300TRUTH_ttbar_singletop_wjets_mt110_met230_scaling.json'
 COLLECTION = ['jet'] 
-REMOVE_VAR = ['_m', '_mv2c10', '_id', '0_pt', '0_eta', '0_phi', '0_e', '1_pt', '1_eta', '1_phi', '1_e']
+COLLECTION_VAR = ['_pt', '_eta', '_phi', '_e']
+COLLECTION_TRANSFORM = ['_pt','_e']
 #----------------------------------------#
 
 
@@ -129,12 +130,18 @@ def getObjDict(c, prefix, variables, i=0):
 
 def getJets(c):
   addJetVars =  []
-  if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_e'] + ['jet_'+x for x in addJetVars]
+  if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_m'] + ['jet_'+x for x in addJetVars]
+  #if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_e'] + ['jet_'+x for x in addJetVars]
   nJet = int(c.GetLeaf("n_jet").GetValue())
   jets=[]
   for i in range(nJet):
-    jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'e'], i)
+    jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'm'], i)
+    #jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'e'], i)
     jet.update(getObjDict(c, 'jet_', addJetVars, i))
+    e = ROOT.TLorentzVector()
+    e.SetPtEtaPhiM(jet['jet_pt'], jet['jet_eta'], jet['jet_phi'], jet['jet_m'])
+    jet.update({"jet_e":e.E()})
+ 
     jets.append(jet)
   return jets
 
@@ -224,15 +231,15 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
   return y_hat
 
 
-def multiply_by_thousand(unscaled_dataframe, variables_list):
+def multiply_by_thousand(unscaled_dataframe, variable_index):
   """ Some frameworks use different units as other frameworks, whyever. In order to be able to compare the data anyway,
       all units are scaled to MeV. In this function we assume, that the used unit is GeV. So, in order to get the used
       GeV to MeV one needs to multiply the value by thousand. This function takes as arguments the dataframe which
       should be scaled and a list of variables which use GeV as unit and returns a dataframe in terms of MeV."""
   
-  # Loop through each element of variables list and multiply by thousand 
-  for ele in variables_list:
-    unscaled_dataframe[ele] = unscaled_dataframe[ele] * 1000
+  # Loop through each element of variable index and multiply by thousand 
+  for ele in variable_index:
+    unscaled_dataframe[:,ele] = unscaled_dataframe[:,ele] * 1000
 
   # Nb. unscaled_dataframe is scaled now.  
   
@@ -250,10 +257,9 @@ def multiply_jets_by_thousand(complicated_list, variables_list):
 
   # Read pandas DataFrame from complicated list jet_seq
   jet_df = complicated_list[0]['df']
-
+  
   # We iterate through each variable we want to scale  
   for var in variables_list:
-
     # Create a new list, which contains values of pandas Series of column var
     # Since its entries are lists, we basically have a list of list
     list_arrays = jet_df[var].tolist()
@@ -270,7 +276,7 @@ def multiply_jets_by_thousand(complicated_list, variables_list):
     # Update series of old values with series created out of new list
     jet_df[var].update(pd.Series(scaled_list_arrays))
   
-  # Rewrite in format of complicated list
+   #Rewrite in format of complicated list
   complicated_list[0]['df'] = jet_df
 
   return complicated_list
@@ -319,7 +325,6 @@ def main():
   global SCALER
   global SEQ_SCALER
   global COLLECTION
-  global REMOVE_VAR
   global CHUNKSIZE
   global USE_GEV
 
@@ -363,7 +368,6 @@ def main():
     for name in set([k.GetName() for k in inFile.GetListOfKeys() if k.GetClassName() == "TTree"]):
 
       t = inFile.Get(name)
-      
       # Defining and getting strings of tree names      
       name_data_tree = name
       name_new_tree = t.GetName()+"_ML"
@@ -380,55 +384,64 @@ def main():
       print 'This file has {} entries and chunks of size {} are used, thus resulting in {} loops.\n'.format(nevents, CHUNKSIZE, nevents//CHUNKSIZE + 1 )    
     
       # Loop over every chunk
-      for chunks in rp.read_root(fSrc, chunksize=CHUNKSIZE, columns=VAR):
-        
+      #for chunks in rp.read_root(fSrc, chunksize=CHUNKSIZE, columns=VAR):
+      for start in range(0, nevents, CHUNKSIZE):
         # Print status
         print 'Processing loop {} out of {}'.format(idx+1, nevents//CHUNKSIZE + 1)
+
+        chunk = rn.tree2array(t, branches=VAR, start=start, stop=start+CHUNKSIZE) 
+        X_eval = rn.rec2array(chunk[VAR]) 
+        
 
         # Remove array polution and transform entry of type array in entry of type float
         # Transforms [458.54823] into 458.54823
         # Possible loss of accuracy here due to rounding
-        chunks = remove_array_pollution(chunks, ['lep_pt', 'lep_eta', 'lep_phi', 'lep_e'])
+        #chunk = remove_array_pollution(chunks, ['lep_pt', 'lep_eta', 'lep_phi', 'lep_e'])
 
 
         # Define a sequence of jets for each chunk of entries.
-        # Each sequence(list) contains as entries all dataframe of events in that chunk.  
-        jet_seq = [{'df':pd.DataFrame(index=range(0), columns=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
+        # Each sequence(list) contains as entries all dataframe of events in that chunk. 
+        if rnn: 
+          jet_seq = [{'df':pd.DataFrame(index=range(0), columns=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
 
         # Print status
         print '\tSetting jet events to right format.'
 
-        for i in range(chunks.shape[0]):          
+        for i in range(X_eval.shape[0]):          
 
-          t.GetEntry(i + idx*chunks.shape[0])
-
+          t.GetEntry(i + start*X_eval.shape[0])
+          
           if rnn:
             collection = []
             jets = getJets(t)
             collection.append(transformCollection(jets, 'jet'))
             jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
 
-
         # If unit is given in GeV, it needs to be transformed to MeV
         if USE_GEV:
-          chunks = multiply_by_thousand(chunks, ['met', 'mt', 'lep_pt', 'lep_e'])
-          jet_seq = multiply_jets_by_thousand(jet_seq, ['jet_pt', 'jet_e', 'jet_phi'])
+          var_indices = [VAR.index(v) for v in VAR_TRANSFORM]
+          X_eval = multiply_by_thousand(X_eval, var_indices)
+          jet_seq = multiply_jets_by_thousand(jet_seq, ['jet_pt', 'jet_e'])
 
         # Actual evaluation with status printing
         print '\tEvaluating chunk of data.'
         if rnn:
-          y_predict = evaluate(model, chunks.values, scaler, SEQ_SCALER, rnn=True, col=jet_seq)
+          y_predict = evaluate(model, X_eval, scaler, SEQ_SCALER, rnn=True, col=jet_seq)
         else:
-          y_predict = evaluate(model, chunks.values, scaler)
+          y_predict = evaluate(model, X_eval, scaler)
         
         # Take only the first column of the output
         output = y_predict[:,0]
-
-        # Dataframe of y_predict for function 'to_root'
-        output_df = pd.DataFrame.from_records({'outputScore': output})
-      
+        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore', np.float64)]))
+        friend_tree = friend_df.to_records()[['outputScore']]
+        #if start == 0:
+        #  mode = 'recreate'
+        #else:
+        mode = 'update'
+        print "Write to file"
         # Write to new root file
-        output_df.to_root(fSrc, tree_key= name_new_tree, mode='a')          
+        rn.array2root(friend_tree, fSrc, treename=name_new_tree, mode=mode)
+        print "Done"
 
         # Increasing chunk index
         idx = idx + 1
@@ -460,7 +473,6 @@ def main():
     # Write data tree and close file  
     data_tree.Write(data_tree.GetName(), ROOT.TObject.kOverwrite)       
     root_file.Close()
-
     
 
 if __name__ == '__main__':
