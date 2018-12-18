@@ -40,9 +40,9 @@ import matplotlib.pyplot as plt
 
 def ATLASLabel(axes, x, y, text='Work in progress', color='black'):
   #bb = dict(boxstyle='square', fc='w', lw=0)
-  atlas = axes.text(x, y, 'ATLAS', style='italic', weight='bold', size='x-large', color=color, transform=axes.transAxes)
+  atlas = axes.text(x, y, 'ATLAS', style='italic', weight='bold', size='x-large', color=color, transform=plt.gcf().transFigure)
   p = atlas.get_position()
-  add = axes.text(x+0.17, y, text, size='x-large', color=color, transform=axes.transAxes)
+  add = axes.text(x+0.09, y, text, size='x-large', color=color, transform=plt.gcf().transFigure)
   
 def ATLASLabel2(axes, x, y, text='Work in progress', color='black'):
   #bb = dict(boxstyle='square', fc='w', lw=0)
