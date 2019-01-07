@@ -28,12 +28,12 @@ sys.path.append('./python/plotting/')
 import plot_ROCcurves
 
 #inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
-inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection_new/'
+inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-12-10_11-09_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01'
+modelfile = '2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
@@ -83,8 +83,10 @@ VAR = [
         #'m3'
         'met',
         'met_phi',
-        'dphi_met_lep',
         'mt',
+        'dphi_met_lep',
+        'm_bl',
+        'bjet_pt[0]',
         'n_jet',
         'n_bjet',
         #'jet_pt[0]',
@@ -174,7 +176,7 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
   if rnn:  
     for idx, c in enumerate(col):
       #c['n_max'] = max([len(j) for j in c['df'][c['name']+'_pt']])
-      c['n_max'] = 15
+      c['n_max'] = 16
       c['Xobj'] = create_scale_stream(c['df'], c['n_max'], sort_col=c['name']+'_pt', VAR_FILE_NAME=seq_scaler) 
 
     y_hat = model.predict([c['Xobj'] for c in col]+[dataset])
@@ -199,7 +201,7 @@ def pickBenchmark(signal, delimiter='_'):
 def create_scale_stream(df, num_obj, sort_col, VAR_FILE_NAME):
   n_variables = df.shape[1]
   var_names = df.keys()
-  data = np.zeros((df.shape[0], num_obj, n_variables), dtype='float32')
+  data = np.zeros((df.shape[0], num_obj, n_variables), dtype='float64')
   
   # call functions to build X (a.k.a. data)
   sort_objects(df, data, sort_col, num_obj)
@@ -225,19 +227,20 @@ def sort_objects(df, data, SORT_COL, max_nobj):
   
   '''
   import tqdm
-  # i = event number, event = all the variables for that event 
-  for i, event in tqdm.tqdm(df.iterrows(), total=df.shape[0]): 
+  # i = event number, event = all the variables for that event
+  idx = 0 
+  for i, event in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
     # objs = [[pt's], [eta's], ...] of particles for each event
 
     #objs = np.array([v.tolist() for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
-    objs = np.array([v for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
+    objs = np.array([v.tolist() for v in event.get_values()], dtype='float64')[:, (np.argsort(event[SORT_COL]))[::-1]]
     # total number of tracks per jet      
     nobjs = objs.shape[1] 
     # take all tracks unless there are more than n_tracks 
-    data[i, :(min(nobjs, max_nobj)), :] = objs.T[:(min(nobjs, max_nobj)), :] 
+    data[idx, :(min(nobjs, max_nobj)), :] = objs.T[:(min(nobjs, max_nobj)), :] 
     # default value for missing tracks 
-    data[i, (min(nobjs, max_nobj)):, :  ] = -999
-
+    data[idx, (min(nobjs, max_nobj)):, :  ] = -999
+    idx = idx + 1
 
 def scale(data, var_names, VAR_FILE_NAME):
   import json
@@ -253,7 +256,7 @@ def scale(data, var_names, VAR_FILE_NAME):
     s = varinfo[name]['sd']
     slc -= m
     slc /= s
-    data[:, :, v][f != -999] = slc.astype('float32')
+    data[:, :, v][f != -999] = slc.astype('float64')
 
 
 def main():
