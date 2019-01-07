@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from numpy.lib.recfunctions import stack_arrays
-from root_numpy import root2array, root2rec
+import root_numpy as rn
 import glob
 import pandas as pd
 
@@ -25,8 +24,8 @@ def root2pandas(files_path, tree_name, **kwargs):
   # -- create list of .root files to process
   files = glob.glob(files_path)
 
-  # -- process ntuples into rec arrays
-  ss = stack_arrays([root2rec(fpath, tree_name, **kwargs) for fpath in files])
+  # -- process ntuples into rec arrays (root2rec is deprecated)
+  ss = np.lib.recfunctions.stack_arrays([rn.root2array(fpath, tree_name, **kwargs).view(np.recarray) for fpath in files])
 
   try:
     return pd.DataFrame(ss)

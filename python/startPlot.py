@@ -126,9 +126,9 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
         model = load_model(modelDir)
         model.load_weights(modelDir.replace('.h5' , '_weights.h5').replace('models' , 'weights'))
         if analysis.lower() == 'rnn':
-          print('Recurrent Neuronal Network detected!')
+          print('Recurrent Neural Network detected!')
         else:
-          print('Neuronal Network detected!')
+          print('Neural Network detected!')
           print('Scaling and reading values...')
     except IOError:
         model = joblib.load(modelDir)
@@ -154,9 +154,16 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     
     scaler = joblib.load(modelDir.replace('.h5' , '_scaler.pkl')) # RNN sequences already scaled!
 
-    X_train_scaled = scaler.transform(np.nan_to_num(X_train))
-    X_test_scaled = scaler.transform(np.nan_to_num(X_test))
-    X_scaled = scaler.transform(np.nan_to_num(X))
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    X_scaled = scaler.transform(X)
+
+    where_nan_train = np.isnan(X_train)
+    where_nan_test = np.isnan(X_test)
+    where_nan = np.isnan(X)
+    X_train[where_nan_train] = 0. 
+    X_test[where_nan_test] = 0. 
+    X[where_nan] = 0.
     
     if analysis == 'rnn':
       y_predict_train = model.predict([s['X_train'] for s in sequence] + [X_train_scaled])
@@ -313,7 +320,7 @@ def startPlotDataset(modelDir, datasetDir, binning=[50,0,1.], save=False):
         pickleDir = modelDir.replace('.h5', '_history.pkl')
         model = load_model(modelDir)
         model.load_weights(modelDir.replace('.h5' , '_weights.h5').replace('models' , 'weights'))
-        print('Neuronal Network detected!')
+        print('Neural Network detected!')
         print('Scaling and reading values...')
     except IOError:
         model = joblib.load(modelDir)

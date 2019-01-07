@@ -111,14 +111,14 @@ def trainNN(X_train, X_test, y_train, y_test, w_train, w_test, netDim, epochs, b
     model.add(Dense(netDim[0], input_dim=X_train.shape[1], activation=activation, kernel_initializer=initializer))
     if activation.lower() == 'linear':
       model.add(LeakyReLU(alpha=0.1))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     first = False
   for layer in netDim[1:len(netDim)]:
     model.add(Dense(layer, activation=activation, kernel_initializer=initializer, kernel_regularizer=l1(regularizer)))
     if activation.lower() == 'linear':
       model.add(LeakyReLU(alpha=0.1))
     #model.add(Dropout(dropout))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
   if multiclass:
     model.add(Dense(classes, activation='softmax'))
     loss = 'sparse_categorical_crossentropy'
