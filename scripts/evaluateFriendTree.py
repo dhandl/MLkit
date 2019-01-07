@@ -172,7 +172,7 @@ def transformCollection(jets, name):
 def create_scale_stream(df, num_obj, sort_col, VAR_FILE_NAME):
   n_variables = df.shape[1]
   var_names = df.keys()
-  data = np.zeros((df.shape[0], num_obj, n_variables), dtype='float32')
+  data = np.zeros((df.shape[0], num_obj, n_variables), dtype='float64')
   
   # call functions to build X (a.k.a. data)
   sort_objects(df, data, sort_col, num_obj)
@@ -189,7 +189,7 @@ def sort_objects(df, data, SORT_COL, max_nobj):
     # objs = [[pt's], [eta's], ...] of particles for each event
 
     #objs = np.array([v.tolist() for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
-    objs = np.array([v for v in event.get_values()], dtype='float32')[:, (np.argsort(event[SORT_COL]))[::-1]]
+    objs = np.array([v for v in event.get_values()], dtype='float64')[:, (np.argsort(event[SORT_COL]))[::-1]]
     # total number of tracks per jet      
     nobjs = objs.shape[1] 
     # take all tracks unless there are more than n_tracks 
@@ -212,7 +212,7 @@ def scale(data, var_names, VAR_FILE_NAME):
     s = varinfo[name]['sd']
     slc -= m
     slc /= s
-    data[:, :, v][f != -999] = slc.astype('float32')
+    data[:, :, v][f != -999] = slc.astype('float64')
 
 
 def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
