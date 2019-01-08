@@ -21,7 +21,7 @@ VAR = [
         'mt',
         'dphi_met_lep',
         'm_bl',
-        'bjet_pt',
+        'bjet_pt0',
         #'dphi_b_lep_max',
         #'dphi_jet0_ptmiss',
         #'met_sig',
@@ -56,6 +56,13 @@ VAR = [
         #'dphi_b_ptmiss_max'
 ]
 
+VAR_TRANSFORM = ['met', 'mt', 'lep_pt', 'lep_e']
+
+# *
+# Index '[0]' not needed anymore, since array pollution is removed by function 'remove_array_pollution'.
+# It is cleaner coding style to delete the index '[0]' ('lep_pt' instead of 'lep_pt[0]').
+# If it is needed for whatever reason, the initialisation file of root_pandas "__init__.py" needs to be changed according to marked comments in that file. 
+
 
 MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01.h5'
 #MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01.h5'
@@ -65,6 +72,11 @@ SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_j
 
 CHUNKSIZE = 100000
 
+# Set unit used for energy in given framework
+# Standardly the unit MeV is used for energy, so standardly this boolean shall be set to False
+# However, some frameworks create energy in GeV. If that is the case, this boolean should be set to True
+USE_GEV = True
+
 #--------- important for RNN's ----------#
 rnn = True
 SEQ_SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/20181220_stop_bWN_450_300TRUTH_allBkgs_njet4_nbjet1_met230_mt110_RNN_scaling.json'
@@ -72,6 +84,7 @@ SEQ_SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/20181220_stop_bWN_
 #SEQ_SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/20180927_stop_bWN_450_300TRUTH_ttbar_singletop_wjets_mt110_met230_scaling.json'
 COLLECTION = ['jet'] 
 COLLECTION_VAR = ['_pt', '_eta', '_phi', '_e']
+COLLECTION_TRANSFORM = ['_pt','_e']
 #----------------------------------------#
 
 
@@ -122,17 +135,17 @@ def getObjDict(c, prefix, variables, i=0):
 
 def getJets(c):
   addJetVars =  []
-  #if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_m'] + ['jet_'+x for x in addJetVars]
-  if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_e'] + ['jet_'+x for x in addJetVars]
+  if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_m'] + ['jet_'+x for x in addJetVars]
+  #if c=="branches":return ['n_jet','jet_pt','jet_eta', 'jet_phi', 'jet_e'] + ['jet_'+x for x in addJetVars]
   nJet = int(c.GetLeaf("n_jet").GetValue())
   jets=[]
   for i in range(nJet):
-    #jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'm'], i)
-    jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'e'], i)
+    jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'm'], i)
+    #jet = getObjDict(c, 'jet_', ['pt','eta', 'phi', 'e'], i)
     jet.update(getObjDict(c, 'jet_', addJetVars, i))
-    #e = ROOT.TLorentzVector()
-    #e.SetPtEtaPhiM(jet['jet_pt'], jet['jet_eta'], jet['jet_phi'], jet['jet_m'])
-    #jet.update({"jet_e":e.E()})
+    e = ROOT.TLorentzVector()
+    e.SetPtEtaPhiM(jet['jet_pt'], jet['jet_eta'], jet['jet_phi'], jet['jet_m'])
+    jet.update({"jet_e":e.E()})
  
     jets.append(jet)
   return jets
@@ -222,6 +235,58 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
 
   return y_hat
 
+
+def multiply_by_thousand(unscaled_dataframe, variable_index):
+  """ Some frameworks use different units as other frameworks, whyever. In order to be able to compare the data anyway,
+      all units are scaled to MeV. In this function we assume, that the used unit is GeV. So, in order to get the used
+      GeV to MeV one needs to multiply the value by thousand. This function takes as arguments the dataframe which
+      should be scaled and a list of variables which use GeV as unit and returns a dataframe in terms of MeV."""
+  
+  # Loop through each element of variable index and multiply by thousand 
+  for ele in variable_index:
+    unscaled_dataframe[:,ele] = unscaled_dataframe[:,ele] * 1000
+
+  # Nb. unscaled_dataframe is scaled now.  
+  
+  return unscaled_dataframe
+
+
+def multiply_jets_by_thousand(complicated_list, variables_list):
+  """ Same problem as stated in function 'multiply_by_thousand'. If this function is called, jet energies will be given in terms of GeV.
+      However, this model needs values of MeV. This function does that job.
+      First we read the pandas DataFrame from the complicated list 'jet_seq'. For each variable we then create a list containing the entries.
+      I.e., list_raw=[entry1, entry2, entry3,...]. In this case however, the entries are lists of their own (hence the name list_arrays).
+      Each entry belongs to an own event. We then create another list, which will contain the scaled values. For each entry of list_raw we
+      create the scaled entry, type of list, and append that scaled entry to scaled list of arrays.
+      As a last step we swap the pandas Series with the newl created pandas Series. After transforming it back to the complicated list, we return mentioned."""
+
+  # Read pandas DataFrame from complicated list jet_seq
+  jet_df = complicated_list[0]['df']
+  
+  # We iterate through each variable we want to scale  
+  for var in variables_list:
+    # Create a new list, which contains values of pandas Series of column var
+    # Since its entries are lists, we basically have a list of list
+    list_arrays = jet_df[var].tolist()
+    
+    # Initialise empty list
+    scaled_list_arrays = []
+
+    # Loop through each entry of list...
+    for lst in list_arrays:
+      
+      # ... and basically create a copy of values times 1000 in new list
+      scaled_list_arrays.append([value*1000 for value in lst])
+
+    # Update series of old values with series created out of new list
+    jet_df[var].update(pd.Series(scaled_list_arrays))
+  
+   #Rewrite in format of complicated list
+  complicated_list[0]['df'] = jet_df
+
+  return complicated_list
+
+
 def remove_array_pollution(dirtydf, variables_list):
   """ It is seen that the lepton variables are of type array containing only one entry, which is
       the wished value. This function takes the name of the variable, of which column shall be
@@ -271,6 +336,7 @@ def main():
   global SEQ_SCALER
   global COLLECTION
   global CHUNKSIZE
+  global USE_GEV
 
   # Check number of arguments and act respectively thereof
   if len(sys.argv) == 2:
@@ -334,14 +400,14 @@ def main():
         print 'Processing loop {} out of {}'.format(idx+1, nevents//CHUNKSIZE + 1)
 
         chunk = rn.tree2array(t, branches=VAR, start=start, stop=start+CHUNKSIZE)
-        #X_eval = rn.rec2array(chunk[VAR]) 
-        X_eval = pd.DataFrame(chunk) 
+        X_eval = rn.rec2array(chunk[VAR]) 
+        #X_eval = pd.DataFrame(chunk) 
         
         # Remove array polution and transform entry of type array in entry of type float
         # Transforms [458.54823] into 458.54823
         # Possible loss of accuracy here due to rounding
         #print '\nDEBUG: BEFORE\t',X_eval[:5]
-        X_eval = remove_array_pollution(X_eval, ['bjet_pt', 'lep_pt', 'lep_eta', 'lep_phi', 'lep_e'])
+        #X_eval = remove_array_pollution(X_eval, ['bjet_pt', 'lep_pt', 'lep_eta', 'lep_phi', 'lep_e'])
         #print '\nDEBUG: AFTER\t',X_eval[:5]
 
         # Define a sequence of jets for each chunk of entries.
@@ -361,6 +427,12 @@ def main():
             jets = getJets(t)
             collection.append(transformCollection(jets, 'jet'))
             jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
+
+        # If unit is given in GeV, it needs to be transformed to MeV
+        if USE_GEV:
+          var_indices = [VAR.index(v) for v in VAR_TRANSFORM]
+          X_eval = multiply_by_thousand(X_eval, var_indices)
+          jet_seq = multiply_jets_by_thousand(jet_seq, ['jet_pt', 'jet_e'])
 
         # Actual evaluation with status printing
         print '\tEvaluating chunk of data.'
