@@ -158,13 +158,6 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     X_test_scaled = scaler.transform(X_test)
     X_scaled = scaler.transform(X)
 
-    where_nan_train = np.isnan(X_train)
-    where_nan_test = np.isnan(X_test)
-    where_nan = np.isnan(X)
-    X_train[where_nan_train] = 0. 
-    X_test[where_nan_test] = 0. 
-    X[where_nan] = 0.
-    
     if analysis == 'rnn':
       y_predict_train = model.predict([s['X_train'] for s in sequence] + [X_train_scaled])
       y_predict_test = model.predict([s['X_test'] for s in sequence] + [X_test_scaled])
