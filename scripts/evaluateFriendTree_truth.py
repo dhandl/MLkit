@@ -56,7 +56,7 @@ VAR = [
         #'dphi_b_ptmiss_max'
 ]
 
-VAR_TRANSFORM = ['met', 'mt', 'lep_pt', 'lep_e']
+VAR_TRANSFORM = ['met', 'mt', 'lep_pt', 'lep_e', 'm_bl', 'bjet_pt0']
 
 # *
 # Index '[0]' not needed anymore, since array pollution is removed by function 'remove_array_pollution'.
@@ -71,11 +71,6 @@ SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_j
 #SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01_scaler.pkl'
 
 CHUNKSIZE = 100000
-
-# Set unit used for energy in given framework
-# Standardly the unit MeV is used for energy, so standardly this boolean shall be set to False
-# However, some frameworks create energy in GeV. If that is the case, this boolean should be set to True
-USE_GEV = True
 
 #--------- important for RNN's ----------#
 rnn = True
@@ -336,7 +331,6 @@ def main():
   global SEQ_SCALER
   global COLLECTION
   global CHUNKSIZE
-  global USE_GEV
 
   # Check number of arguments and act respectively thereof
   if len(sys.argv) == 2:
@@ -376,6 +370,8 @@ def main():
 
     # Get all trees in this file
     for name in set([k.GetName() for k in inFile.GetListOfKeys() if k.GetClassName() == "TTree"]):
+      if ("_ML" in name) or ("_lumi" in name):
+        continue
 
       t = inFile.Get(name)
       # Defining and getting strings of tree names      
@@ -413,26 +409,25 @@ def main():
         # Define a sequence of jets for each chunk of entries.
         # Each sequence(list) contains as entries all dataframe of events in that chunk. 
         if rnn: 
-          jet_seq = [{'df':pd.DataFrame(index=range(0), columns=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
+          # Print status
+          print '\tSetting jet events to right format.'
+          jet_chunk = rn.tree2array(t, branches=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e'], start=start, stop=start+CHUNKSIZE)
+          jet_seq = [{'df':pd.DataFrame(jet_chunk), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
 
-        # Print status
-        print '\tSetting jet events to right format.'
 
-        for i in range(X_eval.shape[0]):          
+        #for i in range(X_eval.shape[0]):          
 
-          t.GetEntry(i + start*X_eval.shape[0])
-          
-          if rnn:
-            collection = []
-            jets = getJets(t)
-            collection.append(transformCollection(jets, 'jet'))
-            jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
+        #  t.GetEntry(i + start*X_eval.shape[0])
+        #  
+        #  if rnn:
+        #    collection = []
+        #    jets = getJets(t)
+        #    collection.append(transformCollection(jets, 'jet'))
+        #    jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
 
-        # If unit is given in GeV, it needs to be transformed to MeV
-        if USE_GEV:
-          var_indices = [VAR.index(v) for v in VAR_TRANSFORM]
-          X_eval = multiply_by_thousand(X_eval, var_indices)
-          jet_seq = multiply_jets_by_thousand(jet_seq, ['jet_pt', 'jet_e'])
+        var_indices = [VAR.index(v) for v in VAR_TRANSFORM]
+        X_eval = multiply_by_thousand(X_eval, var_indices)
+        jet_seq = multiply_jets_by_thousand(jet_seq, ['jet_pt', 'jet_e'])
 
         # Actual evaluation with status printing
         print '\tEvaluating chunk of data.'
@@ -443,8 +438,8 @@ def main():
         
         # Take only the first column of the output
         output = y_predict[:,0]
-        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore', np.float64)]))
-        friend_tree = friend_df.to_records()[['outputScore']]
+        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore_RNN', np.float64)]))
+        friend_tree = friend_df.to_records()[['outputScore_RNN']]
         #if start == 0:
         #  mode = 'recreate'
         #else:

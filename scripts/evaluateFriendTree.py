@@ -175,7 +175,6 @@ def create_scale_stream(df, num_obj, sort_col, VAR_FILE_NAME):
 
 
 def sort_objects(df, data, SORT_COL, max_nobj):
-  import tqdm
   # i = event number, event = all the variables for that event 
   for i, event in df.iterrows(): 
     # objs = [[pt's], [eta's], ...] of particles for each event
@@ -215,6 +214,7 @@ def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
       #c['n_max'] = max([len(j) for j in c['df'][c['name']+'_pt']])
       c['n_max'] = 16
       c['Xobj'] = create_scale_stream(c['df'], c['n_max'], sort_col=c['name']+'_pt', VAR_FILE_NAME=seq_scaler) 
+      #print '\nDEBUG: AFTER:\t',c['Xobj'][:,5],'\t',c['Xobj'].shape
     y_hat = model.predict([c['Xobj'] for c in col]+[dataset])
 
   else:
@@ -310,6 +310,9 @@ def main():
 
     # Get all trees in this file
     for name in set([k.GetName() for k in inFile.GetListOfKeys() if k.GetClassName() == "TTree"]):
+      if ("_ML" in name) or ("_lumi" in name):
+        print "Skipping {} ...".format(name)
+        continue
 
       t = inFile.Get(name)
       # Defining and getting strings of tree names      
@@ -346,21 +349,23 @@ def main():
 
         # Define a sequence of jets for each chunk of entries.
         # Each sequence(list) contains as entries all dataframe of events in that chunk. 
-        if rnn: 
-          jet_seq = [{'df':pd.DataFrame(index=range(0), columns=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
+        if rnn:
+          # Print status
+          print '\tSetting jet events to right format.'
+          jet_chunk = rn.tree2array(t, branches=['jet_pt', 'jet_eta', 'jet_phi', 'jet_e'], start=start, stop=start+CHUNKSIZE)
+          jet_seq = [{'df':pd.DataFrame(jet_chunk), 'name':'jet', 'vars':['jet_pt', 'jet_eta', 'jet_phi', 'jet_e']}]
+          #print '\nDEBUG: BEFORE:\t',jet_seq[0]['df'].head(),'\t',jet_seq[0]['df'].shape
 
-        # Print status
-        print '\tSetting jet events to right format.'
 
-        for i in range(X_eval.shape[0]):          
+        #for i in range(X_eval.shape[0]):          
 
-          t.GetEntry(i + start*X_eval.shape[0])
-          
-          if rnn:
-            collection = []
-            jets = getJets(t)
-            collection.append(transformCollection(jets, 'jet'))
-            jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
+        #  t.GetEntry(i + start*X_eval.shape[0])
+        #  
+        #  if rnn:
+        #    collection = []
+        #    jets = getJets(t)
+        #    collection.append(transformCollection(jets, 'jet'))
+        #    jet_seq[0]['df'] = pd.concat((jet_seq[0]['df'], collection[0]['df']), axis=0, ignore_index=True)
 
         # Actual evaluation with status printing
         print '\tEvaluating chunk of data.'
@@ -371,8 +376,8 @@ def main():
         
         # Take only the first column of the output
         output = y_predict[:,0]
-        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore', np.float64)]))
-        friend_tree = friend_df.to_records()[['outputScore']]
+        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore_RNN', np.float64)]))
+        friend_tree = friend_df.to_records()[['outputScore_RNN']]
         #if start == 0:
         #  mode = 'recreate'
         #else:
