@@ -244,11 +244,6 @@ def main():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    where_nan_train = np.isnan(X_train)
-    where_nan_test = np.isnan(X_test)
-    X_train[where_nan_train] = 0. 
-    X_test[where_nan_test] = 0. 
-   
     if opts.hyperoptimization:
         print 'Using hyperas for hyperparameter optimization'
         
@@ -367,103 +362,5 @@ def main():
   runtimeSummary(t0)
       
 
-def trainextern():
-    
-  """
-  Train and evaluate model for different parameters
-  
-  NOT WORKING YET
-  """
-    
-  # define timer to check how long the job runs
-  t = timer.Timer()
-  t.start()
-  
-  #Replace parse_options
-  
-  workdir = os.getenv('WorkDir')
-  output = os.path.join(workdir, 'TrainedModels')
-  
-  #End of Replace
-
-  print 'Loading configuration...'
-  from variables import preselection, lumi, nvar, weight
-  from samples import Signal, Background
-  from algorithm import analysis
-  
-  alg = getModel(analysis, opts.analysis)
-  opts.name = opts.name + alg.modelname
-  
-  dataset = os.path.join(opts.dataDir,opts.dataset+'.h5')
-  
-  print 'Creating training and test set!'
-  if (opts.analysis.lower() == 'rnn'):
-    X_train, X_test, y_train, y_test, w_train, w_test, sequence = prepareSequentialTraining(dataset, Signal, Background, preselection, alg.options['collection'], nvar, weight, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
-    
-  else:
-    X_train, X_test, y_train, y_test, w_train, w_test = prepareTraining(dataset, Signal, Background, preselection, nvar, weight, lumi, opts.trainsize, opts.testsize, opts.reproduce, multiclass=opts.multiclass)
-
-  checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
-  
-  if (opts.analysis.lower() == 'bdt'): 
-    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'],                              alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'], 
-                             opts.reproduce)
-
-  elif (opts.analysis.lower() == 'nn'):
-      
-    print 'Standardize training and test set...'
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)  
-      
-    model, history, y_pred = trainNN(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['layers'], 
-                                     alg.options['ncycles'], alg.options['batchSize'], alg.options['dropout'], 
-                                     alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], alg.options['classWeight'], 
-                                     alg.options['learningRate'], alg.options['decay'], alg.options['momentum'], 
-                                     alg.options['nesterov'], alg.options['multiclassification'])
-
-    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
-      pickle.dump(history.history, hist_pi)
-
-  elif (opts.analysis.lower() == 'rnn'):
-      
-    if alg.options['mergeModels']:
-        print 'Standardize training set...'
-        scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
-    
-    model, history, y_pred = trainRNN(X_train, X_test, y_train, y_test, w_train, w_test, sequence, alg.options['collection'],
-                                      alg.options['unit_type'], alg.options['n_units'], alg.options['combinedDim'],
-                                      alg.options['epochs'], alg.options['batchSize'], alg.options['dropout'], 
-                                      alg.options['optimizer'], alg.options['activation'], alg.options['initializer'], alg.options['regularizer'], 
-                                      alg.options['learningRate'], alg.options['decay'], 
-                                      alg.options['momentum'], alg.options['nesterov'], alg.options['mergeModels'], 
-                                      alg.options['multiclassification'])
-
-    with open(os.path.join(opts.modelDir,opts.name+'_history.pkl'), 'w') as hist_pi:
-      pickle.dump(history.history, hist_pi)
-
-  saveModel(model, opts.modelDir, opts.weightDir, opts.name, opts.analysis)
-
-  try:
-    print('Saving Scaler to file...')
-    joblib.dump(scaler, os.path.join(opts.modelDir,opts.name+'_scaler.pkl'))
-  except NameError:
-      print('No Scaler found')
- 
-  saveInfos(opts.name, opts.analysis.lower(), opts.dataset, ' '.join(nvar), preselection, lumi, Signal, Background, str(alg.options), opts.trainsize, opts.testsize, opts.reproduce, opts.multiclass, ' '.join(weight))
-  
-  # end timer and print time
-  t.stop()
-  t0 = t.elapsed
-  t.reset()
-  runtimeSummary(t0)
-  
-  if opts.plot:
-    print('Start Plotting...')
-    startPlot(os.path.join('TrainedModels/models',opts.name+'.h5'),save=True, multiclass=opts.multiclass)    
-
-  
 if __name__ == '__main__':
   main()
