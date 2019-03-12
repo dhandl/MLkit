@@ -51,4 +51,4 @@ def ATLASLabel2(axes, x, y, text='Work in progress', color='black'):
   add = axes.text(x+0.12, y, text, size='x-large', color=color, transform=axes.transAxes)
 
 def LumiLabel(axes, x, y, lumi=100, color='black'):
-  axes.text(x, y, '$\sqrt{\mathrm{s}}=$13 TeV, L$=$'+str(lumi)+'fb$^{-1}$', size='x-large', transform=axes.transAxes)
+  axes.text(x, y, '$\sqrt{\mathrm{s}}=$13 TeV, L$=$'+str(lumi)+'fb$^{-1}$', size='x-large', transform=plt.gcf().transFigure)
