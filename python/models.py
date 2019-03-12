@@ -13,6 +13,7 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 
 # scikit-learn
+import sklearn # necessary for xgboost!
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
@@ -22,7 +23,10 @@ from sklearn.metrics import classification_report, roc_auc_score, roc_curve, auc
 from sklearn.externals import joblib
 from sklearn.utils.class_weight import compute_class_weight
 
-def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_depth, min_samples_leaf, n_estimators, learning_rate, reproduce=False):
+# XGBoost
+import xgboost as xgb
+
+def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_depth, n_estimators, learning_rate, l2=None, l1=None, gamma=None, scale_pos_weights=None, reproduce=False):
   print "Performing a Boosted Decision Tree!"
   if reproduce:
     print "Warning! Constant seed is activated"
@@ -34,13 +38,16 @@ def trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, classifier, max_
   elif classifier.lower() == 'gradientboost':
     print "Using GradientBoost technique!"
     model = GradientBoostingClassifier(max_depth=max_depth, criterion='friedman_mse', min_samples_leaf=min_samples_leaf, loss='deviance', n_estimators=n_estimators, learning_rate=learning_rate, warm_start=True)
+  else:
+    print "Perfomring a boosted decision tree with XGBoost!"
+    model = xgb.XGBClassifier(objective='binary:logistic', max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators, reg_lambda=l2, reg_alpha=l1, gamma=gamma, scale_pos_weights=scale_pos_weights)
 
   try:
-    model.fit(X_train, y_train)
+    model.fit(X_train, y_train, eval_metric=['auc', 'error'], eval_set=[(X_train, y_train), (X_test, y_test)])
   except KeyboardInterrupt:
     print '--- Training ended early. ---'
-  y_predicted = model.predict(X_test)
-  print classification_report(y_test, y_predicted, target_names=["background", "signal"])
+  y_predicted = model.predict_proba(X_test)
+  #print classification_report(y_test, y_predicted, target_names=["background", "signal"])
 
   print "BDT finished!"
   return model, y_predicted
