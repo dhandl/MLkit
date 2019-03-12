@@ -56,6 +56,8 @@ VAR = [
         #'dphi_b_ptmiss_max'
 ]
 
+BRANCH_NAME = 'outputScore_RNN'
+
 VAR_TRANSFORM = ['met', 'mt', 'lep_pt', 'lep_e', 'm_bl', 'bjet_pt0']
 
 # *
@@ -326,6 +328,7 @@ def remove_array_pollution(dirtydf, variables_list):
 
 def main():
   global VAR
+  global BRANCH_NAME 
   global MODEL
   global SCALER
   global SEQ_SCALER
@@ -342,7 +345,7 @@ def main():
   elif len(sys.argv) == 3:
     src, MODEL = sys.argv[1:]
   else:
-    print 'Usage: evaluateFriendTree.py <sample directory> (<var list> <model file> <scaler file>)'
+    print 'Usage: evaluateFriendTree_truth.py <sample directory> (<var list> <model file> <scaler file>)'
     return
  
   if not os.path.isdir(src):
@@ -370,14 +373,18 @@ def main():
 
     # Get all trees in this file
     for name in set([k.GetName() for k in inFile.GetListOfKeys() if k.GetClassName() == "TTree"]):
-      if ("_ML" in name) or ("_lumi" in name):
-        continue
 
       t = inFile.Get(name)
       # Defining and getting strings of tree names      
       name_data_tree = name
-      name_new_tree = t.GetName()+"_ML"
+      #name_new_tree = t.GetName()+"_ML"
 
+      branches = [b.GetName() for b in t.GetListOfBranches()]
+      #if ("_ML" in name) or ("_lumi" in name):
+      inList = filter(lambda x: x == BRANCH_NAME, branches)
+      if len(inList) > 0:
+        print "Skipping {} ...".format(name)
+        continue
 
       # Loop over all events
       nevents = t.GetEntries()
@@ -438,15 +445,15 @@ def main():
         
         # Take only the first column of the output
         output = y_predict[:,0]
-        friend_df = pd.DataFrame(np.array(output, dtype=[('outputScore_RNN', np.float64)]))
-        friend_tree = friend_df.to_records()[['outputScore_RNN']]
+        friend_df = pd.DataFrame(np.array(output, dtype=[(BRANCH_NAME, np.float64)]))
+        friend_tree = friend_df.to_records()[[BRANCH_NAME]]
         #if start == 0:
         #  mode = 'recreate'
         #else:
         mode = 'update'
         print "Write to file"
         # Write to new root file
-        rn.array2root(friend_tree, fSrc, treename=name_new_tree, mode=mode)
+        rn.array2root(friend_tree, fSrc, treename=name_data_tree, mode=mode)
         print "Done"
 
         # Increasing chunk index
@@ -461,24 +468,24 @@ def main():
     # Now file will be opened in new instance and the trees are going to be befriended
     
     #Open ROOT file again       
-    root_file = ROOT.TFile(fSrc, "UPDATE")
+    #root_file = ROOT.TFile(fSrc, "UPDATE")
     
     # Get outputScore tree    
-    outputScore_tree = root_file.Get(name_new_tree)
+    #outputScore_tree = root_file.Get(name_new_tree)
     
     # Write outpurScore tree
-    root_file.cd()
-    outputScore_tree.Write("", ROOT.TObject.kOverwrite)
+    #root_file.cd()
+    #outputScore_tree.Write("", ROOT.TObject.kOverwrite)
 
     # Get tree with original data 
-    data_tree = root_file.Get(name_data_tree)
+    #data_tree = root_file.Get(name_data_tree)
 
     # Make them friends <3
-    data_tree.AddFriend(name_new_tree)
+    #data_tree.AddFriend(name_new_tree)
     
     # Write data tree and close file  
-    data_tree.Write(data_tree.GetName(), ROOT.TObject.kOverwrite)       
-    root_file.Close()
+    #data_tree.Write(data_tree.GetName(), ROOT.TObject.kOverwrite)       
+    #root_file.Close()
     
 
 if __name__ == '__main__':

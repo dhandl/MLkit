@@ -28,13 +28,14 @@ sys.path.append('./python/plotting/')
 import plot_ROCcurves
 
 #inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/hdf5/cut_mt30_met60_preselection/'
-inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
+inputDir = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection_v60/'
+#inputDirSig = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 #SIGNAL = ['stop_bWN_250_100', 'stop_bWN_250_130', 'stop_bWN_300_150', 'stop_bWN_300_180', 'stop_bWN_350_200', 'stop_bWN_350_230', 'stop_bWN_400_250', 'stop_bWN_400_280', 'stop_bWN_450_300', 'stop_bWN_450_330', 'stop_bWN_500_350', 'stop_bWN_500_380', 'stop_bWN_550_400', 'stop_bWN_550_430', 'stop_bWN_600_450', 'stop_bWN_600_480', 'stop_bWN_650_500', 'stop_bWN_650_530']
-SIGNAL = ['stop_bWN_450_300_mc16d']
+SIGNAL = [['mc16a_bWN_500_380', 'mc16d_bWN_500_380', 'mc16e_bWN_500_380']]
 #SIGNAL = ['stop_tN_800_500']
 
-BACKGROUND = ['mc16e_ttbar', 'mc16e_singletop', 'mc16e_wjets']
+BACKGROUND = [['mc16a_ttbar', 'mc16d_ttbar', 'mc16e_ttbar'], ['mc16a_singletop', 'mc16d_singletop', 'mc16e_singletop'], ['mc16a_wjets', 'mc16d_wjets', 'mc16e_wjets'], ['mc16a_ttV', 'mc16d_ttV', 'mc16e_ttV'], ['mc16a_multiboson', 'mc16d_multiboson', 'mc16e_multiboson']]
 
 PRESELECTION = [
                 {'name':'n_jet',  'threshold':4,      'type':'geq'},
@@ -47,6 +48,7 @@ PRESELECTION = [
 
 WEIGHTS = [
            'weight',
+           'lumi_weight',
            'xs_weight',
            'sf_total'
           ]
@@ -71,22 +73,26 @@ def asimovZ(s, b, b_err, syst=False):
   return Z
 
 
-def evaluate(model, dataset, scaler, seq_scaler=None, col=None, rnn=False):
+def evaluate(model, dataset, scaler, seq_scaler=None, col=None, method='nn'):
 
   #where_nan = np.isnan(dataset)
   #dataset[where_nan] = -999. 
-  dataset = scaler.transform(dataset)
+  if scaler:
+    dataset = scaler.transform(dataset)
 
-  if rnn:  
+  if method.lower() == 'rnn':  
     for idx, c in enumerate(col):
       #c['n_max'] = max([len(j) for j in c['df'][c['name']+'_pt']])
-      c['n_max'] = 15
+      c['n_max'] = 16
       c['Xobj'] = create_scale_stream(c['df'], c['n_max'], sort_col=c['name']+'_pt', VAR_FILE_NAME=seq_scaler) 
 
     y_hat = model.predict([c['Xobj'] for c in col]+[dataset])
 
-  else:
+  elif method.lower() == 'nn':
     y_hat = model.predict(dataset)
+
+  elif method.lower() == 'bdt':
+    y_hat = model.predict_proba(dataset)
 
   return y_hat
 
@@ -179,41 +185,76 @@ def main():
   
   modelDir = Dir+modelfile+'.h5'
 
-  model = load_model(os.path.join(Dir, modelfile+'.h5'))
-
-  scaler = joblib.load(os.path.join(Dir,modelfile+'_scaler.pkl'))
+  if os.path.exists(os.path.join(Dir,modelfile+'_scaler.pkl')):
+    scaler = joblib.load(os.path.join(Dir,modelfile+'_scaler.pkl'))
+  else:
+    scaler = None
 
   infofile = open(modelDir.replace('.h5','_infofile.txt'))
   infos = infofile.readlines()
   analysis=infos[0].replace('Used analysis method: ','').replace('\n','')
   dataset = DatasetDir + infos[3].replace('Used dataset: ', '').replace('\n','')
   VAR = infos[5].replace('Used variables for training: ', '').replace('\n','').split()
+
   print VAR
+
   recurrent = False
   if analysis.lower() == 'rnn':
     recurrent = True
     seq_scaler = dataset+'_scaling.json'
+
+  if 'nn' in analysis.lower():
+    model = load_model(os.path.join(Dir, modelfile+'.h5'))
+  elif 'bdt' in analysis.lower():
+    model = joblib.load(os.path.join(Dir, modelfile+'.h5'))
 
   db = (RESOLUTION[2] - RESOLUTION[1]) / RESOLUTION[0]    # bin width in discriminator distribution
   bins = np.arange(RESOLUTION[1], RESOLUTION[2]+db, db)   # bin edges in discriminator distribution
   center = (bins[:-1] + bins[1:]) / 2
 
   print '#----MODEL----#'
-  print modelDir
+  print '\t',modelDir
 
   ###########################
   # Read and evaluate signals
   ###########################
 
   Signal = []
-  for s in SIGNAL:
-    x, y = pickBenchmark(s)
+  for smp in SIGNAL:
+    first = True
+    for s in smp:
+      print 'Sample:\t',s
+      x, y = pickBenchmark(s)
+      if not recurrent:
+        _df, _weight = loadDataFrame(os.path.join(inputDir, s+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
+        print _df.shape,_weight.shape
+        if first:
+          df = _df.copy()
+          weight = _weight.copy()
+          first = False
+        else: 
+          df = pd.concat((df, _df), ignore_index=True)
+          weight = pd.concat((weight, _weight), ignore_index=True)
+      else: 
+        _df, _weight, collection = loadSequentialDataFrame(os.path.join(inputDir, s+'/'), PRESELECTION, COLLECTION, REMOVE_VAR, VAR, WEIGHTS, LUMI)
+        print _df.shape,_weight.shape, collection[0]['df'].shape
+        if first:
+          df = _df.copy()
+          weight = _weight.copy()
+          seq = collection[0]['df'].copy()
+          first = False
+        else:
+          df = pd.concat((df, _df), ignore_index=True)
+          weight = pd.concat((weight, _weight), ignore_index=True)
+          seq = pd.concat((seq, collection[0]['df']), ignore_index=True)
+
     if not recurrent:
-      df, weight = loadDataFrame(os.path.join(inputDir, s+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
-      y_hat = evaluate(model, df.values, scaler)
-    else: 
-      df, weight, collection = loadSequentialDataFrame(os.path.join(inputDir, s+'/'), PRESELECTION, COLLECTION, REMOVE_VAR, VAR, WEIGHTS, LUMI)
-      y_hat = evaluate(model, df.values, scaler, seq_scaler, rnn=True, col=collection)
+      y_hat = evaluate(model, df.values, scaler, method=analysis)
+      print df.shape, weight.shape
+    else:
+      collection[0]['df'] = seq
+      print df.shape, weight.shape, collection[0]['df'].shape
+      y_hat = evaluate(model, df.values, scaler, seq_scaler, method=analysis, col=collection)
 
     bin_index = np.digitize(y_hat[:,0], bins[1:])   # get the bin index of the output score for each event 
     outputWeighted = []
@@ -228,7 +269,7 @@ def main():
       outputMC.append(len(w))
       outputMCVar.append(np.sqrt(len(w)))
     
-    Signal.append({'name':s, 'm_stop':x, 'm_X':y, 'dataset':df, 'weight':weight, 'nEvents':weight.sum(), 'y_pred':y_hat, 'outputScore':np.array(outputWeighted), 'outputMC':np.array(outputMC), 'output_var':np.array(outputWeightedVar), 'outputMC_var':np.array(outputMCVar)})
+    Signal.append({'name':s[6:], 'm_stop':x, 'm_X':y, 'dataset':df, 'weight':weight, 'nEvents':weight.sum(), 'y_pred':y_hat, 'outputScore':np.array(outputWeighted), 'outputMC':np.array(outputMC), 'output_var':np.array(outputWeightedVar), 'outputMC_var':np.array(outputMCVar)})
 
     del df, weight, y_hat, bin_index, outputWeighted, outputWeightedVar, outputMC, outputMCVar
 
@@ -239,13 +280,40 @@ def main():
   totBkgEvents = 0.
   totBkgVar = 0.
   Background = []
-  for b in BACKGROUND:
+  for smp in BACKGROUND:
+    first = True
+    for b in smp:
+      print 'Sample:\t',b
+      if not recurrent:
+        _df, _weight = loadDataFrame(os.path.join(inputDir, b+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
+        print _df.shape,_weight.shape
+        if first:
+          df = _df.copy()
+          weight = _weight.copy()
+          first = False
+        else:        
+          df = pd.concat((df, _df), ignore_index=True)
+          weight = pd.concat((weight, _weight), ignore_index=True)
+      else:
+        _df, _weight, collection = loadSequentialDataFrame(os.path.join(inputDir, b+'/'), PRESELECTION, COLLECTION, REMOVE_VAR, VAR, WEIGHTS, LUMI)
+        print _df.shape,_weight.shape, collection[0]['df'].shape
+        if first:
+          df = _df.copy()
+          weight = _weight.copy()
+          seq = collection[0]['df'].copy()
+          first = False
+        else:
+          df = pd.concat((df, _df), ignore_index=True)
+          weight = pd.concat((weight, _weight), ignore_index=True)
+          seq = pd.concat((seq, collection[0]['df']), ignore_index=True)
+
     if not recurrent:
-      df, weight = loadDataFrame(os.path.join(inputDir, b+'/'), PRESELECTION, VAR, WEIGHTS, LUMI)
-      y_hat = evaluate(model, df.values, scaler)
+      print df.shape, weight.shape
+      y_hat = evaluate(model, df.values, scaler, method=analysis)
     else:
-      df, weight, collection = loadSequentialDataFrame(os.path.join(inputDir, b+'/'), PRESELECTION, COLLECTION, REMOVE_VAR, VAR, WEIGHTS, LUMI)
-      y_hat = evaluate(model, df.values, scaler, seq_scaler, rnn=True, col=collection)
+      collection[0]['df'] = seq
+      print df.shape, weight.shape, collection[0]['df'].shape
+      y_hat = evaluate(model, df.values, scaler, seq_scaler, method=analysis, col=collection)
 
     bin_index = np.digitize(y_hat[:,0], bins[1:])
     outputWeighted = []
@@ -265,14 +333,16 @@ def main():
 
     Background.append({'name':b, 'dataset':df, 'weight':weight, 'nEvents':weight.sum(), 'y_pred':y_hat, 'outputScore':np.array(outputWeighted), 'outputMC':np.array(outputMC), 'output_var':np.array(outputWeightedVar), 'outputMC_var':np.array(outputMCVar)})
 
-    del df, weight, y_hat, bin_index, outputWeighted, outputWeightedVar, outputMC, outputMCVar
-  
+    del df, weight, y_hat, bin_index, outputWeighted, outputWeightedVar, outputMC, outputMCVar 
+ 
   totalBkgOutput = np.array([b['outputScore'] for b in Background]) 
   totalBkgOutput = totalBkgOutput.sum(axis=0)
   
   totalBkgVar = np.array([b['output_var'] for b in Background])
   totalBkgVar = totalBkgVar.sum(axis=0)
-   
+  
+  print len(Signal), len(Background), Signal[0]['outputScore'][:].sum(), totalBkgOutput
+
   for s in Signal:
     significance = []
     significance_err = []
@@ -309,7 +379,7 @@ def main():
       #total_rel_err = np.sqrt(rel_err_sig**2. + rel_err_bkg**2. + 0.25**2.)
       total_rel_err = np.sqrt(rel_err_bkg**2. + 0.25**2.)
 
-      if (eff_sig == 0) or (eff_bkg == 0):
+      if float(eff_sig == 0) or float(eff_bkg == 0):
         Z = 0.
         Z_err = 0.
         ams = 0.
@@ -374,6 +444,9 @@ def main():
   print Signal[0]['outputScore'][np.where(bins[:-1] >= sigMax_index)], Signal[0]['output_var'][np.where(bins[:-1] >= sigMax_index)]
   print totalBkgOutput[np.where(bins[:-1] >= sigMax_index)], totalBkgVar[np.where(bins[:-1] >= sigMax_index)]
 
+  print np.sum(Signal[0]['outputScore'][np.where(bins[:-1] >= sigMax_index)]), np.sqrt(np.sum(Signal[0]['output_var'][np.where(bins[:-1] >= sigMax_index)]**2))
+  print np.sum(totalBkgOutput[np.where(bins[:-1] >= sigMax_index)]), np.sqrt(np.sum(totalBkgVar[np.where(bins[:-1] >= sigMax_index)]**2))
+
   print Signal[0]['outputScore'], Signal[0]['output_var']
   print totalBkgOutput, totalBkgVar
   # Set up a regular grid of interpolation points
@@ -397,17 +470,20 @@ def main():
   scaled_var = Signal[0]['output_var']
   scaled_label = 'Signal'
 
-  w = plt.bar(center, Background[2]['outputScore'], width=db, yerr=np.sqrt(Background[2]['output_var']), color='gold', alpha=0.5, error_kw=dict(ecolor='gold', lw=1.5), label='W+jets')  
-  st = plt.bar(center, Background[1]['outputScore'], width=db, yerr=np.sqrt(Background[1]['output_var']), color='limegreen', alpha=0.5, error_kw=dict(ecolor='limegreen', lw=1.5), label='singletop', bottom=Background[2]['outputScore'])  
-  tt = plt.bar(center, Background[0]['outputScore'], width=db, yerr=np.sqrt(Background[0]['output_var']), color='dodgerblue', alpha=0.5, error_kw=dict(ecolor='dodgerblue', lw=1.5), label='ttbar', bottom=Background[2]['outputScore']+Background[1]['outputScore'])  
+  multib = plt.bar(center, Background[4]['outputScore'], width=db, yerr=np.sqrt(Background[4]['output_var']), color='seagreen', alpha=0.5, error_kw=dict(ecolor='seagreen', lw=1.5), label='multiboson')  
+  ttV = plt.bar(center, Background[3]['outputScore'], width=db, yerr=np.sqrt(Background[4]['output_var']), color='lightcoral', alpha=0.5, error_kw=dict(ecolor='lightcoral', lw=1.5), label='ttV', bottom=Background[4]['outputScore'])  
+  w = plt.bar(center, Background[2]['outputScore'], width=db, yerr=np.sqrt(Background[2]['output_var']), color='gold', alpha=0.5, error_kw=dict(ecolor='gold', lw=1.5), label='W+jets', bottom=Background[4]['outputScore']+Background[3]['outputScore'])  
+  st = plt.bar(center, Background[1]['outputScore'], width=db, yerr=np.sqrt(Background[1]['output_var']), color='limegreen', alpha=0.5, error_kw=dict(ecolor='limegreen', lw=1.5), label='singletop', bottom=Background[4]['outputScore']+Background[3]['outputScore']+Background[2]['outputScore'])  
+  tt = plt.bar(center, Background[0]['outputScore'], width=db, yerr=np.sqrt(Background[0]['output_var']), color='dodgerblue', alpha=0.5, error_kw=dict(ecolor='dodgerblue', lw=1.5), label='ttbar', bottom=Background[4]['outputScore']+Background[3]['outputScore']+Background[2]['outputScore']+Background[1]['outputScore'])  
   plt.bar(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label=Signal[0]['name'], color='r', alpha=0.5, error_kw=dict(ecolor='r', lw=1.5))  
+  #plt.step(center, Signal[0]['outputScore'], width=db, yerr= np.sqrt(Signal[0]['output_var']), label=Signal[0]['name'], color='r', error_kw=dict(ecolor='r', lw=1.5))  
 
   ax1.set_ylim((0.1, totalBkgOutput.max()*(15.)))
   ax1.set_yscale('log')
   leg = plt.legend(loc="best", frameon=False)
 
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.85, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.87, lumi=LUMI*0.001)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.84, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.79, lumi=LUMI*0.001)
 
   plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.pdf")
   plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
@@ -430,8 +506,8 @@ def main():
   plt.plot(center, len(center)*[5.], '--', color='red', alpha=0.5)
   leg = plt.legend(loc="best", frameon=False)
 
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.85, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.87, lumi=LUMI*0.001)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.84, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.79, lumi=LUMI*0.001)
 
   plt.savefig("plots/"+modelfile+"_Significance_bWN-450-300.pdf")
   plt.savefig("plots/"+modelfile+"_Significance_bWN-450-300.png")
@@ -451,10 +527,10 @@ def main():
   plt.plot(s['roc'][:,0], s['roc'][:,1], 'k-', color='cornflowerblue', label='ROC (AUC = %0.4f)'%(auc))
   #plt.fill_between(center, Signal[0]['ams']-Signal[0]['ams_err'], Signal[0]['ams']+Signal[0]['ams_err'], alpha=0.2, edgecolor='cornflowerblue', facecolor='cornflowerblue', linewidth=0)
   plt.plot([0, 1], [1, 0], '--', color=(0.6, 0.6, 0.6), label='Luck')
-  leg = plt.legend(loc="best", frameon=False)
+  leg = plt.legend(loc="lower left", frameon=False)
 
-  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.2, 'Work in progress')
-  AtlasStyle_mpl.LumiLabel(ax1, 0.02, 0.05, lumi=LUMI*0.001)
+  AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.28, 'Work in progress')
+  AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.23, lumi=LUMI*0.001)
 
   plt.savefig("plots/"+modelfile+"_ROC_bWN-450-300.pdf")
   plt.savefig("plots/"+modelfile+"_ROC_bWN-450-300.png")

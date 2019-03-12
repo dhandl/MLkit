@@ -235,7 +235,7 @@ def main():
     checkDataset(y_train, y_test, w_train, w_test, multiclass=opts.multiclass)
   
   if (opts.analysis.lower() == 'bdt'): 
-    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['min_samples_leaf'], alg.options['n_estimators'], alg.options['learning_rate'],                opts.reproduce)
+    model, y_pred = trainBDT(X_train, X_test, y_train, y_test, w_train, w_test, alg.options['classifier'], alg.options['max_depth'], alg.options['n_estimators'], alg.options['learning_rate'],  alg.options['lambda'], alg.options['alpha'], alg.options['gamma'], alg.options['scale_pos_weights'], opts.reproduce)
 
   elif (opts.analysis.lower() == 'nn'):
       

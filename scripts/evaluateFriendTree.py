@@ -58,11 +58,11 @@ VAR = [
 
 BRANCH_NAME = 'outputScore_RNN'
 
-MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01.h5'
-#MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01.h5'
+MODEL = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01.h5' # outputScore_RNN
+#MODEL = '/home/d/David.Handl/testareas/MLkit/TrainedModels/models/2019-02-04_16-52_RNN_jetOnly_ADAM_leakyReLU_LSTM_128NNlayer_batch32_BatchNorm_GlorotNormalInitializer_l2-0p01_lr0p001_decay0p0.h5' # outputScore_RNNv2
 
 SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01_scaler.pkl'
-#SCALER = '/project/etp5/dhandl/MachineLearning/finalModel/2018-09-28_00-38_RNN_jetOnly_ADAM_leayReLU_LSTM32_128NNlayer_batch32_NormalInitializer_l2-0p01_scaler.pkl'
+#SCALER = '/home/d/David.Handl/testareas/MLkit/TrainedModels/models/2019-02-04_16-52_RNN_jetOnly_ADAM_leakyReLU_LSTM_128NNlayer_batch32_BatchNorm_GlorotNormalInitializer_l2-0p01_lr0p001_decay0p0_scaler.pkl'
 
 CHUNKSIZE = 100000
 
