@@ -29,7 +29,7 @@ from getRatio import getRatio
 Dir = 'TrainedModels/models/'
 DatasetDir = 'TrainedModels/datasets/'
 
-modelfile = '2018-12-10_11-09_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01'
+modelfile = '2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01'
 #modelfile = '2018-08-02_15-24_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-08-02_16-03_DNN_ADAM_layer1x100_batch10_NormalInitializer_dropout0p5_l1-0p01'
 #modelfile = '2018-07-31_13-16_DNN_ADAM_layer1x100_batch40_NormalInitializer_dropout0p5_l1-0p01_multiclass'
