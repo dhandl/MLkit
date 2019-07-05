@@ -485,8 +485,8 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.84, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.79, lumi=LUMI*0.001)
 
-  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.pdf")
-  plt.savefig("plots/"+modelfile+"_eval-bWN-450-300_outputScore.png")
+  plt.savefig("plots/"+modelfile+"_eval-bWN-500-380_outputScore.pdf")
+  plt.savefig("plots/"+modelfile+"_eval-bWN-500-380_outputScore.png")
   plt.close()
 
   print('Plotting significance...')
@@ -509,8 +509,8 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.84, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.79, lumi=LUMI*0.001)
 
-  plt.savefig("plots/"+modelfile+"_Significance_bWN-450-300.pdf")
-  plt.savefig("plots/"+modelfile+"_Significance_bWN-450-300.png")
+  plt.savefig("plots/"+modelfile+"_Significance_bWN-500-380.pdf")
+  plt.savefig("plots/"+modelfile+"_Significance_bWN-500-380.png")
   plt.close()
 
   print('Plotting ROC...')
@@ -532,8 +532,8 @@ def main():
   AtlasStyle_mpl.ATLASLabel(ax1, 0.14, 0.28, 'Work in progress')
   AtlasStyle_mpl.LumiLabel(ax1, 0.14, 0.23, lumi=LUMI*0.001)
 
-  plt.savefig("plots/"+modelfile+"_ROC_bWN-450-300.pdf")
-  plt.savefig("plots/"+modelfile+"_ROC_bWN-450-300.png")
+  plt.savefig("plots/"+modelfile+"_ROC_bWN-500-380.pdf")
+  plt.savefig("plots/"+modelfile+"_ROC_bWN-500-380.png")
   plt.close()
 
 if __name__ == "__main__":

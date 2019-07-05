@@ -3,15 +3,16 @@ from collections import namedtuple
 #input = '/gpfs/scratch/pr62re/di36jop/samples/ttbar_rew/TRUTH3/hdf5/'
 #input = '/project/etp5/dhandl/samples/ttbar_rew/TRUTH3/hdf5/'
 inputMC15 = '/project/etp5/dhandl/samples/SUSY/Stop1L/EarlyRun2/hdf5/cut_mt30_met60_preselection/'
-inputMC16 = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection_new/'
+inputMC16 = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/cut_mt30_met60_preselection/'
 
 testinput = '/project/etp5/dhandl/samples/SUSY/Stop1L/FullRun2/hdf5/test/'
 
 # define your samples here
 SignalMC16 = [
   {'name':'stop_bWN_450_300_truth', 'path':inputMC16+'stop_bWN_450_300_truth/'}
-  #{'name':'stop_bWN_450_300_mc16a', 'path':inputMC16+'stop_bWN_450_300_mc16a/'},
-  #{'name':'stop_bWN_450_300_mc16d', 'path':inputMC16+'stop_bWN_450_300_mc16d/'}
+  #{'name':'mc16a_bWN_450_300', 'path':inputMC16+'mc16a_bWN_450_300/'},
+  #{'name':'mc16d_bWN_450_300', 'path':inputMC16+'mc16d_bWN_450_300/'},
+  #{'name':'mc16e_bWN_450_300', 'path':inputMC16+'mc16e_bWN_450_300/'}
   #{'name':'stop_bWN_450_300', 'path':inputMC16+'stop_bWN_450_300_TruthSmeared/'}
   #{'name':'stop_bWN_450_300_truth', 'path':testinput+'stop_bWN_450_300_truth/'}
 ]
@@ -78,13 +79,20 @@ Signal_Evaluate.extend(Signal3)
 Signal_Evaluate.extend(Signal4)
 
 Background = [
-  #{'name':'ttbar_radHi_TRUTH3',  'path':input+'TestBkg/'}
-  #{'name':'ttbar_radLo_TRUTH3', 'path':input+'ttbar_radLo_TRUTH3/'}
   {'name':'mc16a_ttbar', 'path':inputMC16+'mc16a_ttbar/'},
   {'name':'mc16d_ttbar', 'path':inputMC16+'mc16d_ttbar/'},
+  #{'name':'mc16e_ttbar', 'path':inputMC16+'mc16e_ttbar/'},
   {'name':'mc16a_singletop', 'path':inputMC16+'mc16a_singletop/'},
   {'name':'mc16d_singletop', 'path':inputMC16+'mc16d_singletop/'},
+  #{'name':'mc16e_singletop', 'path':inputMC16+'mc16e_singletop/'},
   {'name':'mc16a_wjets', 'path':inputMC16+'mc16a_wjets/'},
-  {'name':'mc16d_wjets', 'path':inputMC16+'mc16d_wjets/'}
-  #{'name':'mc16a_ttbar', 'path':testinput+'mc16a_ttbar/'},
+  {'name':'mc16d_wjets', 'path':inputMC16+'mc16d_wjets/'},
+  #{'name':'mc16e_wjets', 'path':inputMC16+'mc16e_wjets/'},
+  {'name':'mc16a_ttV', 'path':inputMC16+'mc16a_ttV/'},
+  {'name':'mc16d_ttV', 'path':inputMC16+'mc16d_ttV/'},
+  #{'name':'mc16e_ttV', 'path':inputMC16+'mc16e_ttV/'},
+  {'name':'mc16a_multiboson', 'path':inputMC16+'mc16a_multiboson/'},
+  {'name':'mc16d_multiboson', 'path':inputMC16+'mc16d_multiboson/'}
+  #{'name':'mc16e_multiboson', 'path':inputMC16+'mc16e_multiboson/'}
+  #{'name':'mc16a_ttbar', 'path':testinput+'mc16a_ttbar/'}
 ]

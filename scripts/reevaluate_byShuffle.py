@@ -83,7 +83,8 @@ def getImportanceByGradient(model, nvar, X_train, collection=None, rnn=False):
 
   importance = []
   for i in xrange(len(nvar)):
-    importance.append( (nvar[i], grad_vals[:,i].mean() * X_train[:,i].std() ) )
+    #importance.append( (nvar[i], grad_vals[:,i].mean() * X_train[:,i].std() ) )
+    importance.append( (nvar[i], np.abs(grad_vals[:,i]).mean() ) )
   
   importance = sorted(importance, key=lambda x: x[1])
 
@@ -140,7 +141,7 @@ def main():
 
   #where_nan = np.isnan(X_train)
   #X_train[where_nan] = -999. 
-  #X_train = scaler.transform(X_train)   # collection already standardized in training
+  X_train = scaler.transform(X_train)   # collection already standardized in training
 
   print '#----MODEL----#'
   print modelDir
@@ -151,14 +152,24 @@ def main():
   ######################################
 
   if recurrent:
-    y_hat = model.predict(collection + [scaler.transform(X_train)])
+    y_hat = model.predict(collection + [X_train])
   else:
-    y_hat = model.predict(scaler.transform(X_train))
+    y_hat = model.predict(X_train)
   
   importanceBySquaredWeight = getImportanceBySquaredWeight(model, nvar, recurrent)
   importanceByWeight = getImportanceByWeight(model, nvar, recurrent)
   impotanceByGrad = getImportanceByGradient(model, nvar, X_train, collection, recurrent) 
 
+  print 100*'#'
+  print '\n\t\t\tVariable ranking'
+  print '\n sum of squared weights \t sum of absolute weights \t gradients '
+  print 100*'-'
+  for i in xrange(len(nvar)):
+    print '{}: {}\t{}: {}\t{}: {}'.format(importanceBySquaredWeight[i][0], importanceBySquaredWeight[i][1], importanceByWeight[i][0], importanceByWeight[i][1], impotanceByGrad[i][0], impotanceByGrad[i][1]) 
+  print 100*'-'
+  print 100*'#'
+
+  sys.exit()
   # Re-shuffle for re-evaluate
   X_train_reshuffled = []
   for idx, var in enumerate(nvar):

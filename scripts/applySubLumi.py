@@ -5,9 +5,9 @@ import os
 import sys
 from array import array
 
-TOTAL_LUMI = (3219.56 + 32988.1 + 44307.4 + 59937.2)
-LUMI_FRACTION = [(3219.56 + 32988.1)/TOTAL_LUMI, (44307.4)/TOTAL_LUMI, (59937.2)/TOTAL_LUMI]
-LUMI_BRANCH_NAME = "lumi_weight"
+TOTAL_LUMI = (3219.56 + 32988.1 + 44307.4 + 58450.1)
+LUMI_FRACTION = [(3219.56 + 32988.1)/TOTAL_LUMI, (44307.4)/TOTAL_LUMI, (58450.1)/TOTAL_LUMI]
+LUMI_BRANCH_NAME = "lumi_weight_new"
 LUMI_ARRAY = array("f", [0])
 
 def filesize(num):

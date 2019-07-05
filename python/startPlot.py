@@ -64,7 +64,8 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
     dataset = h5py.File(datasetDir)
     
     filenames = modelDir.replace('TrainedModels/models/','').replace('.h5','')
-    
+    #filenames = 'blabla'
+ 
     print 'Using dataset from:', datasetDir
     
     print 'Loading model...'
@@ -173,19 +174,21 @@ def startPlot(modelDir, binning=[50,0,1.], save=False, multiclass=True):
       plot_learning_curve.learning_curve_for_keras(pickleDir, save=save, filename=filenames)
     
     #Pie Charts
-    #plt.figure()
+    plt.figure()
     #plot_piechart.plot_pie_chart(y, y_predict, w, fileName=filenames, save=save)
     
     #Output Score for cuts that are used in training
+    plt.figure()
     plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=True)
-    plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)
-    
-    plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, multiclass=multiclass)
-    #plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
+    plot_output_score.plot_output_score(sig_predicted[:,0], sig_w, bkg_predicted[:,0], bkg_w, binning, save=save, fileName=filenames, log=False)    
     
     plt.figure()
     plot_ROCcurves.plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=save, fileName=filenames)
  
+    #plt.figure()
+    #plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, multiclass=multiclass)
+    #plot_Correlation.plotCorrelation(X, y_predict, y, variables, fileName=filenames, save=save, plotEPD=False)
+
     if multiclass:    
       #Classification Plots    
       plt.figure()

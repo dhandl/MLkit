@@ -8,6 +8,10 @@ from sklearn.datasets import load_digits
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import ShuffleSplit
 
+HISTORY = "./TrainedModels/models/2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01_history.pkl"
+DIR = "/project/etp5/dhandl/plots/Stop1L/FullRun2/ML/"
+NAME = "2018-12-21_11-20_RNN_jetOnly_ADAM_leakyReLU_LSTM32_128NNlayer_batch32_BatchNorm_NormalInitializer_l2-0p01"
+
 def plot_learning_curve(estimator, title, X, y, scoring, ylim=None, cv=None,
                         n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
     
@@ -109,11 +113,14 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
   # summarize history for accuracy
   plt.plot(history['acc'])
   plt.plot(history['val_acc'])
+  ymax = max(history['acc'])
+  ymin = min(history['acc'])
+
   #plt.title('model accuracy')
   plt.ylabel('Accuracy', horizontalalignment='right', y=1.0)
-  plt.ylim(0.,1.)
+  plt.ylim(ymin-0.05,ymax+0.05)
   plt.xlabel('Training epoch', horizontalalignment='right', x=1.0)
-  plt.legend(['train', 'test'], loc='upper left')
+  plt.legend(['Training', 'Testing'], loc='upper left')
   if save:
     if not os.path.exists("plots/"):
         os.makedirs("plots/")
@@ -125,11 +132,14 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
   plt.figure()
   plt.plot(history['loss'])
   plt.plot(history['val_loss'])
+  ymax = max(history['loss'])
+  ymin = min(history['loss'])
+
   #plt.title('model loss')
   plt.ylabel('Loss', horizontalalignment='right', y=1.0)
-  plt.ylim(0.,1.)
+  plt.ylim(ymin-0.05,ymax+0.05)
   plt.xlabel('Training epoch', horizontalalignment='right', x=1.0)
-  plt.legend(['train', 'test'], loc='upper left')
+  plt.legend(['Training', 'Testing'], loc='upper left')
   if save:
     if not os.path.exists("./plots/"):
         os.makedirs("./plots/")
@@ -137,3 +147,7 @@ def learning_curve_for_keras(hist_pi, savedir='./plots/', filename='Test',save=F
     plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.pdf'))
     plt.savefig(os.path.join(savedir,filename+'_learning_curve_loss.png'))
     plt.close()
+
+
+if __name__ == "__main__":
+  learning_curve_for_keras(HISTORY, DIR, NAME, True)

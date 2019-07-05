@@ -43,7 +43,8 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
     #auc_train = auc(fpr_train, tpr_train, reorder=True)
     #auc_test = auc(fpr_test, tpr_test, reorder=True)
     
-    fig1, ax1 = plt.subplots(figsize=(8,6))
+    fig = plt.figure(figsize=(8,6))
+    ax1 = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=4)
     plt.plot(tpr_train_binary, 1.-fpr_train_binary, lw=1, label='Training (AUC = %0.2f)'%(auc_train_binary), color='b')
     plt.plot(tpr_test_binary, 1.-fpr_test_binary, lw=1, label='Testing (AUC = %0.2f)'%(auc_test_binary), color='r')
     #plt.plot(fpr_train_binary, 1.-tpr_train_binary, lw=1, label='Training (AUC = %0.2f)'%(auc_train_binary), color='b')
@@ -52,14 +53,14 @@ def plot_ROC(y_train, y_test, y_predict_train, y_predict_test, save=False, fileN
 
     ax1.set_xlim([0., 1.])
     ax1.set_ylim([0., 1.])
-    ax1.set_xlabel('Signal Efficiency')
-    ax1.set_ylabel('Background Rejection')
+    ax1.set_xlabel('$\epsilon_{Sig.}$', horizontalalignment='right', x=1.0)
+    ax1.set_ylabel("$r_{Bkg.}$", horizontalalignment='right', y=1.0)
     #plt.xlabel('fpr')
     #plt.ylabel('1-tpr')
     #plt.title('Receiver operating characteristic')
     plt.legend(loc="best")
-    plt.grid()
-    AtlasStyle_mpl.ATLASLabel(ax1, 0.022, 0.925, 'Work in progress')
+    #plt.grid()
+    #AtlasStyle_mpl.ATLASLabel(ax1, 0.022, 0.925, 'Work in progress')
     #AtlasStyle_mpl.LumiLabel(ax1, 0.022, 0.875, lumi=LUMI*0.001)
     if save:
         if not os.path.exists("./plots/"):
